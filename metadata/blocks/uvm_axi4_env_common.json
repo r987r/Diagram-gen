@@ -4,20 +4,5 @@
   "render": {
     "color": "#1565C0"
   },
-  "ports": [
-    {
-      "name": "clk",
-      "direction": "input",
-      "width": 1,
-      "channel": "GLOBAL",
-      "description": "System clock"
-    },
-    {
-      "name": "rst_n",
-      "direction": "input",
-      "width": 1,
-      "channel": "GLOBAL",
-      "description": "Active-low reset"
-    }
-  ]
+  "ports": []
 }

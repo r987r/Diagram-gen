@@ -76,20 +76,6 @@
       },
       "ports": [
         {
-          "name": "clk",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL",
-          "description": "System clock"
-        },
-        {
-          "name": "rst_n",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL",
-          "description": "Active-low reset"
-        },
-        {
           "name": "analysis_export",
           "direction": "input",
           "width": 1,
@@ -104,20 +90,6 @@
         "color": "#E53935"
       },
       "ports": [
-        {
-          "name": "clk",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL",
-          "description": "System clock"
-        },
-        {
-          "name": "rst_n",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL",
-          "description": "Active-low reset"
-        },
         {
           "name": "analysis_export",
           "direction": "input",
@@ -391,31 +363,7 @@
       },
       "to": [
         {
-          "instance": "aw_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "aw_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "aw_mon",
-          "port": "clk"
-        },
-        {
           "instance": "aw_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "w_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "w_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "w_mon",
           "port": "clk"
         },
         {
@@ -423,47 +371,11 @@
           "port": "clk"
         },
         {
-          "instance": "b_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "b_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "b_mon",
-          "port": "clk"
-        },
-        {
           "instance": "b_vif",
           "port": "clk"
         },
         {
-          "instance": "ar_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "ar_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "ar_mon",
-          "port": "clk"
-        },
-        {
           "instance": "ar_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "r_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "r_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "r_mon",
           "port": "clk"
         },
         {
@@ -472,22 +384,6 @@
         },
         {
           "instance": "dut_stub",
-          "port": "clk"
-        },
-        {
-          "instance": "read_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "write_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "read_sb",
-          "port": "clk"
-        },
-        {
-          "instance": "write_sb",
           "port": "clk"
         }
       ]
@@ -502,31 +398,7 @@
       },
       "to": [
         {
-          "instance": "aw_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "aw_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "aw_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "aw_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "w_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "w_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "w_mon",
           "port": "rst_n"
         },
         {
@@ -534,47 +406,11 @@
           "port": "rst_n"
         },
         {
-          "instance": "b_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "b_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "b_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "b_vif",
           "port": "rst_n"
         },
         {
-          "instance": "ar_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ar_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ar_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "ar_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "r_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "r_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "r_mon",
           "port": "rst_n"
         },
         {
@@ -583,22 +419,6 @@
         },
         {
           "instance": "dut_stub",
-          "port": "rst_n"
-        },
-        {
-          "instance": "read_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "write_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "read_sb",
-          "port": "rst_n"
-        },
-        {
-          "instance": "write_sb",
           "port": "rst_n"
         }
       ]

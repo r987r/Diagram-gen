@@ -7,25 +7,11 @@
   },
   "ports": [
     {
-      "name": "clk",
-      "direction": "input",
-      "width": 1,
-      "channel": "GLOBAL",
-      "description": "System clock"
-    },
-    {
-      "name": "rst_n",
-      "direction": "input",
-      "width": 1,
-      "channel": "GLOBAL",
-      "description": "Active-low reset"
-    },
-    {
       "name": "vif",
-      "direction": "output",
+      "direction": "input",
       "width": 1,
       "channel": "VIF",
-      "description": "Virtual interface to DUT"
+      "description": "Virtual interface handle — clock and reset are accessed through the VIF"
     },
     {
       "name": "analysis_port",
