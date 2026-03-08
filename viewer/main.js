@@ -406,7 +406,14 @@ function showInstanceInfo(inst, mod) {
 /** Show connection info in the popup. */
 function showConnectionInfo(conn) {
   let html = `<h3>${conn.label || conn.id}</h3>`;
-  html += `<div class="info-module">${conn.from_instance} → ${conn.to_instance}</div>`;
+
+  // Handle both bus (from_instance/to_instance) and fanout (from/to[]) formats
+  if (conn.from_instance) {
+    html += `<div class="info-module">${conn.from_instance} → ${conn.to_instance}</div>`;
+  } else if (conn.from) {
+    const targets = (conn.to || []).map(t => t.instance).join(', ');
+    html += `<div class="info-module">${conn.from.instance}.${conn.from.port} → ${targets}</div>`;
+  }
   html += `<div class="info-desc">${conn.description ?? ''}</div>`;
 
   if (conn.channel_signals) {
@@ -493,14 +500,18 @@ function highlightInstance(meta) {
   currentHighlight = group;
 }
 
-/** Add a thick glow tube along a clicked connection path. */
+/** Add a thick glow tube along a clicked connection path.
+ *  When meta.segmentPairs is true, routePts are processed in pairs
+ *  (for tree structures like CLK/RST fanout: [a,b, c,d, …]).
+ *  Otherwise routePts are sequential waypoints (for bus connections). */
 function highlightConnection(meta) {
   clearHighlight();
   const pts = meta.routePts;
   if (!pts || pts.length < 2) return;
 
   const group = new THREE.Group();
-  for (let i = 0; i < pts.length - 1; i++) {
+  const step = meta.segmentPairs ? 2 : 1;
+  for (let i = 0; i < pts.length - 1; i += step) {
     const a   = new THREE.Vector3(...pts[i]);
     const b   = new THREE.Vector3(...pts[i + 1]);
     const len = a.distanceTo(b);
@@ -839,24 +850,6 @@ async function buildScene(designPath) {
   const railL   = xMin - 1.5;
   const railR   = xMax + 1.5;
 
-  // ── CLK horizontal rail ────────────────────────────────────────
-  scene.add(solidLine([[railL, clkY, 0], [railR, clkY, 0]], CLK_COL));
-
-  const clkLabel = makeLabel(
-    '<span class="rail-label clk-text">clk ← tb_top</span>', 'rail-label-obj'
-  );
-  clkLabel.position.set(railL - 0.3, clkY, 0);
-  scene.add(clkLabel);
-
-  // ── RST horizontal rail ────────────────────────────────────────
-  scene.add(solidLine([[railL, rstY, 0], [railR, rstY, 0]], RST_COL));
-
-  const rstLabel = makeLabel(
-    '<span class="rail-label rst-text">rst_n ← tb_top</span>', 'rail-label-obj'
-  );
-  rstLabel.position.set(railL - 0.3, rstY, 0);
-  scene.add(rstLabel);
-
   // ── Build set of instances in clock/reset fanout ────────────
   const clkInstances = new Set();
   const rstInstances = new Set();
@@ -872,12 +865,48 @@ async function buildScene(designPath) {
     }
   }
 
+  // Derive testbench info from JSON (with sensible defaults)
+  const tbName = design.testbench?.module_name ?? 'tb_top';
+  const globalSignals = design.testbench?.global_signals ?? [];
+  const clkSig = globalSignals.find(s => /clk/i.test(s.name));
+  const rstSig = globalSignals.find(s => /rst/i.test(s.name));
+  const clkSigName = clkConn?.from?.port ?? clkSig?.name ?? 'clk';
+  const rstSigName = rstConn?.from?.port ?? rstSig?.name ?? 'rst_n';
+
+  // ── CLK horizontal rail (only if clock connections exist) ───
+  if (clkConn) {
+    scene.add(solidLine([[railL, clkY, 0], [railR, clkY, 0]], CLK_COL));
+    const clkLabel = makeLabel(
+      `<span class="rail-label clk-text">${clkSigName} ← ${tbName}</span>`, 'rail-label-obj'
+    );
+    clkLabel.position.set(railL - 0.3, clkY, 0);
+    scene.add(clkLabel);
+  }
+
+  // ── RST horizontal rail (only if reset connections exist) ───
+  if (rstConn) {
+    scene.add(solidLine([[railL, rstY, 0], [railR, rstY, 0]], RST_COL));
+    const rstLabel = makeLabel(
+      `<span class="rail-label rst-text">${rstSigName} ← ${tbName}</span>`, 'rail-label-obj'
+    );
+    rstLabel.position.set(railL - 0.3, rstY, 0);
+    scene.add(rstLabel);
+  }
+
   // ── Per-instance CLK and RST stubs (only for instances in fanout) ─
-  // Shared route-point arrays: clicking any clk/rst element highlights the
-  // entire fanout tree (rail + all stubs), which is the intended behaviour
-  // for clock/reset nets.
-  const clkRoutePts = [[railL, clkY, 0], [railR, clkY, 0]];
-  const rstRoutePts = [[railL, rstY, 0], [railR, rstY, 0]];
+  // Shared route-point arrays stored as segment pairs: [a1,b1, a2,b2, …]
+  // so that the highlight function can draw each segment independently
+  // without creating spurious diagonal tubes between unrelated points.
+  const clkRoutePts = clkConn ? [[railL, clkY, 0], [railR, clkY, 0]] : [];
+  const rstRoutePts = rstConn ? [[railL, rstY, 0], [railR, rstY, 0]] : [];
+
+  /** Register a hit zone for a CLK/RST segment. */
+  function addFanoutHitZone(from, to, conn, routePts) {
+    const hitZone = busHitZone(from, to);
+    scene.add(hitZone);
+    clickableObjects.push(hitZone);
+    objectMeta.set(hitZone, { type: 'connection', connection: conn, routePts, segmentPairs: true });
+  }
 
   for (const inst of instances) {
     const x = inst.position.x;
@@ -888,41 +917,25 @@ async function buildScene(designPath) {
       scene.add(solidLine([[x, y - hy, 0], [x, clkY, 0]], CLK_COL));
       scene.add(portDot([x, y - hy, 0], CLK_COL));
       clkRoutePts.push([x, y - hy, 0], [x, clkY, 0]);
-
-      // Hit zone for stub
-      const hitZone = busHitZone([x, y - hy, 0], [x, clkY, 0]);
-      scene.add(hitZone);
-      clickableObjects.push(hitZone);
-      objectMeta.set(hitZone, { type: 'connection', connection: clkConn, routePts: clkRoutePts });
+      addFanoutHitZone([x, y - hy, 0], [x, clkY, 0], clkConn, clkRoutePts);
     }
 
     if (rstInstances.has(inst.instance_name)) {
       scene.add(solidLine([[x, y + hy, 0], [x, rstY, 0]], RST_COL));
       scene.add(portDot([x, y + hy, 0], RST_COL));
       rstRoutePts.push([x, y + hy, 0], [x, rstY, 0]);
-
-      // Hit zone for stub
-      const hitZone = busHitZone([x, y + hy, 0], [x, rstY, 0]);
-      scene.add(hitZone);
-      clickableObjects.push(hitZone);
-      objectMeta.set(hitZone, { type: 'connection', connection: rstConn, routePts: rstRoutePts });
+      addFanoutHitZone([x, y + hy, 0], [x, rstY, 0], rstConn, rstRoutePts);
     }
   }
 
   // Hit zone for CLK horizontal rail
   if (clkConn) {
-    const railHit = busHitZone([railL, clkY, 0], [railR, clkY, 0]);
-    scene.add(railHit);
-    clickableObjects.push(railHit);
-    objectMeta.set(railHit, { type: 'connection', connection: clkConn, routePts: clkRoutePts });
+    addFanoutHitZone([railL, clkY, 0], [railR, clkY, 0], clkConn, clkRoutePts);
   }
 
   // Hit zone for RST horizontal rail
   if (rstConn) {
-    const railHit = busHitZone([railL, rstY, 0], [railR, rstY, 0]);
-    scene.add(railHit);
-    clickableObjects.push(railHit);
-    objectMeta.set(railHit, { type: 'connection', connection: rstConn, routePts: rstRoutePts });
+    addFanoutHitZone([railL, rstY, 0], [railR, rstY, 0], rstConn, rstRoutePts);
   }
 
   // ── Bus / TLM connections ────────────────────────────────────
@@ -1025,7 +1038,7 @@ async function buildScene(designPath) {
     }
   }
 
-  // ── Testbench (tb_top) wireframe ──────────────────────────────
+  // ── Testbench wireframe ─────────────────────────────────────────
   const tbL  = railL  - 1;
   const tbR  = railR  + 1;
   const tbB  = clkY   - 1;
@@ -1040,7 +1053,7 @@ async function buildScene(designPath) {
   scene.add(dashedBox(tbCX, tbCY, 0, tbW, tbH, tbZ * 2, TB_COL));
 
   const tbLabel = makeLabel(
-    '<span class="tb-label-text">tb_top</span>', 'tb-label-obj'
+    `<span class="tb-label-text">${tbName}</span>`, 'tb-label-obj'
   );
   tbLabel.position.set(tbL + 0.8, tbT + 0.35, 0);
   scene.add(tbLabel);
@@ -1113,12 +1126,12 @@ async function buildScene(designPath) {
 
   // Testbench
   const tbLi = document.createElement('li');
-  tbLi.innerHTML = `<span class="dot" style="background:#546E7A; outline:1px dashed #546E7A"></span> tb_top (testbench)`;
+  tbLi.innerHTML = `<span class="dot" style="background:#546E7A; outline:1px dashed #546E7A"></span> ${tbName} (testbench)`;
   legendList.appendChild(tbLi);
 
   const paramTable = document.getElementById('param-table');
   paramTable.innerHTML = '';
-  for (const [k, v] of Object.entries(design.parameters)) {
+  for (const [k, v] of Object.entries(design.parameters ?? {})) {
     const tr = document.createElement('tr');
     tr.innerHTML = `<td class="pk">${k}</td><td class="pv">${v}</td>`;
     paramTable.appendChild(tr);

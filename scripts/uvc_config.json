@@ -1,0 +1,94 @@
+{
+  "_comment": "UVC view generation config. Each entry produces a metadata/uvm_{key}_uvc.json. The script reads this and generates the full design JSONs.",
+  "common": {
+    "version": "3.0",
+    "includes": [
+      "blocks/uvm_sequencer.json",
+      "blocks/uvm_driver.json",
+      "blocks/uvm_monitor.json",
+      "blocks/uvm_sequence.json",
+      "blocks/axi4_vif.json",
+      "blocks/uvm_axi4_env_common.json"
+    ],
+    "parameters": {
+      "DATA_WIDTH": 64,
+      "ADDR_WIDTH": 32,
+      "ID_WIDTH": 4
+    },
+    "testbench": {
+      "module_name": "tb_top",
+      "global_signals": [
+        {
+          "name": "clk",
+          "width": 1,
+          "type": "reg",
+          "description": "System clock.",
+          "render": { "face": "bottom", "color": "#00E676" }
+        },
+        {
+          "name": "rst_n",
+          "width": 1,
+          "type": "reg",
+          "description": "Active-low reset.",
+          "render": { "face": "top", "color": "#FF5252" }
+        }
+      ]
+    },
+    "connection_types": {
+      "axi4_bus": { "color": "#FFC107", "description": "AXI4 Bus" },
+      "vif":      { "color": "#795548", "description": "Virtual Interface" },
+      "tlm":      { "color": "#E91E63", "description": "TLM Analysis Port" }
+    },
+    "dut_module": {
+      "description": "AXI4 interconnect DUT stub",
+      "render": {
+        "color": "#FF9800",
+        "size": { "w": 8, "h": 3, "d": 3 }
+      },
+      "ports": [
+        { "name": "clk",   "direction": "input", "width": 1, "channel": "GLOBAL", "description": "System clock" },
+        { "name": "rst_n", "direction": "input", "width": 1, "channel": "GLOBAL", "description": "Active-low reset" }
+      ]
+    },
+    "scoreboard_modules": {
+      "uvm_read_scoreboard": {
+        "description": "Read scoreboard — checks AR/R channel transactions",
+        "render": { "color": "#F44336" },
+        "ports": [
+          { "name": "analysis_export", "direction": "input", "width": 1, "channel": "TLM", "description": "Receives monitor transactions" }
+        ]
+      },
+      "uvm_write_scoreboard": {
+        "description": "Write scoreboard — checks AW/W/B channel transactions",
+        "render": { "color": "#E91E63" },
+        "ports": [
+          { "name": "analysis_export", "direction": "input", "width": 1, "channel": "TLM", "description": "Receives monitor transactions" }
+        ]
+      }
+    },
+    "channels": ["aw", "w", "b", "ar", "r"],
+    "agent_layout": {
+      "aw": { "sqr": {"x": -9, "y": 10, "z": 0}, "drv": {"x": -5, "y": 10, "z": 0}, "mon": {"x": -1, "y": 10, "z": 0}, "vif": {"x": -5, "y": 6, "z": 0} },
+      "w":  { "sqr": {"x": -9, "y": 3,  "z": 0}, "drv": {"x": -5, "y": 3,  "z": 0}, "mon": {"x": -1, "y": 3,  "z": 0}, "vif": {"x": -5, "y": -1, "z": 0} },
+      "b":  { "sqr": {"x": 3,  "y": 10, "z": 0}, "drv": {"x": 7,  "y": 10, "z": 0}, "mon": {"x": 11, "y": 10, "z": 0}, "vif": {"x": 7,  "y": 6,  "z": 0} },
+      "ar": { "sqr": {"x": 3,  "y": 3,  "z": 0}, "drv": {"x": 7,  "y": 3,  "z": 0}, "mon": {"x": 11, "y": 3,  "z": 0}, "vif": {"x": 7,  "y": -1, "z": 0} },
+      "r":  { "sqr": {"x": 3,  "y": -4, "z": 0}, "drv": {"x": 7,  "y": -4, "z": 0}, "mon": {"x": 11, "y": -4, "z": 0}, "vif": {"x": 7,  "y": -8, "z": 0} }
+    },
+    "extra_positions": {
+      "dut_stub":  {"x": 0,  "y": -14, "z": 0},
+      "read_seq":  {"x": -9, "y": -4,  "z": 0},
+      "write_seq": {"x": -5, "y": -4,  "z": 0},
+      "read_sb":   {"x": -9, "y": -8,  "z": 0},
+      "write_sb":  {"x": -5, "y": -8,  "z": 0}
+    }
+  },
+  "uvcs": {
+    "cpu":  { "role": "master", "env_color": "#1565C0", "label": "CPU" },
+    "dma":  { "role": "master", "env_color": "#1565C0", "label": "DMA" },
+    "gpu":  { "role": "master", "env_color": "#1565C0", "label": "GPU" },
+    "sram": { "role": "slave",  "env_color": "#00897B", "label": "SRAM" },
+    "ddr":  { "role": "slave",  "env_color": "#00897B", "label": "DDR" },
+    "uart": { "role": "slave",  "env_color": "#00897B", "label": "UART" },
+    "spi":  { "role": "slave",  "env_color": "#00897B", "label": "SPI" }
+  }
+}
