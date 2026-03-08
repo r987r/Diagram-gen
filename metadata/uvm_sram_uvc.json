@@ -17,7 +17,6 @@
   },
   "testbench": {
     "module_name": "tb_top",
-    "description": "Testbench for SRAM AXI4 Env debug view.",
     "global_signals": [
       {
         "name": "clk",
@@ -39,7 +38,22 @@
           "color": "#FF5252"
         }
       }
-    ]
+    ],
+    "description": "Testbench for SRAM AXI4 Env debug view."
+  },
+  "connection_types": {
+    "axi4_bus": {
+      "color": "#FFC107",
+      "description": "AXI4 Bus"
+    },
+    "vif": {
+      "color": "#795548",
+      "description": "Virtual Interface"
+    },
+    "tlm": {
+      "color": "#E91E63",
+      "description": "TLM Analysis Port"
+    }
   },
   "modules": {
     "axi4_interconnect": {
@@ -80,14 +94,14 @@
           "direction": "input",
           "width": 1,
           "channel": "TLM",
-          "description": "TLM analysis export"
+          "description": "Receives monitor transactions"
         }
       ]
     },
     "uvm_write_scoreboard": {
       "description": "Write scoreboard \u2014 checks AW/W/B channel transactions",
       "render": {
-        "color": "#E53935"
+        "color": "#E91E63"
       },
       "ports": [
         {
@@ -95,7 +109,7 @@
           "direction": "input",
           "width": 1,
           "channel": "TLM",
-          "description": "TLM analysis export"
+          "description": "Receives monitor transactions"
         }
       ]
     }
@@ -104,207 +118,186 @@
     {
       "instance_name": "aw_sqr",
       "module": "uvm_sequencer",
-      "description": "AW channel sequencer",
       "position": {
-        "x": -16,
-        "y": 4,
+        "x": -9,
+        "y": 10,
         "z": 0
       }
     },
     {
       "instance_name": "aw_drv",
       "module": "uvm_driver",
-      "description": "AW channel driver",
       "position": {
-        "x": -16,
-        "y": 1,
+        "x": -5,
+        "y": 10,
         "z": 0
       }
     },
     {
       "instance_name": "aw_mon",
       "module": "uvm_monitor",
-      "description": "AW channel monitor",
       "position": {
-        "x": -16,
-        "y": -2,
+        "x": -1,
+        "y": 10,
         "z": 0
       }
     },
     {
       "instance_name": "aw_vif",
       "module": "axi4_vif",
-      "description": "AW channel virtual interface",
       "position": {
-        "x": -16,
-        "y": -7,
+        "x": -5,
+        "y": 6,
         "z": 0
       }
     },
     {
       "instance_name": "w_sqr",
       "module": "uvm_sequencer",
-      "description": "W channel sequencer",
       "position": {
-        "x": -8,
-        "y": 4,
+        "x": -9,
+        "y": 3,
         "z": 0
       }
     },
     {
       "instance_name": "w_drv",
       "module": "uvm_driver",
-      "description": "W channel driver",
       "position": {
-        "x": -8,
-        "y": 1,
+        "x": -5,
+        "y": 3,
         "z": 0
       }
     },
     {
       "instance_name": "w_mon",
       "module": "uvm_monitor",
-      "description": "W channel monitor",
       "position": {
-        "x": -8,
-        "y": -2,
+        "x": -1,
+        "y": 3,
         "z": 0
       }
     },
     {
       "instance_name": "w_vif",
       "module": "axi4_vif",
-      "description": "W channel virtual interface",
       "position": {
-        "x": -8,
-        "y": -7,
+        "x": -5,
+        "y": -1,
         "z": 0
       }
     },
     {
       "instance_name": "b_sqr",
       "module": "uvm_sequencer",
-      "description": "B channel sequencer",
       "position": {
-        "x": 0,
-        "y": 4,
+        "x": 3,
+        "y": 10,
         "z": 0
       }
     },
     {
       "instance_name": "b_drv",
       "module": "uvm_driver",
-      "description": "B channel driver",
       "position": {
-        "x": 0,
-        "y": 1,
+        "x": 7,
+        "y": 10,
         "z": 0
       }
     },
     {
       "instance_name": "b_mon",
       "module": "uvm_monitor",
-      "description": "B channel monitor",
       "position": {
-        "x": 0,
-        "y": -2,
+        "x": 11,
+        "y": 10,
         "z": 0
       }
     },
     {
       "instance_name": "b_vif",
       "module": "axi4_vif",
-      "description": "B channel virtual interface",
       "position": {
-        "x": 0,
-        "y": -7,
+        "x": 7,
+        "y": 6,
         "z": 0
       }
     },
     {
       "instance_name": "ar_sqr",
       "module": "uvm_sequencer",
-      "description": "AR channel sequencer",
       "position": {
-        "x": 8,
-        "y": 4,
+        "x": 3,
+        "y": 3,
         "z": 0
       }
     },
     {
       "instance_name": "ar_drv",
       "module": "uvm_driver",
-      "description": "AR channel driver",
       "position": {
-        "x": 8,
-        "y": 1,
+        "x": 7,
+        "y": 3,
         "z": 0
       }
     },
     {
       "instance_name": "ar_mon",
       "module": "uvm_monitor",
-      "description": "AR channel monitor",
       "position": {
-        "x": 8,
-        "y": -2,
+        "x": 11,
+        "y": 3,
         "z": 0
       }
     },
     {
       "instance_name": "ar_vif",
       "module": "axi4_vif",
-      "description": "AR channel virtual interface",
       "position": {
-        "x": 8,
-        "y": -7,
+        "x": 7,
+        "y": -1,
         "z": 0
       }
     },
     {
       "instance_name": "r_sqr",
       "module": "uvm_sequencer",
-      "description": "R channel sequencer",
       "position": {
-        "x": 16,
-        "y": 4,
+        "x": 3,
+        "y": -4,
         "z": 0
       }
     },
     {
       "instance_name": "r_drv",
       "module": "uvm_driver",
-      "description": "R channel driver",
       "position": {
-        "x": 16,
-        "y": 1,
+        "x": 7,
+        "y": -4,
         "z": 0
       }
     },
     {
       "instance_name": "r_mon",
       "module": "uvm_monitor",
-      "description": "R channel monitor",
       "position": {
-        "x": 16,
-        "y": -2,
+        "x": 11,
+        "y": -4,
         "z": 0
       }
     },
     {
       "instance_name": "r_vif",
       "module": "axi4_vif",
-      "description": "R channel virtual interface",
       "position": {
-        "x": 16,
-        "y": -7,
+        "x": 7,
+        "y": -8,
         "z": 0
       }
     },
     {
       "instance_name": "dut_stub",
       "module": "axi4_interconnect",
-      "description": "AXI4 interconnect DUT stub",
       "position": {
         "x": 0,
         "y": -14,
@@ -314,40 +307,36 @@
     {
       "instance_name": "read_seq",
       "module": "uvm_sequence",
-      "description": "Read sequence \u2014 AR/R stimulus",
       "position": {
-        "x": -12,
-        "y": 10,
+        "x": -9,
+        "y": -4,
         "z": 0
       }
     },
     {
       "instance_name": "write_seq",
       "module": "uvm_sequence",
-      "description": "Write sequence \u2014 AW/W/B stimulus",
       "position": {
-        "x": 12,
-        "y": 10,
+        "x": -5,
+        "y": -4,
         "z": 0
       }
     },
     {
       "instance_name": "read_sb",
       "module": "uvm_read_scoreboard",
-      "description": "Read scoreboard",
       "position": {
-        "x": -12,
-        "y": -11,
+        "x": -9,
+        "y": -8,
         "z": 0
       }
     },
     {
       "instance_name": "write_sb",
       "module": "uvm_write_scoreboard",
-      "description": "Write scoreboard",
       "position": {
-        "x": 12,
-        "y": -11,
+        "x": -5,
+        "y": -8,
         "z": 0
       }
     }
@@ -356,7 +345,7 @@
     {
       "id": "clk_fanout",
       "type": "clock",
-      "description": "System clock",
+      "description": "System clock to all VIFs and DUT",
       "from": {
         "instance": "tb_top",
         "port": "clk"
@@ -391,7 +380,7 @@
     {
       "id": "rst_fanout",
       "type": "reset",
-      "description": "Active-low reset",
+      "description": "Active-low reset to all VIFs and DUT",
       "from": {
         "instance": "tb_top",
         "port": "rst_n"
@@ -425,84 +414,16 @@
     },
     {
       "id": "aw_sqr_to_drv",
-      "type": "axi4_bus",
-      "label": "AW sqr \u2192 drv",
-      "description": "AW sequencer delivers items to driver",
+      "type": "tlm",
+      "label": "AW sqr\u2192drv",
+      "description": "AW sequencer to driver",
       "from_instance": "aw_sqr",
       "to_instance": "aw_drv",
       "channel_signals": {
         "TLM": [
           {
-            "from_port": "seq_item_export",
-            "wire": "seq_item_port",
-            "to_port": "seq_item_port"
-          }
-        ]
-      }
-    },
-    {
-      "id": "w_sqr_to_drv",
-      "type": "axi4_bus",
-      "label": "W sqr \u2192 drv",
-      "description": "W sequencer delivers items to driver",
-      "from_instance": "w_sqr",
-      "to_instance": "w_drv",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "seq_item_export",
-            "wire": "seq_item_port",
-            "to_port": "seq_item_port"
-          }
-        ]
-      }
-    },
-    {
-      "id": "b_sqr_to_drv",
-      "type": "axi4_bus",
-      "label": "B sqr \u2192 drv",
-      "description": "B sequencer delivers items to driver",
-      "from_instance": "b_sqr",
-      "to_instance": "b_drv",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "seq_item_export",
-            "wire": "seq_item_port",
-            "to_port": "seq_item_port"
-          }
-        ]
-      }
-    },
-    {
-      "id": "ar_sqr_to_drv",
-      "type": "axi4_bus",
-      "label": "AR sqr \u2192 drv",
-      "description": "AR sequencer delivers items to driver",
-      "from_instance": "ar_sqr",
-      "to_instance": "ar_drv",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "seq_item_export",
-            "wire": "seq_item_port",
-            "to_port": "seq_item_port"
-          }
-        ]
-      }
-    },
-    {
-      "id": "r_sqr_to_drv",
-      "type": "axi4_bus",
-      "label": "R sqr \u2192 drv",
-      "description": "R sequencer delivers items to driver",
-      "from_instance": "r_sqr",
-      "to_instance": "r_drv",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "seq_item_export",
-            "wire": "seq_item_port",
+            "from_port": "seq_item_port",
+            "wire": "aw_seq_item",
             "to_port": "seq_item_port"
           }
         ]
@@ -510,84 +431,16 @@
     },
     {
       "id": "aw_drv_to_vif",
-      "type": "axi4_bus",
-      "label": "AW drv \u2192 vif",
-      "description": "AW driver drives signals through virtual interface",
+      "type": "vif",
+      "label": "AW drv\u2192vif",
+      "description": "AW driver to virtual interface",
       "from_instance": "aw_drv",
       "to_instance": "aw_vif",
       "channel_signals": {
         "VIF": [
           {
             "from_port": "vif",
-            "wire": "vif_handle",
-            "to_port": "driver_mp"
-          }
-        ]
-      }
-    },
-    {
-      "id": "w_drv_to_vif",
-      "type": "axi4_bus",
-      "label": "W drv \u2192 vif",
-      "description": "W driver drives signals through virtual interface",
-      "from_instance": "w_drv",
-      "to_instance": "w_vif",
-      "channel_signals": {
-        "VIF": [
-          {
-            "from_port": "vif",
-            "wire": "vif_handle",
-            "to_port": "driver_mp"
-          }
-        ]
-      }
-    },
-    {
-      "id": "b_drv_to_vif",
-      "type": "axi4_bus",
-      "label": "B drv \u2192 vif",
-      "description": "B driver drives signals through virtual interface",
-      "from_instance": "b_drv",
-      "to_instance": "b_vif",
-      "channel_signals": {
-        "VIF": [
-          {
-            "from_port": "vif",
-            "wire": "vif_handle",
-            "to_port": "driver_mp"
-          }
-        ]
-      }
-    },
-    {
-      "id": "ar_drv_to_vif",
-      "type": "axi4_bus",
-      "label": "AR drv \u2192 vif",
-      "description": "AR driver drives signals through virtual interface",
-      "from_instance": "ar_drv",
-      "to_instance": "ar_vif",
-      "channel_signals": {
-        "VIF": [
-          {
-            "from_port": "vif",
-            "wire": "vif_handle",
-            "to_port": "driver_mp"
-          }
-        ]
-      }
-    },
-    {
-      "id": "r_drv_to_vif",
-      "type": "axi4_bus",
-      "label": "R drv \u2192 vif",
-      "description": "R driver drives signals through virtual interface",
-      "from_instance": "r_drv",
-      "to_instance": "r_vif",
-      "channel_signals": {
-        "VIF": [
-          {
-            "from_port": "vif",
-            "wire": "vif_handle",
+            "wire": "aw_drv_vif",
             "to_port": "driver_mp"
           }
         ]
@@ -595,85 +448,340 @@
     },
     {
       "id": "aw_mon_to_vif",
-      "type": "axi4_bus",
-      "label": "AW mon \u2192 vif",
-      "description": "AW monitor observes signals through virtual interface",
+      "type": "vif",
+      "label": "AW mon\u2192vif",
+      "description": "AW monitor to virtual interface",
       "from_instance": "aw_mon",
       "to_instance": "aw_vif",
       "channel_signals": {
         "VIF": [
           {
             "from_port": "vif",
-            "wire": "vif_handle",
+            "wire": "aw_mon_vif",
             "to_port": "monitor_mp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "w_sqr_to_drv",
+      "type": "tlm",
+      "label": "W sqr\u2192drv",
+      "description": "W sequencer to driver",
+      "from_instance": "w_sqr",
+      "to_instance": "w_drv",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "w_seq_item",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "w_drv_to_vif",
+      "type": "vif",
+      "label": "W drv\u2192vif",
+      "description": "W driver to virtual interface",
+      "from_instance": "w_drv",
+      "to_instance": "w_vif",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "w_drv_vif",
+            "to_port": "driver_mp"
           }
         ]
       }
     },
     {
       "id": "w_mon_to_vif",
-      "type": "axi4_bus",
-      "label": "W mon \u2192 vif",
-      "description": "W monitor observes signals through virtual interface",
+      "type": "vif",
+      "label": "W mon\u2192vif",
+      "description": "W monitor to virtual interface",
       "from_instance": "w_mon",
       "to_instance": "w_vif",
       "channel_signals": {
         "VIF": [
           {
             "from_port": "vif",
-            "wire": "vif_handle",
+            "wire": "w_mon_vif",
             "to_port": "monitor_mp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_sqr_to_drv",
+      "type": "tlm",
+      "label": "B sqr\u2192drv",
+      "description": "B sequencer to driver",
+      "from_instance": "b_sqr",
+      "to_instance": "b_drv",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "b_seq_item",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_drv_to_vif",
+      "type": "vif",
+      "label": "B drv\u2192vif",
+      "description": "B driver to virtual interface",
+      "from_instance": "b_drv",
+      "to_instance": "b_vif",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "b_drv_vif",
+            "to_port": "driver_mp"
           }
         ]
       }
     },
     {
       "id": "b_mon_to_vif",
-      "type": "axi4_bus",
-      "label": "B mon \u2192 vif",
-      "description": "B monitor observes signals through virtual interface",
+      "type": "vif",
+      "label": "B mon\u2192vif",
+      "description": "B monitor to virtual interface",
       "from_instance": "b_mon",
       "to_instance": "b_vif",
       "channel_signals": {
         "VIF": [
           {
             "from_port": "vif",
-            "wire": "vif_handle",
+            "wire": "b_mon_vif",
             "to_port": "monitor_mp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ar_sqr_to_drv",
+      "type": "tlm",
+      "label": "AR sqr\u2192drv",
+      "description": "AR sequencer to driver",
+      "from_instance": "ar_sqr",
+      "to_instance": "ar_drv",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "ar_seq_item",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ar_drv_to_vif",
+      "type": "vif",
+      "label": "AR drv\u2192vif",
+      "description": "AR driver to virtual interface",
+      "from_instance": "ar_drv",
+      "to_instance": "ar_vif",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "ar_drv_vif",
+            "to_port": "driver_mp"
           }
         ]
       }
     },
     {
       "id": "ar_mon_to_vif",
-      "type": "axi4_bus",
-      "label": "AR mon \u2192 vif",
-      "description": "AR monitor observes signals through virtual interface",
+      "type": "vif",
+      "label": "AR mon\u2192vif",
+      "description": "AR monitor to virtual interface",
       "from_instance": "ar_mon",
       "to_instance": "ar_vif",
       "channel_signals": {
         "VIF": [
           {
             "from_port": "vif",
-            "wire": "vif_handle",
+            "wire": "ar_mon_vif",
             "to_port": "monitor_mp"
           }
         ]
       }
     },
     {
+      "id": "r_sqr_to_drv",
+      "type": "tlm",
+      "label": "R sqr\u2192drv",
+      "description": "R sequencer to driver",
+      "from_instance": "r_sqr",
+      "to_instance": "r_drv",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "r_seq_item",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "r_drv_to_vif",
+      "type": "vif",
+      "label": "R drv\u2192vif",
+      "description": "R driver to virtual interface",
+      "from_instance": "r_drv",
+      "to_instance": "r_vif",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "r_drv_vif",
+            "to_port": "driver_mp"
+          }
+        ]
+      }
+    },
+    {
       "id": "r_mon_to_vif",
-      "type": "axi4_bus",
-      "label": "R mon \u2192 vif",
-      "description": "R monitor observes signals through virtual interface",
+      "type": "vif",
+      "label": "R mon\u2192vif",
+      "description": "R monitor to virtual interface",
       "from_instance": "r_mon",
       "to_instance": "r_vif",
       "channel_signals": {
         "VIF": [
           {
             "from_port": "vif",
-            "wire": "vif_handle",
+            "wire": "r_mon_vif",
             "to_port": "monitor_mp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ar_mon_to_read_sb",
+      "type": "tlm",
+      "label": "AR mon\u2192SB",
+      "description": "AR monitor analysis to read sb",
+      "from_instance": "ar_mon",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "ar_mon_ap",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "r_mon_to_read_sb",
+      "type": "tlm",
+      "label": "R mon\u2192SB",
+      "description": "R monitor analysis to read sb",
+      "from_instance": "r_mon",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "r_mon_ap",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "aw_mon_to_write_sb",
+      "type": "tlm",
+      "label": "AW mon\u2192SB",
+      "description": "AW monitor analysis to write sb",
+      "from_instance": "aw_mon",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "aw_mon_ap",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "w_mon_to_write_sb",
+      "type": "tlm",
+      "label": "W mon\u2192SB",
+      "description": "W monitor analysis to write sb",
+      "from_instance": "w_mon",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "w_mon_ap",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_mon_to_write_sb",
+      "type": "tlm",
+      "label": "B mon\u2192SB",
+      "description": "B monitor analysis to write sb",
+      "from_instance": "b_mon",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "b_mon_ap",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "read_seq_to_ar",
+      "type": "tlm",
+      "label": "Read seq\u2192AR",
+      "description": "Read sequence generates AR channel transactions",
+      "from_instance": "read_seq",
+      "to_instance": "ar_sqr",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "read_seq_out",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "write_seq_to_aw",
+      "type": "tlm",
+      "label": "Write seq\u2192AW",
+      "description": "Write sequence generates AW channel transactions",
+      "from_instance": "write_seq",
+      "to_instance": "aw_sqr",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "write_seq_out",
+            "to_port": "seq_item_port"
           }
         ]
       }
@@ -762,244 +870,80 @@
           }
         ]
       }
-    },
-    {
-      "id": "write_seq_to_aw_sqr",
-      "type": "axi4_bus",
-      "label": "seq \u2192 AW",
-      "description": "Write sequence drives AW sequencer",
-      "from_instance": "write_seq",
-      "to_instance": "aw_sqr",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "seq_item_port",
-            "wire": "seq_item_port",
-            "to_port": "seq_item_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "write_seq_to_w_sqr",
-      "type": "axi4_bus",
-      "label": "seq \u2192 W",
-      "description": "Write sequence drives W sequencer",
-      "from_instance": "write_seq",
-      "to_instance": "w_sqr",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "seq_item_port",
-            "wire": "seq_item_port",
-            "to_port": "seq_item_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "write_seq_to_b_sqr",
-      "type": "axi4_bus",
-      "label": "seq \u2192 B",
-      "description": "Write sequence drives B sequencer",
-      "from_instance": "write_seq",
-      "to_instance": "b_sqr",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "seq_item_port",
-            "wire": "seq_item_port",
-            "to_port": "seq_item_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "read_seq_to_ar_sqr",
-      "type": "axi4_bus",
-      "label": "seq \u2192 AR",
-      "description": "Read sequence drives AR sequencer",
-      "from_instance": "read_seq",
-      "to_instance": "ar_sqr",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "seq_item_port",
-            "wire": "seq_item_port",
-            "to_port": "seq_item_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "read_seq_to_r_sqr",
-      "type": "axi4_bus",
-      "label": "seq \u2192 R",
-      "description": "Read sequence drives R sequencer",
-      "from_instance": "read_seq",
-      "to_instance": "r_sqr",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "seq_item_port",
-            "wire": "seq_item_port",
-            "to_port": "seq_item_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "aw_mon_to_write_sb",
-      "type": "axi4_bus",
-      "label": "AW \u2192 SB",
-      "description": "AW monitor to write scoreboard",
-      "from_instance": "aw_mon",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "analysis_write",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "w_mon_to_write_sb",
-      "type": "axi4_bus",
-      "label": "W \u2192 SB",
-      "description": "W monitor to write scoreboard",
-      "from_instance": "w_mon",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "analysis_write",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "b_mon_to_write_sb",
-      "type": "axi4_bus",
-      "label": "B \u2192 SB",
-      "description": "B monitor to write scoreboard",
-      "from_instance": "b_mon",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "analysis_write",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "ar_mon_to_read_sb",
-      "type": "axi4_bus",
-      "label": "AR \u2192 SB",
-      "description": "AR monitor to read scoreboard",
-      "from_instance": "ar_mon",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "analysis_write",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "r_mon_to_read_sb",
-      "type": "axi4_bus",
-      "label": "R \u2192 SB",
-      "description": "R monitor to read scoreboard",
-      "from_instance": "r_mon",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "analysis_write",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
     }
   ],
   "groups": [
     {
       "name": "aw_agent",
       "label": "AW Agent",
-      "description": "AW channel agent \u2014 encapsulates sequencer, driver, and monitor",
-      "color": "#2196F3",
+      "description": "AXI4 AW channel agent (sequencer + driver + monitor + VIF)",
+      "color": "#42A5F5",
+      "padding": 0.8,
       "members": [
         "aw_sqr",
         "aw_drv",
-        "aw_mon"
-      ],
-      "padding": 0.8
+        "aw_mon",
+        "aw_vif"
+      ]
     },
     {
       "name": "w_agent",
       "label": "W Agent",
-      "description": "W channel agent \u2014 encapsulates sequencer, driver, and monitor",
-      "color": "#2196F3",
+      "description": "AXI4 W channel agent (sequencer + driver + monitor + VIF)",
+      "color": "#42A5F5",
+      "padding": 0.8,
       "members": [
         "w_sqr",
         "w_drv",
-        "w_mon"
-      ],
-      "padding": 0.8
+        "w_mon",
+        "w_vif"
+      ]
     },
     {
       "name": "b_agent",
       "label": "B Agent",
-      "description": "B channel agent \u2014 encapsulates sequencer, driver, and monitor",
-      "color": "#2196F3",
+      "description": "AXI4 B channel agent (sequencer + driver + monitor + VIF)",
+      "color": "#42A5F5",
+      "padding": 0.8,
       "members": [
         "b_sqr",
         "b_drv",
-        "b_mon"
-      ],
-      "padding": 0.8
+        "b_mon",
+        "b_vif"
+      ]
     },
     {
       "name": "ar_agent",
       "label": "AR Agent",
-      "description": "AR channel agent \u2014 encapsulates sequencer, driver, and monitor",
-      "color": "#2196F3",
+      "description": "AXI4 AR channel agent (sequencer + driver + monitor + VIF)",
+      "color": "#42A5F5",
+      "padding": 0.8,
       "members": [
         "ar_sqr",
         "ar_drv",
-        "ar_mon"
-      ],
-      "padding": 0.8
+        "ar_mon",
+        "ar_vif"
+      ]
     },
     {
       "name": "r_agent",
       "label": "R Agent",
-      "description": "R channel agent \u2014 encapsulates sequencer, driver, and monitor",
-      "color": "#2196F3",
+      "description": "AXI4 R channel agent (sequencer + driver + monitor + VIF)",
+      "color": "#42A5F5",
+      "padding": 0.8,
       "members": [
         "r_sqr",
         "r_drv",
-        "r_mon"
-      ],
-      "padding": 0.8
+        "r_mon",
+        "r_vif"
+      ]
     },
     {
       "name": "axi4_env",
       "label": "AXI4 Env (SRAM)",
-      "description": "AXI4 Env (SRAM) \u2014 5 per-channel agents with internal sequencer/driver/monitor, per-channel VIFs, sequences and scoreboards",
+      "description": "AXI4 Env (SRAM) \u2014 5 per-channel agents (AW, W, B for write; AR, R for read), sequences, and scoreboards.",
       "color": "#00897B",
+      "padding": 1.5,
       "members": [
         "aw_sqr",
         "aw_drv",
@@ -1027,11 +971,5 @@
         "write_sb"
       ]
     }
-  ],
-  "connection_types": {
-    "axi4_bus": {
-      "color": "#FFC107",
-      "description": "AXI4 bus / TLM / VIF connection"
-    }
-  }
+  ]
 }

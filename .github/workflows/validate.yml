@@ -25,6 +25,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Generate UVC views from config
+        run: python scripts/generate_uvc_views.py metadata/
+
       - name: Validate JSON syntax, schema & connectivity
         run: python scripts/validate_design.py metadata/
 
