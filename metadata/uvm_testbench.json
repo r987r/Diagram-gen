@@ -12,7 +12,8 @@
     "blocks/uvm_scoreboard.json",
     "blocks/uvm_sequence.json",
     "blocks/axi4_vif.json",
-    "blocks/tlm_analysis_fifo.json"
+    "blocks/tlm_analysis_fifo.json",
+    "blocks/axi4_interconnect.json"
   ],
   "parameters": {
     "DATA_WIDTH": 64,
@@ -90,6 +91,12 @@
       "position": { "x": -3, "y": -4, "z": 0 }
     },
     {
+      "instance_name": "dut_i",
+      "module": "axi4_interconnect",
+      "description": "External DUT — the RTL design under test connected via virtual interface",
+      "position": { "x": -3, "y": -8, "z": 0 }
+    },
+    {
       "instance_name": "seq_i",
       "module": "uvm_sequence",
       "description": "UVM sequence — generates stimulus, connects to sequencer via TLM port",
@@ -123,7 +130,8 @@
         { "instance": "mon_i", "port": "clk" },
         { "instance": "vif_i", "port": "clk" },
         { "instance": "seq_i", "port": "clk" },
-        { "instance": "sb_i", "port": "clk" }
+        { "instance": "sb_i", "port": "clk" },
+        { "instance": "dut_i", "port": "clk" }
       ]
     },
     {
@@ -140,7 +148,8 @@
         { "instance": "mon_i", "port": "rst_n" },
         { "instance": "vif_i", "port": "rst_n" },
         { "instance": "seq_i", "port": "rst_n" },
-        { "instance": "sb_i", "port": "rst_n" }
+        { "instance": "sb_i", "port": "rst_n" },
+        { "instance": "dut_i", "port": "rst_n" }
       ]
     },
     {
@@ -274,15 +283,15 @@
       }
     },
     {
-      "id": "vif_to_mon",
+      "id": "mon_to_vif",
       "type": "axi4_bus",
-      "label": "vif → monitor",
+      "label": "monitor → vif",
       "description": "Monitor gets a handle to the virtual interface and observes AXI4 signals from the DUT through it.",
-      "from_instance": "vif_i",
-      "to_instance": "mon_i",
+      "from_instance": "mon_i",
+      "to_instance": "vif_i",
       "channel_signals": {
         "VIF": [
-          { "from_port": "monitor_mp", "wire": "vif_handle", "to_port": "vif" }
+          { "from_port": "vif", "wire": "vif_handle", "to_port": "monitor_mp" }
         ]
       }
     },
@@ -309,6 +318,19 @@
       "channel_signals": {
         "TLM": [
           { "from_port": "blocking_get_export", "wire": "get_port", "to_port": "analysis_export" }
+        ]
+      }
+    },
+    {
+      "id": "vif_to_dut",
+      "type": "axi4_bus",
+      "label": "vif → DUT",
+      "description": "Virtual interface connects to the external RTL DUT AXI4 port.",
+      "from_instance": "vif_i",
+      "to_instance": "dut_i",
+      "channel_signals": {
+        "VIF": [
+          { "from_port": "dut_mp", "wire": "axi4_if", "to_port": "axi4_port" }
         ]
       }
     }
