@@ -412,7 +412,7 @@ function clearHighlight() {
   if (currentHighlight) {
     currentHighlight.traverse(c => {
       c.geometry?.dispose();
-      c.material?.dispose?.();
+      c.material?.dispose();
     });
     scene.remove(currentHighlight);
     currentHighlight = null;
@@ -544,6 +544,7 @@ renderer.domElement.addEventListener('pointerup', (e) => {
 
 /** Clear all scene objects (except lights and grid) for design switching. */
 function clearScene() {
+  clearHighlight();
   const keep = new Set();
   scene.traverse((obj) => {
     if (obj instanceof THREE.Light || obj === grid || obj === scene) keep.add(obj);
@@ -565,7 +566,6 @@ function clearScene() {
   }
   clickableObjects.length = 0;
   objectMeta.clear();
-  currentHighlight = null;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -931,9 +931,9 @@ async function buildScene(designPath) {
     // Invisible hit zones for click detection (one per route segment)
     for (let i = 0; i < routePts.length - 1; i++) {
       const segLen = Math.hypot(
-        routePts[i+1][0] - routePts[i][0],
-        routePts[i+1][1] - routePts[i][1],
-        routePts[i+1][2] - routePts[i][2]);
+        routePts[i + 1][0] - routePts[i][0],
+        routePts[i + 1][1] - routePts[i][1],
+        routePts[i + 1][2] - routePts[i][2]);
       if (segLen < 0.01) continue;
       const hitZone = busHitZone(routePts[i], routePts[i + 1]);
       scene.add(hitZone);
