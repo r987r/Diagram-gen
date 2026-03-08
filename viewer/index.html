@@ -27,37 +27,49 @@
   <header id="topbar">
     <span id="design-title">AXI4 Interconnect</span>
     <span id="design-subtitle">Master → Repeater → Slave</span>
+
+    <!-- Design selector -->
+    <select id="design-select" title="Choose design">
+      <option value="metadata/axi4_design.json">AXI4 M→R→S</option>
+      <option value="metadata/axi4_wide_interconnect.json">Wide Interconnect</option>
+    </select>
+
+    <button id="btn-overview" title="Design overview">ℹ️</button>
     <span id="controls-hint">🖱 Drag to orbit · Scroll to zoom · Right-drag to pan</span>
   </header>
 
-  <!-- ── Side panel ───────────────────────────────────────────── -->
-  <aside id="panel">
-    <h2 id="panel-design-name">Loading…</h2>
-    <p  id="panel-desc"></p>
+  <!-- ── Overview overlay (design info, legend, parameters) ──── -->
+  <div id="overview-overlay" class="overlay hidden">
+    <div class="overlay-content">
+      <button class="overlay-close" data-close="overview-overlay">✕</button>
+      <h2 id="panel-design-name">Loading…</h2>
+      <p  id="panel-desc"></p>
 
-    <section class="panel-section">
-      <h3>Instances</h3>
-      <ul id="instance-list"></ul>
-    </section>
+      <section class="panel-section">
+        <h3>Instances</h3>
+        <ul id="instance-list"></ul>
+      </section>
 
-    <section class="panel-section">
-      <h3>Legend</h3>
-      <ul id="legend">
-        <li><span class="dot" style="background:#00E676"></span> CLK (bottom of cube)</li>
-        <li><span class="dot" style="background:#FF5252"></span> RST_N (top of cube)</li>
-        <li><span class="dot" style="background:#FFC107"></span> AXI4 Bus</li>
-        <li><span class="dot" style="background:#2196F3"></span> AXI4 Master</li>
-        <li><span class="dot" style="background:#9C27B0"></span> AXI4 Repeater</li>
-        <li><span class="dot" style="background:#4CAF50"></span> AXI4 Slave</li>
-        <li><span class="dot" style="background:#546E7A; outline:1px dashed #546E7A"></span> tb_top (testbench)</li>
-      </ul>
-    </section>
+      <section class="panel-section">
+        <h3>Legend</h3>
+        <ul id="legend"></ul>
+      </section>
 
-    <section class="panel-section">
-      <h3>Parameters</h3>
-      <table id="param-table"></table>
-    </section>
-  </aside>
+      <section class="panel-section">
+        <h3>Parameters</h3>
+        <table id="param-table"></table>
+      </section>
+    </div>
+  </div>
+
+  <!-- ── Info popup (shows on click of box / connection) ──────── -->
+  <div id="info-popup" class="popup collapsed">
+    <div class="popup-handle" id="popup-handle">
+      <span class="popup-hint">Click a box or connection for details</span>
+      <button class="popup-toggle" id="popup-toggle" title="Expand / collapse">▲</button>
+    </div>
+    <div class="popup-body" id="popup-body"></div>
+  </div>
 
   <!-- ── Three.js canvas fills the viewport ───────────────────── -->
   <canvas id="canvas"></canvas>
