@@ -1,0 +1,534 @@
+{
+  "design_name": "uvm_axi4_testbench",
+  "version": "1.0.0",
+  "description": "UVM verification environment for an AXI4 DUT. Shows the agent hierarchy with driver, monitor, sequencer, and scoreboard connected via analysis TLM FIFOs and ports.",
+  "parameters": {
+    "DATA_WIDTH": 64,
+    "ADDR_WIDTH": 32,
+    "ID_WIDTH": 4
+  },
+  "testbench": {
+    "module_name": "tb_top",
+    "description": "Top-level UVM testbench module. Instantiates the DUT and connects the UVM environment via virtual interfaces.",
+    "global_signals": [
+      {
+        "name": "clk",
+        "width": 1,
+        "type": "reg",
+        "description": "System clock driven by the testbench.",
+        "render": {
+          "face": "bottom",
+          "color": "#00E676"
+        }
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "type": "reg",
+        "description": "Active-low synchronous reset.",
+        "render": {
+          "face": "top",
+          "color": "#FF5252"
+        }
+      }
+    ]
+  },
+  "modules": {
+    "uvm_test": {
+      "description": "UVM test. Configures the environment and starts the default sequence on the sequencer.",
+      "render": {
+        "color": "#9C27B0"
+      },
+      "ports": [
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "System clock"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "Active-low reset"
+        }
+      ]
+    },
+    "uvm_env": {
+      "description": "UVM environment. Contains the AXI4 agent and scoreboard. Connects the monitor analysis port to the scoreboard via a TLM FIFO.",
+      "render": {
+        "color": "#3F51B5"
+      },
+      "ports": [
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "System clock"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "Active-low reset"
+        }
+      ]
+    },
+    "uvm_agent": {
+      "description": "UVM AXI4 agent (active). Contains the sequencer, driver and monitor. Operates in active mode to both drive and observe the AXI4 interface.",
+      "render": {
+        "color": "#2196F3"
+      },
+      "ports": [
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "System clock"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "Active-low reset"
+        }
+      ]
+    },
+    "uvm_sequencer": {
+      "description": "UVM sequencer. Arbitrates sequences and delivers sequence items to the driver via a TLM seq_item_port.",
+      "render": {
+        "color": "#00BCD4"
+      },
+      "ports": [
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "System clock"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "Active-low reset"
+        },
+        {
+          "name": "seq_item_export",
+          "direction": "output",
+          "width": 1,
+          "channel": "TLM",
+          "description": "Sequence item export (to driver)"
+        }
+      ]
+    },
+    "uvm_driver": {
+      "description": "UVM AXI4 driver. Receives sequence items from the sequencer and drives them onto the AXI4 virtual interface signals.",
+      "render": {
+        "color": "#4CAF50"
+      },
+      "ports": [
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "System clock"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "Active-low reset"
+        },
+        {
+          "name": "seq_item_port",
+          "direction": "input",
+          "width": 1,
+          "channel": "TLM",
+          "description": "Sequence item port (from sequencer)"
+        },
+        {
+          "name": "vif",
+          "direction": "output",
+          "width": 1,
+          "channel": "VIF",
+          "description": "Virtual interface to DUT"
+        }
+      ]
+    },
+    "uvm_monitor": {
+      "description": "UVM AXI4 monitor. Observes AXI4 interface signals via the virtual interface and broadcasts observed transactions on its analysis port.",
+      "render": {
+        "color": "#FF9800"
+      },
+      "ports": [
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "System clock"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "Active-low reset"
+        },
+        {
+          "name": "vif",
+          "direction": "input",
+          "width": 1,
+          "channel": "VIF",
+          "description": "Virtual interface to DUT"
+        },
+        {
+          "name": "analysis_port",
+          "direction": "output",
+          "width": 1,
+          "channel": "TLM",
+          "description": "Analysis port broadcasting observed transactions"
+        }
+      ]
+    },
+    "uvm_scoreboard": {
+      "description": "UVM scoreboard. Receives expected and actual transactions via analysis TLM FIFOs and compares them for correctness.",
+      "render": {
+        "color": "#F44336"
+      },
+      "ports": [
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "System clock"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "Active-low reset"
+        },
+        {
+          "name": "analysis_export",
+          "direction": "input",
+          "width": 1,
+          "channel": "TLM",
+          "description": "Analysis export (from TLM FIFO)"
+        }
+      ]
+    },
+    "tlm_analysis_fifo": {
+      "description": "UVM TLM analysis FIFO. Buffers transactions between the monitor analysis port and the scoreboard analysis export.",
+      "render": {
+        "color": "#607D8B"
+      },
+      "ports": [
+        {
+          "name": "analysis_imp",
+          "direction": "input",
+          "width": 1,
+          "channel": "TLM",
+          "description": "Analysis implementation (input from monitor)"
+        },
+        {
+          "name": "blocking_get_export",
+          "direction": "output",
+          "width": 1,
+          "channel": "TLM",
+          "description": "Blocking get export (to scoreboard)"
+        }
+      ]
+    }
+  },
+  "instances": [
+    {
+      "instance_name": "uvm_test_i",
+      "module": "uvm_test",
+      "description": "Top-level UVM test",
+      "position": {
+        "x": 0,
+        "y": 10,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "env_i",
+      "module": "uvm_env",
+      "description": "UVM environment instance",
+      "position": {
+        "x": 0,
+        "y": 6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "agent_i",
+      "module": "uvm_agent",
+      "description": "AXI4 UVM agent instance",
+      "position": {
+        "x": -6,
+        "y": 2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "sqr_i",
+      "module": "uvm_sequencer",
+      "description": "AXI4 sequencer instance",
+      "position": {
+        "x": -12,
+        "y": -2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "drv_i",
+      "module": "uvm_driver",
+      "description": "AXI4 driver instance",
+      "position": {
+        "x": -6,
+        "y": -2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "mon_i",
+      "module": "uvm_monitor",
+      "description": "AXI4 monitor instance",
+      "position": {
+        "x": 0,
+        "y": -2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "fifo_i",
+      "module": "tlm_analysis_fifo",
+      "description": "TLM analysis FIFO connecting monitor to scoreboard",
+      "position": {
+        "x": 6,
+        "y": 2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "sb_i",
+      "module": "uvm_scoreboard",
+      "description": "Scoreboard instance",
+      "position": {
+        "x": 12,
+        "y": 2,
+        "z": 0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "clk_fanout",
+      "type": "clock",
+      "description": "System clock from testbench to all UVM components",
+      "from": {
+        "instance": "tb_top",
+        "port": "clk"
+      },
+      "to": [
+        {
+          "instance": "uvm_test_i",
+          "port": "clk"
+        },
+        {
+          "instance": "env_i",
+          "port": "clk"
+        },
+        {
+          "instance": "agent_i",
+          "port": "clk"
+        },
+        {
+          "instance": "sqr_i",
+          "port": "clk"
+        },
+        {
+          "instance": "drv_i",
+          "port": "clk"
+        },
+        {
+          "instance": "mon_i",
+          "port": "clk"
+        },
+        {
+          "instance": "fifo_i",
+          "port": "clk"
+        },
+        {
+          "instance": "sb_i",
+          "port": "clk"
+        }
+      ]
+    },
+    {
+      "id": "rst_fanout",
+      "type": "reset",
+      "description": "Active-low reset from testbench to all UVM components",
+      "from": {
+        "instance": "tb_top",
+        "port": "rst_n"
+      },
+      "to": [
+        {
+          "instance": "uvm_test_i",
+          "port": "rst_n"
+        },
+        {
+          "instance": "env_i",
+          "port": "rst_n"
+        },
+        {
+          "instance": "agent_i",
+          "port": "rst_n"
+        },
+        {
+          "instance": "sqr_i",
+          "port": "rst_n"
+        },
+        {
+          "instance": "drv_i",
+          "port": "rst_n"
+        },
+        {
+          "instance": "mon_i",
+          "port": "rst_n"
+        },
+        {
+          "instance": "fifo_i",
+          "port": "rst_n"
+        },
+        {
+          "instance": "sb_i",
+          "port": "rst_n"
+        }
+      ]
+    },
+    {
+      "id": "test_to_env",
+      "type": "axi4_bus",
+      "label": "uvm_test \u2192 env",
+      "description": "UVM test creates and configures the environment",
+      "from_instance": "uvm_test_i",
+      "to_instance": "env_i",
+      "channel_signals": {
+        "HIERARCHY": [
+          {
+            "from_port": "build_phase",
+            "wire": "create",
+            "to_port": "env_i"
+          }
+        ]
+      }
+    },
+    {
+      "id": "env_to_agent",
+      "type": "axi4_bus",
+      "label": "env \u2192 agent",
+      "description": "Environment creates and contains the AXI4 agent",
+      "from_instance": "env_i",
+      "to_instance": "agent_i",
+      "channel_signals": {
+        "HIERARCHY": [
+          {
+            "from_port": "build_phase",
+            "wire": "create",
+            "to_port": "agent_i"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sqr_to_drv",
+      "type": "axi4_bus",
+      "label": "seq_item_port",
+      "description": "TLM seq_item_port: Sequencer delivers sequence items to the driver. The driver calls get_next_item() / item_done() on this port.",
+      "from_instance": "sqr_i",
+      "to_instance": "drv_i",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_export",
+            "wire": "seq_item_port",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mon_to_fifo",
+      "type": "axi4_bus",
+      "label": "analysis_port \u2192 FIFO",
+      "description": "Monitor broadcasts observed transactions to the TLM analysis FIFO via its analysis port.",
+      "from_instance": "mon_i",
+      "to_instance": "fifo_i",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_imp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fifo_to_sb",
+      "type": "axi4_bus",
+      "label": "FIFO \u2192 scoreboard",
+      "description": "TLM analysis FIFO provides buffered transactions to the scoreboard for checking.",
+      "from_instance": "fifo_i",
+      "to_instance": "sb_i",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "blocking_get_export",
+            "wire": "get_port",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "env_to_sb",
+      "type": "axi4_bus",
+      "label": "env \u2192 scoreboard",
+      "description": "Environment creates and contains the scoreboard",
+      "from_instance": "env_i",
+      "to_instance": "sb_i",
+      "channel_signals": {
+        "HIERARCHY": [
+          {
+            "from_port": "build_phase",
+            "wire": "create",
+            "to_port": "sb_i"
+          }
+        ]
+      }
+    }
+  ],
+  "connection_types": {
+    "axi4_bus": {
+      "color": "#FFC107",
+      "description": "AXI4 bus / TLM / hierarchy connection"
+    }
+  }
+}

@@ -144,12 +144,15 @@ function dashedBox(cx, cy, cz, w, h, d, color) {
   return ls;
 }
 
-/** Coloured cube with white wireframe edges and a floating label. */
-function instanceCube(inst, hexColor) {
+/** Coloured cube with white wireframe edges and a floating label.
+ *  `scale` multiplies the default CUBE size (1 = normal, >1 = bigger). */
+function instanceCube(inst, hexColor, scale = 1) {
   const group = new THREE.Group();
+  const size = CUBE * scale;
+  const half = size / 2;
 
   // Solid face
-  const geo = new THREE.BoxGeometry(CUBE, CUBE, CUBE);
+  const geo = new THREE.BoxGeometry(size, size, size);
   const mat = new THREE.MeshLambertMaterial({
     color: hexColor, transparent: true, opacity: 0.82,
   });
@@ -168,10 +171,11 @@ function instanceCube(inst, hexColor) {
     `<div class="mod-name">(${inst.module})</div>`,
     'cube-label'
   );
-  label.position.set(0, HALF + 0.5, 0);
+  label.position.set(0, half + 0.5, 0);
   group.add(label);
 
   group.position.set(inst.position.x, inst.position.y, inst.position.z);
+  group.userData.cubeHalf = half;      // expose for connection wiring
   return group;
 }
 
@@ -385,10 +389,35 @@ async function buildScene(designPath) {
 
   const instances = design.instances;
 
+  // ── Compute fan-out per instance (number of bus connections) ───
+  const fanOut = {};
+  for (const inst of instances) fanOut[inst.instance_name] = 0;
+  for (const conn of design.connections) {
+    if (conn.type === 'clock' || conn.type === 'reset') continue;
+    if (conn.from_instance && fanOut[conn.from_instance] !== undefined) fanOut[conn.from_instance]++;
+    if (conn.to_instance   && fanOut[conn.to_instance]   !== undefined) fanOut[conn.to_instance]++;
+  }
+  const maxFan = Math.max(1, ...Object.values(fanOut));
+
+  // Scale: 1× for fan-out ≤ 1, up to 2× for the highest fan-out.
+  // A module-level render.scale in the JSON overrides this.
+  function scaleFor(inst) {
+    const mod = design.modules[inst.module];
+    if (mod?.render?.scale) return mod.render.scale;
+    const f = fanOut[inst.instance_name] || 0;
+    if (f <= 1 || maxFan <= 1) return 1;
+    return 1 + (f - 1) / (maxFan - 1);   // linear interpolation: f=1→1.0, f=maxFan→2.0
+  }
+
+  // Map instance name → its cube half-size for wiring
+  const instHalf = {};
+
   // ── Instance cubes ─────────────────────────────────────────────
   for (const inst of instances) {
-    const cubeGroup = instanceCube(inst, moduleColor[inst.module] ?? 0x888888);
+    const s = scaleFor(inst);
+    const cubeGroup = instanceCube(inst, moduleColor[inst.module] ?? 0x888888, s);
     scene.add(cubeGroup);
+    instHalf[inst.instance_name] = cubeGroup.userData.cubeHalf;
 
     // Register for click detection
     clickableObjects.push(cubeGroup);
@@ -399,18 +428,23 @@ async function buildScene(designPath) {
     });
   }
 
-  // ── Geometry helpers ───────────────────────────────────────────
-  const xs      = instances.map(i => i.position.x);
-  const ys      = instances.map(i => i.position.y);
-  const xMin    = Math.min(...xs);
-  const xMax    = Math.max(...xs);
-  const yMin    = Math.min(...ys);
-  const yMax    = Math.max(...ys);
+  // ── Geometry helpers (use per-instance half for extents) ───────
+  // Requires at least one instance; designs without instances have nothing to render.
+  if (instances.length === 0) return;
 
-  const clkY    = yMin - HALF - 1.8;   // horizontal CLK rail Y
-  const rstY    = yMax + HALF + 1.8;   // horizontal RST rail Y
-  const railL   = xMin - HALF - 1.5;
-  const railR   = xMax + HALF + 1.5;
+  let xMin = Infinity, xMax = -Infinity, yMin = Infinity, yMax = -Infinity;
+  for (const inst of instances) {
+    const h = instHalf[inst.instance_name];
+    xMin = Math.min(xMin, inst.position.x - h);
+    xMax = Math.max(xMax, inst.position.x + h);
+    yMin = Math.min(yMin, inst.position.y - h);
+    yMax = Math.max(yMax, inst.position.y + h);
+  }
+
+  const clkY    = yMin - 1.8;            // horizontal CLK rail Y
+  const rstY    = yMax + 1.8;            // horizontal RST rail Y
+  const railL   = xMin - 1.5;
+  const railR   = xMax + 1.5;
 
   // ── CLK horizontal rail ────────────────────────────────────────
   scene.add(solidLine([[railL, clkY, 0], [railR, clkY, 0]], CLK_COL));
@@ -434,38 +468,53 @@ async function buildScene(designPath) {
   for (const inst of instances) {
     const x = inst.position.x;
     const y = inst.position.y;
+    const h = instHalf[inst.instance_name];
 
     // CLK: bottom face of cube → CLK rail
-    scene.add(solidLine([[x, y - HALF, 0], [x, clkY, 0]], CLK_COL));
-    scene.add(portDot([x, y - HALF, 0], CLK_COL));
+    scene.add(solidLine([[x, y - h, 0], [x, clkY, 0]], CLK_COL));
+    scene.add(portDot([x, y - h, 0], CLK_COL));
 
     // RST: top face of cube → RST rail
-    scene.add(solidLine([[x, y + HALF, 0], [x, rstY, 0]], RST_COL));
-    scene.add(portDot([x, y + HALF, 0], RST_COL));
+    scene.add(solidLine([[x, y + h, 0], [x, rstY, 0]], RST_COL));
+    scene.add(portDot([x, y + h, 0], RST_COL));
   }
 
-  // ── AXI4 bus connections ───────────────────────────────────────
+  // ── Bus / TLM connections ────────────────────────────────────
+  // Build a colour lookup from optional design.connection_types,
+  // falling back to AXI4_COL for any unlisted type.
+  const connColor = {};
+  if (design.connection_types) {
+    for (const [t, def] of Object.entries(design.connection_types)) {
+      connColor[t] = parseInt(def.color.replace('#', ''), 16);
+    }
+  }
+
   for (const conn of design.connections) {
-    if (conn.type !== 'axi4_bus') continue;
+    if (conn.type === 'clock' || conn.type === 'reset') continue;
 
     const fromInst = instances.find(i => i.instance_name === conn.from_instance);
     const toInst   = instances.find(i => i.instance_name === conn.to_instance);
     if (!fromInst || !toInst) continue;
 
-    const fromX = fromInst.position.x + HALF;
-    const toX   = toInst.position.x   - HALF;
+    const fromH = instHalf[conn.from_instance] || HALF;
+    const toH   = instHalf[conn.to_instance]   || HALF;
+
+    const fromX = fromInst.position.x + fromH;
+    const toX   = toInst.position.x   - toH;
     const fromY = fromInst.position.y;
     const toY   = toInst.position.y;
     const midX  = (fromX + toX) / 2;
     const midY  = (fromY + toY) / 2;
     const busY  = midY + 0.25;
 
+    const col = connColor[conn.type] ?? AXI4_COL;
+
     // Arrow
-    scene.add(arrow([fromX, fromY + 0.25, 0], [toX, toY + 0.25, 0], AXI4_COL));
+    scene.add(arrow([fromX, fromY + 0.25, 0], [toX, toY + 0.25, 0], col));
 
     // Port dots
-    scene.add(portDot([fromX, fromY + 0.25, 0], AXI4_COL, 0.16));
-    scene.add(portDot([toX,   toY + 0.25, 0], AXI4_COL, 0.16));
+    scene.add(portDot([fromX, fromY + 0.25, 0], col, 0.16));
+    scene.add(portDot([toX,   toY + 0.25, 0], col, 0.16));
 
     // Bus label
     const busLabel = makeLabel(
@@ -505,7 +554,7 @@ async function buildScene(designPath) {
   scene.add(tbLabel);
 
   // ── Adjust camera for larger designs ──────────────────────────
-  const sceneWidth  = xMax - xMin + CUBE * 2 + 6;
+  const sceneWidth  = (xMax - xMin) + 6;
   const sceneHeight = (rstY - clkY) + 4;
   const maxDim = Math.max(sceneWidth, sceneHeight);
   if (maxDim > CAM_AUTO_FIT) {
@@ -550,10 +599,18 @@ async function buildScene(designPath) {
     legendList.appendChild(li);
   }
 
-  // AXI4 Bus
-  const busLi = document.createElement('li');
-  busLi.innerHTML = `<span class="dot" style="background:#FFC107"></span> AXI4 Bus`;
-  legendList.appendChild(busLi);
+  // Connection types (from config or default AXI4)
+  if (design.connection_types) {
+    for (const [t, def] of Object.entries(design.connection_types)) {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="dot" style="background:${def.color}"></span> ${def.description || t}`;
+      legendList.appendChild(li);
+    }
+  } else {
+    const busLi = document.createElement('li');
+    busLi.innerHTML = `<span class="dot" style="background:#FFC107"></span> AXI4 Bus`;
+    legendList.appendChild(busLi);
+  }
 
   // Modules
   for (const [name, mod] of Object.entries(design.modules)) {
