@@ -11,7 +11,6 @@
     "NUM_MASTERS": 3,
     "NUM_SLAVES": 4
   },
-
   "testbench": {
     "module_name": "tb_top",
     "description": "Top-level testbench. Drives clk/rst and connects virtual interfaces between the DUT interconnect and UVC agents.",
@@ -21,511 +20,951 @@
         "width": 1,
         "type": "reg",
         "description": "System clock.",
-        "render": { "face": "bottom", "color": "#00E676" }
+        "render": {
+          "face": "bottom",
+          "color": "#00E676"
+        }
       },
       {
         "name": "rst_n",
         "width": 1,
         "type": "reg",
         "description": "Active-low synchronous reset.",
-        "render": { "face": "top", "color": "#FF5252" }
+        "render": {
+          "face": "top",
+          "color": "#FF5252"
+        }
       }
     ]
   },
-
   "modules": {
     "uvm_env": {
       "description": "Top-level UVM environment. Contains all master/slave agents, the scoreboard and the interconnect DUT.",
-      "render": { "color": "#3F51B5" },
+      "render": {
+        "color": "#3F51B5"
+      },
       "ports": [
-        { "name": "clk",   "direction": "input", "width": 1, "channel": "GLOBAL" },
-        { "name": "rst_n", "direction": "input", "width": 1, "channel": "GLOBAL" }
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL"
+        }
       ]
     },
     "axi4_master_uvc": {
       "description": "AXI4 master UVC agent (BFM). Replaces the RTL master. Contains sequencer, driver and monitor for generating and observing AXI4 master transactions.",
-      "render": { "color": "#2196F3" },
+      "render": {
+        "color": "#2196F3"
+      },
       "ports": [
-        { "name": "clk",   "direction": "input",  "width": 1,  "channel": "GLOBAL" },
-        { "name": "rst_n", "direction": "input",  "width": 1,  "channel": "GLOBAL" },
-        { "name": "analysis_port", "direction": "output", "width": 1, "channel": "TLM", "description": "Monitor analysis port" },
-        { "name": "vif",   "direction": "output", "width": 1,  "channel": "VIF", "description": "Virtual interface to DUT" }
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL"
+        },
+        {
+          "name": "analysis_port",
+          "direction": "output",
+          "width": 1,
+          "channel": "TLM",
+          "description": "Monitor analysis port"
+        },
+        {
+          "name": "vif",
+          "direction": "output",
+          "width": 1,
+          "channel": "VIF",
+          "description": "Virtual interface to DUT"
+        }
       ]
     },
     "axi4_interconnect": {
       "description": "AXI4 crossbar / interconnect (DUT). Routes transactions from master ports to slave ports based on address decoding. This is the real RTL design under verification.",
-      "render": { "color": "#FF9800" },
+      "render": {
+        "color": "#FF9800"
+      },
       "ports": [
-        { "name": "clk",       "direction": "input",  "width": 1,  "channel": "GLOBAL" },
-        { "name": "rst_n",     "direction": "input",  "width": 1,  "channel": "GLOBAL" },
-        { "name": "s0_awid",   "direction": "input",  "width": 4,  "channel": "AW", "side": "slave", "description": "Master port 0 write address ID" },
-        { "name": "s0_awaddr", "direction": "input",  "width": 32, "channel": "AW", "side": "slave" },
-        { "name": "s0_awvalid","direction": "input",  "width": 1,  "channel": "AW", "side": "slave" },
-        { "name": "s0_awready","direction": "output", "width": 1,  "channel": "AW", "side": "slave" },
-        { "name": "m0_awid",   "direction": "output", "width": 6,  "channel": "AW", "side": "master" },
-        { "name": "m0_awaddr", "direction": "output", "width": 32, "channel": "AW", "side": "master" },
-        { "name": "m0_awvalid","direction": "output", "width": 1,  "channel": "AW", "side": "master" },
-        { "name": "m0_awready","direction": "input",  "width": 1,  "channel": "AW", "side": "master" }
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL"
+        },
+        {
+          "name": "s0_awid",
+          "direction": "input",
+          "width": 4,
+          "channel": "AW",
+          "side": "slave",
+          "description": "Master port 0 write address ID"
+        },
+        {
+          "name": "s0_awaddr",
+          "direction": "input",
+          "width": 32,
+          "channel": "AW",
+          "side": "slave"
+        },
+        {
+          "name": "s0_awvalid",
+          "direction": "input",
+          "width": 1,
+          "channel": "AW",
+          "side": "slave"
+        },
+        {
+          "name": "s0_awready",
+          "direction": "output",
+          "width": 1,
+          "channel": "AW",
+          "side": "slave"
+        },
+        {
+          "name": "m0_awid",
+          "direction": "output",
+          "width": 6,
+          "channel": "AW",
+          "side": "master"
+        },
+        {
+          "name": "m0_awaddr",
+          "direction": "output",
+          "width": 32,
+          "channel": "AW",
+          "side": "master"
+        },
+        {
+          "name": "m0_awvalid",
+          "direction": "output",
+          "width": 1,
+          "channel": "AW",
+          "side": "master"
+        },
+        {
+          "name": "m0_awready",
+          "direction": "input",
+          "width": 1,
+          "channel": "AW",
+          "side": "master"
+        }
       ]
     },
     "axi4_slave_uvc": {
       "description": "AXI4 slave UVC agent (BFM). Replaces the RTL slave. Contains responder driver and monitor for responding to and observing AXI4 slave transactions.",
-      "render": { "color": "#4CAF50" },
+      "render": {
+        "color": "#4CAF50"
+      },
       "ports": [
-        { "name": "clk",   "direction": "input",  "width": 1,  "channel": "GLOBAL" },
-        { "name": "rst_n", "direction": "input",  "width": 1,  "channel": "GLOBAL" },
-        { "name": "analysis_port", "direction": "output", "width": 1, "channel": "TLM", "description": "Monitor analysis port" },
-        { "name": "vif",   "direction": "output", "width": 1,  "channel": "VIF", "description": "Virtual interface to DUT" }
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL"
+        },
+        {
+          "name": "analysis_port",
+          "direction": "output",
+          "width": 1,
+          "channel": "TLM",
+          "description": "Monitor analysis port"
+        },
+        {
+          "name": "vif",
+          "direction": "output",
+          "width": 1,
+          "channel": "VIF",
+          "description": "Virtual interface to DUT"
+        }
       ]
     },
     "uvm_scoreboard": {
       "description": "UVM scoreboard. Receives transactions from all master and slave UVC monitors via TLM analysis FIFOs and checks end-to-end data integrity across the interconnect.",
-      "render": { "color": "#F44336" },
+      "render": {
+        "color": "#F44336"
+      },
       "ports": [
-        { "name": "clk",   "direction": "input", "width": 1, "channel": "GLOBAL" },
-        { "name": "rst_n", "direction": "input", "width": 1, "channel": "GLOBAL" },
-        { "name": "mst_analysis_export", "direction": "input", "width": 1, "channel": "TLM", "description": "Master-side analysis exports" },
-        { "name": "slv_analysis_export", "direction": "input", "width": 1, "channel": "TLM", "description": "Slave-side analysis exports" }
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL"
+        },
+        {
+          "name": "mst_analysis_export",
+          "direction": "input",
+          "width": 1,
+          "channel": "TLM",
+          "description": "Master-side analysis exports"
+        },
+        {
+          "name": "slv_analysis_export",
+          "direction": "input",
+          "width": 1,
+          "channel": "TLM",
+          "description": "Slave-side analysis exports"
+        }
       ]
     },
     "tlm_analysis_fifo": {
       "description": "UVM TLM analysis FIFO. Buffers transactions between UVC monitor analysis ports and the scoreboard.",
-      "render": { "color": "#607D8B" },
+      "render": {
+        "color": "#607D8B"
+      },
       "ports": [
-        { "name": "analysis_imp",        "direction": "input",  "width": 1, "channel": "TLM" },
-        { "name": "blocking_get_export", "direction": "output", "width": 1, "channel": "TLM" }
+        {
+          "name": "analysis_imp",
+          "direction": "input",
+          "width": 1,
+          "channel": "TLM"
+        },
+        {
+          "name": "blocking_get_export",
+          "direction": "output",
+          "width": 1,
+          "channel": "TLM"
+        }
       ]
     }
   },
-
   "instances": [
     {
       "instance_name": "env_i",
       "module": "uvm_env",
       "description": "Top-level UVM environment",
-      "position": { "x": 0, "y": 12, "z": 0 }
+      "position": {
+        "x": 0,
+        "y": 12,
+        "z": 0
+      }
     },
     {
       "instance_name": "cpu_uvc",
       "module": "axi4_master_uvc",
       "description": "CPU master UVC agent (replaces RTL u_cpu)",
-      "position": { "x": -18, "y": 4, "z": 0 }
+      "position": {
+        "x": -18,
+        "y": 4,
+        "z": 0
+      }
     },
     {
       "instance_name": "dma_uvc",
       "module": "axi4_master_uvc",
       "description": "DMA master UVC agent (replaces RTL u_dma)",
-      "position": { "x": -18, "y": 0, "z": 0 }
+      "position": {
+        "x": -18,
+        "y": 0,
+        "z": 0
+      }
     },
     {
       "instance_name": "gpu_uvc",
       "module": "axi4_master_uvc",
       "description": "GPU master UVC agent (replaces RTL u_gpu)",
-      "position": { "x": -18, "y": -4, "z": 0 }
+      "position": {
+        "x": -18,
+        "y": -4,
+        "z": 0
+      }
     },
     {
       "instance_name": "u_xbar",
       "module": "axi4_interconnect",
       "description": "AXI4 crossbar / interconnect (DUT under test)",
-      "position": { "x": 0, "y": 0, "z": 0 }
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
     },
     {
       "instance_name": "sram_uvc",
       "module": "axi4_slave_uvc",
       "description": "SRAM slave UVC agent (replaces RTL u_sram)",
-      "position": { "x": 18, "y": 6, "z": 0 }
+      "position": {
+        "x": 18,
+        "y": 6,
+        "z": 0
+      }
     },
     {
       "instance_name": "ddr_uvc",
       "module": "axi4_slave_uvc",
       "description": "DDR slave UVC agent (replaces RTL u_ddr)",
-      "position": { "x": 18, "y": 2, "z": 0 }
+      "position": {
+        "x": 18,
+        "y": 2,
+        "z": 0
+      }
     },
     {
       "instance_name": "uart_uvc",
       "module": "axi4_slave_uvc",
       "description": "UART slave UVC agent (replaces RTL u_uart)",
-      "position": { "x": 18, "y": -2, "z": 0 }
+      "position": {
+        "x": 18,
+        "y": -2,
+        "z": 0
+      }
     },
     {
       "instance_name": "spi_uvc",
       "module": "axi4_slave_uvc",
       "description": "SPI slave UVC agent (replaces RTL u_spi)",
-      "position": { "x": 18, "y": -6, "z": 0 }
+      "position": {
+        "x": 18,
+        "y": -6,
+        "z": 0
+      }
     },
     {
       "instance_name": "sb_i",
       "module": "uvm_scoreboard",
       "description": "Scoreboard checking end-to-end data integrity",
-      "position": { "x": 0, "y": -10, "z": 0 }
+      "position": {
+        "x": 0,
+        "y": -10,
+        "z": 0
+      }
     },
     {
       "instance_name": "mst_fifo_0",
       "module": "tlm_analysis_fifo",
-      "description": "TLM FIFO: CPU UVC monitor → scoreboard",
-      "position": { "x": -10, "y": -6, "z": 0 }
+      "description": "TLM FIFO: CPU UVC monitor \u2192 scoreboard",
+      "position": {
+        "x": -10,
+        "y": -6,
+        "z": 0
+      }
     },
     {
       "instance_name": "mst_fifo_1",
       "module": "tlm_analysis_fifo",
-      "description": "TLM FIFO: DMA UVC monitor → scoreboard",
-      "position": { "x": -6, "y": -6, "z": 0 }
+      "description": "TLM FIFO: DMA UVC monitor \u2192 scoreboard",
+      "position": {
+        "x": -6,
+        "y": -6,
+        "z": 0
+      }
     },
     {
       "instance_name": "mst_fifo_2",
       "module": "tlm_analysis_fifo",
-      "description": "TLM FIFO: GPU UVC monitor → scoreboard",
-      "position": { "x": -2, "y": -6, "z": 0 }
+      "description": "TLM FIFO: GPU UVC monitor \u2192 scoreboard",
+      "position": {
+        "x": -2,
+        "y": -6,
+        "z": 0
+      }
     },
     {
       "instance_name": "slv_fifo_0",
       "module": "tlm_analysis_fifo",
-      "description": "TLM FIFO: SRAM UVC monitor → scoreboard",
-      "position": { "x": 2, "y": -6, "z": 0 }
+      "description": "TLM FIFO: SRAM UVC monitor \u2192 scoreboard",
+      "position": {
+        "x": 2,
+        "y": -6,
+        "z": 0
+      }
     },
     {
       "instance_name": "slv_fifo_1",
       "module": "tlm_analysis_fifo",
-      "description": "TLM FIFO: DDR UVC monitor → scoreboard",
-      "position": { "x": 6, "y": -6, "z": 0 }
+      "description": "TLM FIFO: DDR UVC monitor \u2192 scoreboard",
+      "position": {
+        "x": 6,
+        "y": -6,
+        "z": 0
+      }
     },
     {
       "instance_name": "slv_fifo_2",
       "module": "tlm_analysis_fifo",
-      "description": "TLM FIFO: UART UVC monitor → scoreboard",
-      "position": { "x": 10, "y": -6, "z": 0 }
+      "description": "TLM FIFO: UART UVC monitor \u2192 scoreboard",
+      "position": {
+        "x": 10,
+        "y": -6,
+        "z": 0
+      }
     },
     {
       "instance_name": "slv_fifo_3",
       "module": "tlm_analysis_fifo",
-      "description": "TLM FIFO: SPI UVC monitor → scoreboard",
-      "position": { "x": 14, "y": -6, "z": 0 }
+      "description": "TLM FIFO: SPI UVC monitor \u2192 scoreboard",
+      "position": {
+        "x": 14,
+        "y": -6,
+        "z": 0
+      }
     }
   ],
-
   "connections": [
     {
       "id": "clk_fanout",
       "type": "clock",
       "description": "System clock to all instances",
-      "from": { "instance": "tb_top", "port": "clk" },
+      "from": {
+        "instance": "tb_top",
+        "port": "clk"
+      },
       "to": [
-        { "instance": "env_i",     "port": "clk" },
-        { "instance": "cpu_uvc",   "port": "clk" },
-        { "instance": "dma_uvc",   "port": "clk" },
-        { "instance": "gpu_uvc",   "port": "clk" },
-        { "instance": "u_xbar",    "port": "clk" },
-        { "instance": "sram_uvc",  "port": "clk" },
-        { "instance": "ddr_uvc",   "port": "clk" },
-        { "instance": "uart_uvc",  "port": "clk" },
-        { "instance": "spi_uvc",   "port": "clk" },
-        { "instance": "sb_i",      "port": "clk" }
+        {
+          "instance": "env_i",
+          "port": "clk"
+        },
+        {
+          "instance": "cpu_uvc",
+          "port": "clk"
+        },
+        {
+          "instance": "dma_uvc",
+          "port": "clk"
+        },
+        {
+          "instance": "gpu_uvc",
+          "port": "clk"
+        },
+        {
+          "instance": "u_xbar",
+          "port": "clk"
+        },
+        {
+          "instance": "sram_uvc",
+          "port": "clk"
+        },
+        {
+          "instance": "ddr_uvc",
+          "port": "clk"
+        },
+        {
+          "instance": "uart_uvc",
+          "port": "clk"
+        },
+        {
+          "instance": "spi_uvc",
+          "port": "clk"
+        },
+        {
+          "instance": "sb_i",
+          "port": "clk"
+        }
       ]
     },
     {
       "id": "rst_fanout",
       "type": "reset",
       "description": "Active-low reset to all instances",
-      "from": { "instance": "tb_top", "port": "rst_n" },
+      "from": {
+        "instance": "tb_top",
+        "port": "rst_n"
+      },
       "to": [
-        { "instance": "env_i",     "port": "rst_n" },
-        { "instance": "cpu_uvc",   "port": "rst_n" },
-        { "instance": "dma_uvc",   "port": "rst_n" },
-        { "instance": "gpu_uvc",   "port": "rst_n" },
-        { "instance": "u_xbar",    "port": "rst_n" },
-        { "instance": "sram_uvc",  "port": "rst_n" },
-        { "instance": "ddr_uvc",   "port": "rst_n" },
-        { "instance": "uart_uvc",  "port": "rst_n" },
-        { "instance": "spi_uvc",   "port": "rst_n" },
-        { "instance": "sb_i",      "port": "rst_n" }
+        {
+          "instance": "env_i",
+          "port": "rst_n"
+        },
+        {
+          "instance": "cpu_uvc",
+          "port": "rst_n"
+        },
+        {
+          "instance": "dma_uvc",
+          "port": "rst_n"
+        },
+        {
+          "instance": "gpu_uvc",
+          "port": "rst_n"
+        },
+        {
+          "instance": "u_xbar",
+          "port": "rst_n"
+        },
+        {
+          "instance": "sram_uvc",
+          "port": "rst_n"
+        },
+        {
+          "instance": "ddr_uvc",
+          "port": "rst_n"
+        },
+        {
+          "instance": "uart_uvc",
+          "port": "rst_n"
+        },
+        {
+          "instance": "spi_uvc",
+          "port": "rst_n"
+        },
+        {
+          "instance": "sb_i",
+          "port": "rst_n"
+        }
       ]
     },
     {
       "id": "cpu_to_xbar",
       "type": "axi4_bus",
-      "label": "CPU UVC → XBAR S0",
+      "label": "CPU UVC \u2192 XBAR S0",
       "description": "CPU master UVC drives AXI4 transactions into interconnect slave port 0",
       "from_instance": "cpu_uvc",
       "to_instance": "u_xbar",
       "channel_signals": {
         "AW": [
-          { "from_port": "m_awid",    "wire": "cpu2xbar_awid",    "to_port": "s0_awid" },
-          { "from_port": "m_awaddr",  "wire": "cpu2xbar_awaddr",  "to_port": "s0_awaddr" },
-          { "from_port": "m_awvalid", "wire": "cpu2xbar_awvalid", "to_port": "s0_awvalid" }
+          {
+            "from_port": "m_awid",
+            "wire": "cpu2xbar_awid",
+            "to_port": "s0_awid"
+          },
+          {
+            "from_port": "m_awaddr",
+            "wire": "cpu2xbar_awaddr",
+            "to_port": "s0_awaddr"
+          },
+          {
+            "from_port": "m_awvalid",
+            "wire": "cpu2xbar_awvalid",
+            "to_port": "s0_awvalid"
+          }
         ]
       }
     },
     {
       "id": "dma_to_xbar",
       "type": "axi4_bus",
-      "label": "DMA UVC → XBAR S1",
+      "label": "DMA UVC \u2192 XBAR S1",
       "description": "DMA master UVC drives AXI4 transactions into interconnect slave port 1",
       "from_instance": "dma_uvc",
       "to_instance": "u_xbar",
       "channel_signals": {
         "AW": [
-          { "from_port": "m_awid",    "wire": "dma2xbar_awid",    "to_port": "s1_awid" },
-          { "from_port": "m_awaddr",  "wire": "dma2xbar_awaddr",  "to_port": "s1_awaddr" },
-          { "from_port": "m_awvalid", "wire": "dma2xbar_awvalid", "to_port": "s1_awvalid" }
+          {
+            "from_port": "m_awid",
+            "wire": "dma2xbar_awid",
+            "to_port": "s1_awid"
+          },
+          {
+            "from_port": "m_awaddr",
+            "wire": "dma2xbar_awaddr",
+            "to_port": "s1_awaddr"
+          },
+          {
+            "from_port": "m_awvalid",
+            "wire": "dma2xbar_awvalid",
+            "to_port": "s1_awvalid"
+          }
         ]
       }
     },
     {
       "id": "gpu_to_xbar",
       "type": "axi4_bus",
-      "label": "GPU UVC → XBAR S2",
+      "label": "GPU UVC \u2192 XBAR S2",
       "description": "GPU master UVC drives AXI4 transactions into interconnect slave port 2",
       "from_instance": "gpu_uvc",
       "to_instance": "u_xbar",
       "channel_signals": {
         "AW": [
-          { "from_port": "m_awid",    "wire": "gpu2xbar_awid",    "to_port": "s2_awid" },
-          { "from_port": "m_awaddr",  "wire": "gpu2xbar_awaddr",  "to_port": "s2_awaddr" },
-          { "from_port": "m_awvalid", "wire": "gpu2xbar_awvalid", "to_port": "s2_awvalid" }
+          {
+            "from_port": "m_awid",
+            "wire": "gpu2xbar_awid",
+            "to_port": "s2_awid"
+          },
+          {
+            "from_port": "m_awaddr",
+            "wire": "gpu2xbar_awaddr",
+            "to_port": "s2_awaddr"
+          },
+          {
+            "from_port": "m_awvalid",
+            "wire": "gpu2xbar_awvalid",
+            "to_port": "s2_awvalid"
+          }
         ]
       }
     },
     {
       "id": "xbar_to_sram",
       "type": "axi4_bus",
-      "label": "XBAR M0 → SRAM UVC",
+      "label": "XBAR M0 \u2192 SRAM UVC",
       "description": "Interconnect master port 0 connects to SRAM slave UVC",
       "from_instance": "u_xbar",
       "to_instance": "sram_uvc",
       "channel_signals": {
         "AW": [
-          { "from_port": "m0_awid",    "wire": "xbar2sram_awid",    "to_port": "s_awid" },
-          { "from_port": "m0_awaddr",  "wire": "xbar2sram_awaddr",  "to_port": "s_awaddr" },
-          { "from_port": "m0_awvalid", "wire": "xbar2sram_awvalid", "to_port": "s_awvalid" }
+          {
+            "from_port": "m0_awid",
+            "wire": "xbar2sram_awid",
+            "to_port": "s_awid"
+          },
+          {
+            "from_port": "m0_awaddr",
+            "wire": "xbar2sram_awaddr",
+            "to_port": "s_awaddr"
+          },
+          {
+            "from_port": "m0_awvalid",
+            "wire": "xbar2sram_awvalid",
+            "to_port": "s_awvalid"
+          }
         ]
       }
     },
     {
       "id": "xbar_to_ddr",
       "type": "axi4_bus",
-      "label": "XBAR M1 → DDR UVC",
+      "label": "XBAR M1 \u2192 DDR UVC",
       "description": "Interconnect master port 1 connects to DDR slave UVC",
       "from_instance": "u_xbar",
       "to_instance": "ddr_uvc",
       "channel_signals": {
         "AW": [
-          { "from_port": "m1_awid",    "wire": "xbar2ddr_awid",    "to_port": "s_awid" },
-          { "from_port": "m1_awaddr",  "wire": "xbar2ddr_awaddr",  "to_port": "s_awaddr" },
-          { "from_port": "m1_awvalid", "wire": "xbar2ddr_awvalid", "to_port": "s_awvalid" }
+          {
+            "from_port": "m1_awid",
+            "wire": "xbar2ddr_awid",
+            "to_port": "s_awid"
+          },
+          {
+            "from_port": "m1_awaddr",
+            "wire": "xbar2ddr_awaddr",
+            "to_port": "s_awaddr"
+          },
+          {
+            "from_port": "m1_awvalid",
+            "wire": "xbar2ddr_awvalid",
+            "to_port": "s_awvalid"
+          }
         ]
       }
     },
     {
       "id": "xbar_to_uart",
       "type": "axi4_bus",
-      "label": "XBAR M2 → UART UVC",
+      "label": "XBAR M2 \u2192 UART UVC",
       "description": "Interconnect master port 2 connects to UART slave UVC",
       "from_instance": "u_xbar",
       "to_instance": "uart_uvc",
       "channel_signals": {
         "AW": [
-          { "from_port": "m2_awid",    "wire": "xbar2uart_awid",    "to_port": "s_awid" },
-          { "from_port": "m2_awaddr",  "wire": "xbar2uart_awaddr",  "to_port": "s_awaddr" },
-          { "from_port": "m2_awvalid", "wire": "xbar2uart_awvalid", "to_port": "s_awvalid" }
+          {
+            "from_port": "m2_awid",
+            "wire": "xbar2uart_awid",
+            "to_port": "s_awid"
+          },
+          {
+            "from_port": "m2_awaddr",
+            "wire": "xbar2uart_awaddr",
+            "to_port": "s_awaddr"
+          },
+          {
+            "from_port": "m2_awvalid",
+            "wire": "xbar2uart_awvalid",
+            "to_port": "s_awvalid"
+          }
         ]
       }
     },
     {
       "id": "xbar_to_spi",
       "type": "axi4_bus",
-      "label": "XBAR M3 → SPI UVC",
+      "label": "XBAR M3 \u2192 SPI UVC",
       "description": "Interconnect master port 3 connects to SPI slave UVC",
       "from_instance": "u_xbar",
       "to_instance": "spi_uvc",
       "channel_signals": {
         "AW": [
-          { "from_port": "m3_awid",    "wire": "xbar2spi_awid",    "to_port": "s_awid" },
-          { "from_port": "m3_awaddr",  "wire": "xbar2spi_awaddr",  "to_port": "s_awaddr" },
-          { "from_port": "m3_awvalid", "wire": "xbar2spi_awvalid", "to_port": "s_awvalid" }
+          {
+            "from_port": "m3_awid",
+            "wire": "xbar2spi_awid",
+            "to_port": "s_awid"
+          },
+          {
+            "from_port": "m3_awaddr",
+            "wire": "xbar2spi_awaddr",
+            "to_port": "s_awaddr"
+          },
+          {
+            "from_port": "m3_awvalid",
+            "wire": "xbar2spi_awvalid",
+            "to_port": "s_awvalid"
+          }
         ]
       }
     },
     {
       "id": "cpu_mon_to_fifo",
       "type": "axi4_bus",
-      "label": "CPU mon → FIFO",
+      "label": "CPU mon \u2192 FIFO",
       "description": "CPU UVC monitor analysis port writes to TLM FIFO",
       "from_instance": "cpu_uvc",
       "to_instance": "mst_fifo_0",
       "channel_signals": {
         "TLM": [
-          { "from_port": "analysis_port", "wire": "cpu_ap", "to_port": "analysis_imp" }
+          {
+            "from_port": "analysis_port",
+            "wire": "cpu_ap",
+            "to_port": "analysis_imp"
+          }
         ]
       }
     },
     {
       "id": "dma_mon_to_fifo",
       "type": "axi4_bus",
-      "label": "DMA mon → FIFO",
+      "label": "DMA mon \u2192 FIFO",
       "description": "DMA UVC monitor analysis port writes to TLM FIFO",
       "from_instance": "dma_uvc",
       "to_instance": "mst_fifo_1",
       "channel_signals": {
         "TLM": [
-          { "from_port": "analysis_port", "wire": "dma_ap", "to_port": "analysis_imp" }
+          {
+            "from_port": "analysis_port",
+            "wire": "dma_ap",
+            "to_port": "analysis_imp"
+          }
         ]
       }
     },
     {
       "id": "gpu_mon_to_fifo",
       "type": "axi4_bus",
-      "label": "GPU mon → FIFO",
+      "label": "GPU mon \u2192 FIFO",
       "description": "GPU UVC monitor analysis port writes to TLM FIFO",
       "from_instance": "gpu_uvc",
       "to_instance": "mst_fifo_2",
       "channel_signals": {
         "TLM": [
-          { "from_port": "analysis_port", "wire": "gpu_ap", "to_port": "analysis_imp" }
+          {
+            "from_port": "analysis_port",
+            "wire": "gpu_ap",
+            "to_port": "analysis_imp"
+          }
         ]
       }
     },
     {
       "id": "sram_mon_to_fifo",
       "type": "axi4_bus",
-      "label": "SRAM mon → FIFO",
+      "label": "SRAM mon \u2192 FIFO",
       "description": "SRAM UVC monitor analysis port writes to TLM FIFO",
       "from_instance": "sram_uvc",
       "to_instance": "slv_fifo_0",
       "channel_signals": {
         "TLM": [
-          { "from_port": "analysis_port", "wire": "sram_ap", "to_port": "analysis_imp" }
+          {
+            "from_port": "analysis_port",
+            "wire": "sram_ap",
+            "to_port": "analysis_imp"
+          }
         ]
       }
     },
     {
       "id": "ddr_mon_to_fifo",
       "type": "axi4_bus",
-      "label": "DDR mon → FIFO",
+      "label": "DDR mon \u2192 FIFO",
       "description": "DDR UVC monitor analysis port writes to TLM FIFO",
       "from_instance": "ddr_uvc",
       "to_instance": "slv_fifo_1",
       "channel_signals": {
         "TLM": [
-          { "from_port": "analysis_port", "wire": "ddr_ap", "to_port": "analysis_imp" }
+          {
+            "from_port": "analysis_port",
+            "wire": "ddr_ap",
+            "to_port": "analysis_imp"
+          }
         ]
       }
     },
     {
       "id": "uart_mon_to_fifo",
       "type": "axi4_bus",
-      "label": "UART mon → FIFO",
+      "label": "UART mon \u2192 FIFO",
       "description": "UART UVC monitor analysis port writes to TLM FIFO",
       "from_instance": "uart_uvc",
       "to_instance": "slv_fifo_2",
       "channel_signals": {
         "TLM": [
-          { "from_port": "analysis_port", "wire": "uart_ap", "to_port": "analysis_imp" }
+          {
+            "from_port": "analysis_port",
+            "wire": "uart_ap",
+            "to_port": "analysis_imp"
+          }
         ]
       }
     },
     {
       "id": "spi_mon_to_fifo",
       "type": "axi4_bus",
-      "label": "SPI mon → FIFO",
+      "label": "SPI mon \u2192 FIFO",
       "description": "SPI UVC monitor analysis port writes to TLM FIFO",
       "from_instance": "spi_uvc",
       "to_instance": "slv_fifo_3",
       "channel_signals": {
         "TLM": [
-          { "from_port": "analysis_port", "wire": "spi_ap", "to_port": "analysis_imp" }
+          {
+            "from_port": "analysis_port",
+            "wire": "spi_ap",
+            "to_port": "analysis_imp"
+          }
         ]
       }
     },
     {
       "id": "mst_fifo0_to_sb",
       "type": "axi4_bus",
-      "label": "FIFO → SB",
+      "label": "FIFO \u2192 SB",
       "description": "CPU TLM FIFO delivers to scoreboard",
       "from_instance": "mst_fifo_0",
       "to_instance": "sb_i",
       "channel_signals": {
         "TLM": [
-          { "from_port": "blocking_get_export", "wire": "cpu_get", "to_port": "mst_analysis_export" }
+          {
+            "from_port": "blocking_get_export",
+            "wire": "cpu_get",
+            "to_port": "mst_analysis_export"
+          }
         ]
       }
     },
     {
       "id": "mst_fifo1_to_sb",
       "type": "axi4_bus",
-      "label": "FIFO → SB",
+      "label": "FIFO \u2192 SB",
       "description": "DMA TLM FIFO delivers to scoreboard",
       "from_instance": "mst_fifo_1",
       "to_instance": "sb_i",
       "channel_signals": {
         "TLM": [
-          { "from_port": "blocking_get_export", "wire": "dma_get", "to_port": "mst_analysis_export" }
+          {
+            "from_port": "blocking_get_export",
+            "wire": "dma_get",
+            "to_port": "mst_analysis_export"
+          }
         ]
       }
     },
     {
       "id": "mst_fifo2_to_sb",
       "type": "axi4_bus",
-      "label": "FIFO → SB",
+      "label": "FIFO \u2192 SB",
       "description": "GPU TLM FIFO delivers to scoreboard",
       "from_instance": "mst_fifo_2",
       "to_instance": "sb_i",
       "channel_signals": {
         "TLM": [
-          { "from_port": "blocking_get_export", "wire": "gpu_get", "to_port": "mst_analysis_export" }
+          {
+            "from_port": "blocking_get_export",
+            "wire": "gpu_get",
+            "to_port": "mst_analysis_export"
+          }
         ]
       }
     },
     {
       "id": "slv_fifo0_to_sb",
       "type": "axi4_bus",
-      "label": "FIFO → SB",
+      "label": "FIFO \u2192 SB",
       "description": "SRAM TLM FIFO delivers to scoreboard",
       "from_instance": "slv_fifo_0",
       "to_instance": "sb_i",
       "channel_signals": {
         "TLM": [
-          { "from_port": "blocking_get_export", "wire": "sram_get", "to_port": "slv_analysis_export" }
+          {
+            "from_port": "blocking_get_export",
+            "wire": "sram_get",
+            "to_port": "slv_analysis_export"
+          }
         ]
       }
     },
     {
       "id": "slv_fifo1_to_sb",
       "type": "axi4_bus",
-      "label": "FIFO → SB",
+      "label": "FIFO \u2192 SB",
       "description": "DDR TLM FIFO delivers to scoreboard",
       "from_instance": "slv_fifo_1",
       "to_instance": "sb_i",
       "channel_signals": {
         "TLM": [
-          { "from_port": "blocking_get_export", "wire": "ddr_get", "to_port": "slv_analysis_export" }
+          {
+            "from_port": "blocking_get_export",
+            "wire": "ddr_get",
+            "to_port": "slv_analysis_export"
+          }
         ]
       }
     },
     {
       "id": "slv_fifo2_to_sb",
       "type": "axi4_bus",
-      "label": "FIFO → SB",
+      "label": "FIFO \u2192 SB",
       "description": "UART TLM FIFO delivers to scoreboard",
       "from_instance": "slv_fifo_2",
       "to_instance": "sb_i",
       "channel_signals": {
         "TLM": [
-          { "from_port": "blocking_get_export", "wire": "uart_get", "to_port": "slv_analysis_export" }
+          {
+            "from_port": "blocking_get_export",
+            "wire": "uart_get",
+            "to_port": "slv_analysis_export"
+          }
         ]
       }
     },
     {
       "id": "slv_fifo3_to_sb",
       "type": "axi4_bus",
-      "label": "FIFO → SB",
+      "label": "FIFO \u2192 SB",
       "description": "SPI TLM FIFO delivers to scoreboard",
       "from_instance": "slv_fifo_3",
       "to_instance": "sb_i",
       "channel_signals": {
         "TLM": [
-          { "from_port": "blocking_get_export", "wire": "spi_get", "to_port": "slv_analysis_export" }
+          {
+            "from_port": "blocking_get_export",
+            "wire": "spi_get",
+            "to_port": "slv_analysis_export"
+          }
         ]
       }
     }
-  ]
+  ],
+  "connection_types": {
+    "axi4_bus": {
+      "color": "#FFC107",
+      "description": "AXI4 bus connection"
+    }
+  }
 }

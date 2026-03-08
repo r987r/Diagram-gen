@@ -399,9 +399,12 @@ async function buildScene(designPath) {
   }
   const maxFan = Math.max(1, ...Object.values(fanOut));
 
-  // Scale: 1× for fan-out ≤ 1, up to 2× for the highest fan-out
-  function scaleFor(name) {
-    const f = fanOut[name] || 0;
+  // Scale: 1× for fan-out ≤ 1, up to 2× for the highest fan-out.
+  // A module-level render.scale in the JSON overrides this.
+  function scaleFor(inst) {
+    const mod = design.modules[inst.module];
+    if (mod?.render?.scale) return mod.render.scale;
+    const f = fanOut[inst.instance_name] || 0;
     if (f <= 1 || maxFan <= 1) return 1;
     return 1 + (f - 1) / (maxFan - 1);   // linear 1→2
   }
@@ -411,7 +414,7 @@ async function buildScene(designPath) {
 
   // ── Instance cubes ─────────────────────────────────────────────
   for (const inst of instances) {
-    const s = scaleFor(inst.instance_name);
+    const s = scaleFor(inst);
     const cubeGroup = instanceCube(inst, moduleColor[inst.module] ?? 0x888888, s);
     scene.add(cubeGroup);
     instHalf[inst.instance_name] = cubeGroup.userData.cubeHalf;
@@ -473,9 +476,18 @@ async function buildScene(designPath) {
     scene.add(portDot([x, y + h, 0], RST_COL));
   }
 
-  // ── AXI4 bus connections ───────────────────────────────────────
+  // ── Bus / TLM connections ────────────────────────────────────
+  // Build a colour lookup from optional design.connection_types,
+  // falling back to AXI4_COL for any unlisted type.
+  const connColor = {};
+  if (design.connection_types) {
+    for (const [t, def] of Object.entries(design.connection_types)) {
+      connColor[t] = parseInt(def.color.replace('#', ''), 16);
+    }
+  }
+
   for (const conn of design.connections) {
-    if (conn.type !== 'axi4_bus') continue;
+    if (conn.type === 'clock' || conn.type === 'reset') continue;
 
     const fromInst = instances.find(i => i.instance_name === conn.from_instance);
     const toInst   = instances.find(i => i.instance_name === conn.to_instance);
@@ -492,12 +504,14 @@ async function buildScene(designPath) {
     const midY  = (fromY + toY) / 2;
     const busY  = midY + 0.25;
 
+    const col = connColor[conn.type] ?? AXI4_COL;
+
     // Arrow
-    scene.add(arrow([fromX, fromY + 0.25, 0], [toX, toY + 0.25, 0], AXI4_COL));
+    scene.add(arrow([fromX, fromY + 0.25, 0], [toX, toY + 0.25, 0], col));
 
     // Port dots
-    scene.add(portDot([fromX, fromY + 0.25, 0], AXI4_COL, 0.16));
-    scene.add(portDot([toX,   toY + 0.25, 0], AXI4_COL, 0.16));
+    scene.add(portDot([fromX, fromY + 0.25, 0], col, 0.16));
+    scene.add(portDot([toX,   toY + 0.25, 0], col, 0.16));
 
     // Bus label
     const busLabel = makeLabel(
@@ -582,10 +596,18 @@ async function buildScene(designPath) {
     legendList.appendChild(li);
   }
 
-  // AXI4 Bus
-  const busLi = document.createElement('li');
-  busLi.innerHTML = `<span class="dot" style="background:#FFC107"></span> AXI4 Bus`;
-  legendList.appendChild(busLi);
+  // Connection types (from config or default AXI4)
+  if (design.connection_types) {
+    for (const [t, def] of Object.entries(design.connection_types)) {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="dot" style="background:${def.color}"></span> ${def.description || t}`;
+      legendList.appendChild(li);
+    }
+  } else {
+    const busLi = document.createElement('li');
+    busLi.innerHTML = `<span class="dot" style="background:#FFC107"></span> AXI4 Bus`;
+    legendList.appendChild(busLi);
+  }
 
   // Modules
   for (const [name, mod] of Object.entries(design.modules)) {
