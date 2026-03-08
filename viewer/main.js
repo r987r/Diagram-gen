@@ -883,6 +883,12 @@ async function buildScene(designPath) {
   const instHalf = {};
 
   // ── Compute display names (strip group prefix for cleaner labels) ──
+  // For each instance, find its outermost enclosing group (most members).
+  // If that group has a non-empty common prefix, strip it — the group label
+  // already provides context (e.g. "AXI4 Env (DMA)").
+  // In individual UVC views the outer env group has an empty common prefix
+  // (members are aw_sqr, w_sqr, read_seq, … with no shared prefix) so
+  // nothing gets stripped and labels remain like "aw_sqr".
   const instDisplayName = {};
   if (Array.isArray(design.groups)) {
     // For each group, compute the longest common prefix of all members
@@ -895,18 +901,18 @@ async function buildScene(designPath) {
       }
       groupPrefix[grp.name] = prefix;
     }
-    // For each instance, strip the shortest common prefix from its outermost group
     for (const inst of instances) {
-      let shortestPrefix = '';
+      let outerPrefix = '';
+      let outerSize = 0;
       for (const grp of design.groups) {
         if (!grp.members?.includes(inst.instance_name)) continue;
-        const prefix = groupPrefix[grp.name] || '';
-        if (prefix && (!shortestPrefix || prefix.length < shortestPrefix.length)) {
-          shortestPrefix = prefix;
+        if (grp.members.length > outerSize) {
+          outerPrefix = groupPrefix[grp.name] || '';
+          outerSize = grp.members.length;
         }
       }
-      if (shortestPrefix && inst.instance_name.startsWith(shortestPrefix)) {
-        instDisplayName[inst.instance_name] = inst.instance_name.slice(shortestPrefix.length);
+      if (outerPrefix && inst.instance_name.startsWith(outerPrefix)) {
+        instDisplayName[inst.instance_name] = inst.instance_name.slice(outerPrefix.length);
       }
     }
   }
