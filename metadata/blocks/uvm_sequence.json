@@ -1,0 +1,30 @@
+{
+  "block_name": "uvm_sequence",
+  "description": "UVM sequence. Generates stimulus transaction items and sends them to the sequencer via a TLM seq_item_port. The sequencer arbitrates and forwards items to the driver.",
+  "render": {
+    "color": "#E91E63"
+  },
+  "ports": [
+    {
+      "name": "clk",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "System clock"
+    },
+    {
+      "name": "rst_n",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "Active-low reset"
+    },
+    {
+      "name": "seq_item_port",
+      "direction": "output",
+      "width": 1,
+      "channel": "TLM",
+      "description": "Sequence item TLM port (connects to sequencer's seq_item_export)"
+    }
+  ]
+}
