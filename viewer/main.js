@@ -222,9 +222,8 @@ function dashedBox(cx, cy, cz, w, h, d, color) {
 /** Coloured block with white wireframe edges and a floating label.
  *  Supports cuboid shapes via `renderSize` { w, h, d } or uniform `scale`.
  *  `scale` multiplies the default CUBE size (1 = normal, >1 = bigger).
- *  When `compact` is true, only the instance name is shown (no module name).
- *  `displayName` overrides the label text (instance_name still used for wiring). */
-function instanceCube(inst, hexColor, scale = 1, renderSize = null, compact = false, displayName = null) {
+ *  When `compact` is true, only the instance name is shown (no module name). */
+function instanceCube(inst, hexColor, scale = 1, renderSize = null, compact = false) {
   const group = new THREE.Group();
   const w = renderSize?.w ?? CUBE * scale;
   const h = renderSize?.h ?? CUBE * scale;
@@ -247,10 +246,9 @@ function instanceCube(inst, hexColor, scale = 1, renderSize = null, compact = fa
   ));
 
   // Floating label above the block
-  const name = displayName || inst.instance_name;
   const modLine = compact ? '' : `<div class="mod-name">(${inst.module})</div>`;
   const label = makeLabel(
-    `<div class="inst-name">${name}</div>` + modLine,
+    `<div class="inst-name">${inst.instance_name}</div>` + modLine,
     'cube-label'
   );
   label.position.set(0, halfH + 0.5, 0);
@@ -885,41 +883,6 @@ async function buildScene(designPath) {
   // Map instance name → its cube half-size for wiring
   const instHalf = {};
 
-  // ── Compute display names (strip group prefix for cleaner labels) ──
-  // For each instance, find its outermost enclosing group (most members).
-  // If that group has a non-empty common prefix, strip it — the group label
-  // already provides context (e.g. "AXI4 Env (DMA)").
-  // In individual UVC views the outer env group has an empty common prefix
-  // (members are aw_sqr, w_sqr, read_seq, … with no shared prefix) so
-  // nothing gets stripped and labels remain like "aw_sqr".
-  const instDisplayName = {};
-  if (Array.isArray(design.groups)) {
-    // For each group, compute the longest common prefix of all members
-    const groupPrefix = {};
-    for (const grp of design.groups) {
-      if (!grp.members?.length) continue;
-      let prefix = grp.members[0];
-      for (const m of grp.members) {
-        while (prefix && !m.startsWith(prefix)) prefix = prefix.slice(0, -1);
-      }
-      groupPrefix[grp.name] = prefix;
-    }
-    for (const inst of instances) {
-      let outerPrefix = '';
-      let outerSize = 0;
-      for (const grp of design.groups) {
-        if (!grp.members?.includes(inst.instance_name)) continue;
-        if (grp.members.length > outerSize) {
-          outerPrefix = groupPrefix[grp.name] || '';
-          outerSize = grp.members.length;
-        }
-      }
-      if (outerPrefix && inst.instance_name.startsWith(outerPrefix)) {
-        instDisplayName[inst.instance_name] = inst.instance_name.slice(outerPrefix.length);
-      }
-    }
-  }
-
   // ── Instance cubes / cuboids ────────────────────────────────────
   // Hide module name labels when many instances (reduces clutter)
   const compact = instances.length > 12;
@@ -928,8 +891,7 @@ async function buildScene(designPath) {
     const s = scaleFor(inst);
     const mod = design.modules[inst.module];
     const renderSize = mod?.render?.size ?? null;   // { w, h, d } for cuboid
-    const displayName = instDisplayName[inst.instance_name] || null;
-    const cubeGroup = instanceCube(inst, moduleColor[inst.module] ?? 0x888888, s, renderSize, compact, displayName);
+    const cubeGroup = instanceCube(inst, moduleColor[inst.module] ?? 0x888888, s, renderSize, compact);
     scene.add(cubeGroup);
     instHalf[inst.instance_name]  = cubeGroup.userData.cubeHalf;
     instHalfH[inst.instance_name] = cubeGroup.userData.cubeHalfH ?? cubeGroup.userData.cubeHalf;
