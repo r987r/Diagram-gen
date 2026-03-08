@@ -21,7 +21,10 @@ const RST_COL   = 0xFF5252;   // red
 const AXI4_COL  = 0xFFC107;   // amber
 const TB_COL    = 0x546E7A;   // blue-grey
 const BG_COL    = 0x0d0d1a;   // deep navy
-const CAM_AUTO_FIT = 20;      // scene size threshold for auto camera refit
+const FACE_COVERAGE = 0.7;    // fraction of face width used for signal spreading
+const CAM_DIST_SCALE = 1.5;   // camera distance multiplier relative to scene size
+const CAM_MIN_DIST   = 25;    // minimum camera distance on scene load
+const CAM_Y_OFFSET   = 0.35;  // camera Y-offset ratio above scene centre
 
 // ── Scene ────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -996,7 +999,7 @@ async function buildScene(designPath) {
     const idx   = faceIndex[faceKey] || 0;
     faceIndex[faceKey] = idx + 1;
     if (total <= 1) return 0;
-    const span = half * 2 * 0.7;
+    const span = half * 2 * FACE_COVERAGE;
     return -span / 2 + (idx / (total - 1)) * span;
   }
 
@@ -1114,8 +1117,8 @@ async function buildScene(designPath) {
   const sceneWidth  = (xMax - xMin) + 6;
   const sceneHeight = (rstY - clkY) + 4;
   const maxDim = Math.max(sceneWidth, sceneHeight);
-  const camDist = Math.max(maxDim * 1.5, 25);  // at least 25 so small designs aren't too close
-  camera.position.set(tbCX, tbCY + maxDim * 0.35, camDist);
+  const camDist = Math.max(maxDim * CAM_DIST_SCALE, CAM_MIN_DIST);
+  camera.position.set(tbCX, tbCY + maxDim * CAM_Y_OFFSET, camDist);
   controls.target.set(tbCX, tbCY, 0);
   controls.update();
 
