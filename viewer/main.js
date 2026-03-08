@@ -105,6 +105,44 @@ function makeLabel(html, className) {
   return new CSS2DObject(div);
 }
 
+/** Create a CSS2DObject label, position it, and add it to the scene. */
+function addSceneLabel(html, className, x, y, z) {
+  const label = makeLabel(html, className);
+  label.position.set(x, y, z);
+  scene.add(label);
+  return label;
+}
+
+/** Compute the 3-D axis-aligned bounding box of a list of positioned items.
+ *  halfX(item), halfY(item), halfZ(item) are functions returning half-extents.
+ *  halfZ defaults to () => HALF when omitted. */
+function computeBounds(items, halfX, halfY, halfZ = () => HALF) {
+  let xMin = Infinity, xMax = -Infinity;
+  let yMin = Infinity, yMax = -Infinity;
+  let zMin = Infinity, zMax = -Infinity;
+  for (const item of items) {
+    const hx = halfX(item);
+    const hy = halfY(item);
+    const hz = halfZ(item);
+    xMin = Math.min(xMin, item.position.x - hx);
+    xMax = Math.max(xMax, item.position.x + hx);
+    yMin = Math.min(yMin, item.position.y - hy);
+    yMax = Math.max(yMax, item.position.y + hy);
+    zMin = Math.min(zMin, item.position.z - hz);
+    zMax = Math.max(zMax, item.position.z + hz);
+  }
+  return { xMin, xMax, yMin, yMax, zMin, zMax };
+}
+
+/** Create and register an invisible hit-target cylinder for click detection.
+ *  Adds the mesh to the scene, clickableObjects, and objectMeta. */
+function registerHitZone(from, to, meta) {
+  const hitZone = busHitZone(from, to);
+  scene.add(hitZone);
+  clickableObjects.push(hitZone);
+  objectMeta.set(hitZone, meta);
+}
+
 /** Solid line through an array of [x,y,z] tuples. */
 function solidLine(pts, color) {
   const geo = new THREE.BufferGeometry().setFromPoints(
@@ -370,6 +408,11 @@ window.addEventListener('pointermove', (e) => {
 
 window.addEventListener('pointerup', () => {
   isDragging = false;
+});
+
+// Close popup with Escape key
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') collapsePopup();
 });
 
 /** Show instance info in the popup. */
@@ -792,24 +835,15 @@ async function buildScene(designPath) {
       const members = instances.filter(i => grp.members.includes(i.instance_name));
       if (members.length === 0) continue;
 
-      let gxMin = Infinity, gxMax = -Infinity;
-      let gyMin = Infinity, gyMax = -Infinity;
-      let gzMin = Infinity, gzMax = -Infinity;
-      for (const m of members) {
-        const hx = instHalf[m.instance_name]  || HALF;
-        const hy = instHalfH[m.instance_name] || HALF;
-        gxMin = Math.min(gxMin, m.position.x - hx);
-        gxMax = Math.max(gxMax, m.position.x + hx);
-        gyMin = Math.min(gyMin, m.position.y - hy);
-        gyMax = Math.max(gyMax, m.position.y + hy);
-        gzMin = Math.min(gzMin, m.position.z - HALF);
-        gzMax = Math.max(gzMax, m.position.z + HALF);
-      }
-
+      const bounds = computeBounds(
+        members,
+        m => instHalf[m.instance_name]  || HALF,
+        m => instHalfH[m.instance_name] || HALF
+      );
       const pad = grp.padding ?? 1.2;
-      gxMin -= pad; gxMax += pad;
-      gyMin -= pad; gyMax += pad;
-      gzMin -= pad; gzMax += pad;
+      const gxMin = bounds.xMin - pad, gxMax = bounds.xMax + pad;
+      const gyMin = bounds.yMin - pad, gyMax = bounds.yMax + pad;
+      const gzMin = bounds.zMin - pad, gzMax = bounds.zMax + pad;
 
       const gw = gxMax - gxMin;
       const gh = gyMax - gyMin;
@@ -823,12 +857,10 @@ async function buildScene(designPath) {
       scene.add(box);
 
       // Group label
-      const grpLabel = makeLabel(
+      addSceneLabel(
         `<span class="group-label-text">${grp.label || grp.name}</span>`,
-        'group-label-obj'
+        'group-label-obj', gxMin + 0.6, gyMax + 0.4, gcz
       );
-      grpLabel.position.set(gxMin + 0.6, gyMax + 0.4, gcz);
-      scene.add(grpLabel);
 
       // Make group clickable
       clickableObjects.push(box);
@@ -843,15 +875,11 @@ async function buildScene(designPath) {
   // Requires at least one instance; designs without instances have nothing to render.
   if (instances.length === 0) return;
 
-  let xMin = Infinity, xMax = -Infinity, yMin = Infinity, yMax = -Infinity;
-  for (const inst of instances) {
-    const hx = instHalf[inst.instance_name];
-    const hy = instHalfH[inst.instance_name] || hx;
-    xMin = Math.min(xMin, inst.position.x - hx);
-    xMax = Math.max(xMax, inst.position.x + hx);
-    yMin = Math.min(yMin, inst.position.y - hy);
-    yMax = Math.max(yMax, inst.position.y + hy);
-  }
+  const { xMin, xMax, yMin, yMax } = computeBounds(
+    instances,
+    i => instHalf[i.instance_name] || HALF,
+    i => instHalfH[i.instance_name] || instHalf[i.instance_name] || HALF
+  );
 
   const clkY    = yMin - 1.8;            // horizontal CLK rail Y
   const rstY    = yMax + 1.8;            // horizontal RST rail Y
@@ -884,21 +912,19 @@ async function buildScene(designPath) {
   // ── CLK horizontal rail (only if clock connections exist) ───
   if (clkConn) {
     scene.add(solidLine([[railL, clkY, 0], [railR, clkY, 0]], CLK_COL));
-    const clkLabel = makeLabel(
-      `<span class="rail-label clk-text">${clkSigName} ← ${tbName}</span>`, 'rail-label-obj'
+    addSceneLabel(
+      `<span class="rail-label clk-text">${clkSigName} ← ${tbName}</span>`,
+      'rail-label-obj', railL - 0.3, clkY, 0
     );
-    clkLabel.position.set(railL - 0.3, clkY, 0);
-    scene.add(clkLabel);
   }
 
   // ── RST horizontal rail (only if reset connections exist) ───
   if (rstConn) {
     scene.add(solidLine([[railL, rstY, 0], [railR, rstY, 0]], RST_COL));
-    const rstLabel = makeLabel(
-      `<span class="rail-label rst-text">${rstSigName} ← ${tbName}</span>`, 'rail-label-obj'
+    addSceneLabel(
+      `<span class="rail-label rst-text">${rstSigName} ← ${tbName}</span>`,
+      'rail-label-obj', railL - 0.3, rstY, 0
     );
-    rstLabel.position.set(railL - 0.3, rstY, 0);
-    scene.add(rstLabel);
   }
 
   // ── Per-instance CLK and RST stubs (only for instances in fanout) ─
@@ -908,12 +934,9 @@ async function buildScene(designPath) {
   const clkRoutePts = clkConn ? [[railL, clkY, 0], [railR, clkY, 0]] : [];
   const rstRoutePts = rstConn ? [[railL, rstY, 0], [railR, rstY, 0]] : [];
 
-  /** Register a hit zone for a CLK/RST segment. */
+  /** Register a hit zone for a CLK/RST fanout segment. */
   function addFanoutHitZone(from, to, conn, routePts) {
-    const hitZone = busHitZone(from, to);
-    scene.add(hitZone);
-    clickableObjects.push(hitZone);
-    objectMeta.set(hitZone, { type: 'connection', connection: conn, routePts, segmentPairs: true });
+    registerHitZone(from, to, { type: 'connection', connection: conn, routePts, segmentPairs: true });
   }
 
   for (const inst of instances) {
@@ -964,6 +987,9 @@ async function buildScene(designPath) {
     hh: instHalfH[i.instance_name] || HALF,
   }));
 
+  // O(1) instance lookup by name for connection routing
+  const instByName = new Map(instances.map(i => [i.instance_name, i]));
+
   // ── Precompute per-face connection counts for signal separation ──
   // For each instance face (left/right/top/bottom), count how many bus
   // connections exit through it, and assign each connection a sequential
@@ -972,8 +998,8 @@ async function buildScene(designPath) {
   const faceIndex = {};   // "instName:face" → next index to assign
   for (const conn of design.connections) {
     if (conn.type === 'clock' || conn.type === 'reset') continue;
-    const fi = instances.find(i => i.instance_name === conn.from_instance);
-    const ti = instances.find(i => i.instance_name === conn.to_instance);
+    const fi = instByName.get(conn.from_instance);
+    const ti = instByName.get(conn.to_instance);
     if (!fi || !ti) continue;
     const ddx = ti.position.x - fi.position.x;
     const ddy = ti.position.y - fi.position.y;
@@ -1006,8 +1032,8 @@ async function buildScene(designPath) {
   for (const conn of design.connections) {
     if (conn.type === 'clock' || conn.type === 'reset') continue;
 
-    const fromInst = instances.find(i => i.instance_name === conn.from_instance);
-    const toInst   = instances.find(i => i.instance_name === conn.to_instance);
+    const fromInst = instByName.get(conn.from_instance);
+    const toInst   = instByName.get(conn.to_instance);
     if (!fromInst || !toInst) continue;
 
     const fromH = instHalf[conn.from_instance] || HALF;
@@ -1070,11 +1096,10 @@ async function buildScene(designPath) {
     const midX  = (fromX + toX) / 2;
     const midY  = (fromY + toY) / 2;
     if (conn.label) {
-      const busLabel = makeLabel(
-        `<span class="bus-label-text">${conn.label}</span>`, 'bus-label-obj'
+      const busLabel = addSceneLabel(
+        `<span class="bus-label-text">${conn.label}</span>`,
+        'bus-label-obj', midX, midY + 0.9, 0
       );
-      busLabel.position.set(midX, midY + 0.9, 0);
-      scene.add(busLabel);
       lodObjects.push({ obj: busLabel, maxDist: 60 });
     }
 
@@ -1085,10 +1110,7 @@ async function buildScene(designPath) {
         routePts[i + 1][1] - routePts[i][1],
         routePts[i + 1][2] - routePts[i][2]);
       if (segLen < 0.01) continue;
-      const hitZone = busHitZone(routePts[i], routePts[i + 1]);
-      scene.add(hitZone);
-      clickableObjects.push(hitZone);
-      objectMeta.set(hitZone, { type: 'connection', connection: conn, routePts });
+      registerHitZone(routePts[i], routePts[i + 1], { type: 'connection', connection: conn, routePts });
     }
   }
 
@@ -1106,11 +1128,10 @@ async function buildScene(designPath) {
 
   scene.add(dashedBox(tbCX, tbCY, 0, tbW, tbH, tbZ * 2, TB_COL));
 
-  const tbLabel = makeLabel(
-    `<span class="tb-label-text">${tbName}</span>`, 'tb-label-obj'
+  addSceneLabel(
+    `<span class="tb-label-text">${tbName}</span>`,
+    'tb-label-obj', tbL + 0.8, tbT + 0.35, 0
   );
-  tbLabel.position.set(tbL + 0.8, tbT + 0.35, 0);
-  scene.add(tbLabel);
 
   // ── Adjust camera to fit the design ─────────────────────────────
   // Always centre on the scene centroid, scaling distance to fit.
@@ -1201,14 +1222,18 @@ async function buildScene(designPath) {
 // ═══════════════════════════════════════════════════════════════════
 // Design selector
 // ═══════════════════════════════════════════════════════════════════
+
+/** Handle buildScene() failures — show error in the panel and hide loading overlay. */
+function handleBuildError(err) {
+  console.error('buildScene failed:', err);
+  document.getElementById('panel-design-name').textContent = '⚠ Load error';
+  document.getElementById('panel-desc').textContent        = err.message;
+  hideLoading();
+}
+
 const designSelect = document.getElementById('design-select');
 designSelect.addEventListener('change', () => {
-  buildScene(designSelect.value).catch(err => {
-    console.error('buildScene failed:', err);
-    document.getElementById('panel-design-name').textContent = '⚠ Load error';
-    document.getElementById('panel-desc').textContent        = err.message;
-    hideLoading();
-  });
+  buildScene(designSelect.value).catch(handleBuildError);
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1243,9 +1268,4 @@ const _lodTmpVec = new THREE.Vector3();
 // ═══════════════════════════════════════════════════════════════════
 // Bootstrap
 // ═══════════════════════════════════════════════════════════════════
-buildScene(designSelect.value).catch(err => {
-  console.error('buildScene failed:', err);
-  document.getElementById('panel-design-name').textContent = '⚠ Load error';
-  document.getElementById('panel-desc').textContent        = err.message;
-  hideLoading();
-});
+buildScene(designSelect.value).catch(handleBuildError);
