@@ -1,0 +1,177 @@
+{
+  "block_name": "axi4_master_gpu",
+  "description": "AXI4 GPU Master. Issues texture-fetch reads and frame-buffer writes with high bandwidth requirements. Generates wide bursts targeting the DDR controller and SRAM for render-target access.",
+  "render": {
+    "color": "#673AB7"
+  },
+  "ports": [
+    {
+      "name": "clk",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "System clock"
+    },
+    {
+      "name": "rst_n",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "Active-low reset"
+    },
+    {
+      "name": "m_awid",
+      "direction": "output",
+      "width": 4,
+      "channel": "AW",
+      "description": "Write address ID"
+    },
+    {
+      "name": "m_awaddr",
+      "direction": "output",
+      "width": 32,
+      "channel": "AW",
+      "description": "Write address"
+    },
+    {
+      "name": "m_awlen",
+      "direction": "output",
+      "width": 8,
+      "channel": "AW",
+      "description": "Burst length"
+    },
+    {
+      "name": "m_awvalid",
+      "direction": "output",
+      "width": 1,
+      "channel": "AW",
+      "description": "Write address valid"
+    },
+    {
+      "name": "m_awready",
+      "direction": "input",
+      "width": 1,
+      "channel": "AW",
+      "description": "Write address ready"
+    },
+    {
+      "name": "m_wdata",
+      "direction": "output",
+      "width": 64,
+      "channel": "W",
+      "description": "Write data"
+    },
+    {
+      "name": "m_wstrb",
+      "direction": "output",
+      "width": 8,
+      "channel": "W",
+      "description": "Write byte strobes"
+    },
+    {
+      "name": "m_wvalid",
+      "direction": "output",
+      "width": 1,
+      "channel": "W",
+      "description": "Write data valid"
+    },
+    {
+      "name": "m_wready",
+      "direction": "input",
+      "width": 1,
+      "channel": "W",
+      "description": "Write data ready"
+    },
+    {
+      "name": "m_bid",
+      "direction": "input",
+      "width": 4,
+      "channel": "B",
+      "description": "Write response ID"
+    },
+    {
+      "name": "m_bresp",
+      "direction": "input",
+      "width": 2,
+      "channel": "B",
+      "description": "Write response"
+    },
+    {
+      "name": "m_bvalid",
+      "direction": "input",
+      "width": 1,
+      "channel": "B",
+      "description": "Write response valid"
+    },
+    {
+      "name": "m_bready",
+      "direction": "output",
+      "width": 1,
+      "channel": "B",
+      "description": "Write response ready"
+    },
+    {
+      "name": "m_arid",
+      "direction": "output",
+      "width": 4,
+      "channel": "AR",
+      "description": "Read address ID"
+    },
+    {
+      "name": "m_araddr",
+      "direction": "output",
+      "width": 32,
+      "channel": "AR",
+      "description": "Read address"
+    },
+    {
+      "name": "m_arlen",
+      "direction": "output",
+      "width": 8,
+      "channel": "AR",
+      "description": "Burst length"
+    },
+    {
+      "name": "m_arvalid",
+      "direction": "output",
+      "width": 1,
+      "channel": "AR",
+      "description": "Read address valid"
+    },
+    {
+      "name": "m_arready",
+      "direction": "input",
+      "width": 1,
+      "channel": "AR",
+      "description": "Read address ready"
+    },
+    {
+      "name": "m_rid",
+      "direction": "input",
+      "width": 4,
+      "channel": "R",
+      "description": "Read data ID"
+    },
+    {
+      "name": "m_rdata",
+      "direction": "input",
+      "width": 64,
+      "channel": "R",
+      "description": "Read data"
+    },
+    {
+      "name": "m_rvalid",
+      "direction": "input",
+      "width": 1,
+      "channel": "R",
+      "description": "Read data valid"
+    },
+    {
+      "name": "m_rready",
+      "direction": "output",
+      "width": 1,
+      "channel": "R",
+      "description": "Read data ready"
+    }
+  ]
+}

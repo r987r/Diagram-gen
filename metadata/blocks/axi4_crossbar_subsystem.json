@@ -1,0 +1,903 @@
+{
+  "block_name": "axi4_crossbar_subsystem",
+  "description": "AXI4 crossbar subsystem: 3 masters → interconnect → 4 slaves",
+  "includes": [
+    "blocks/axi4_master_cpu.json",
+    "blocks/axi4_master_dma.json",
+    "blocks/axi4_master_gpu.json",
+    "blocks/axi4_interconnect.json",
+    "blocks/axi4_slave_sram.json",
+    "blocks/axi4_slave_ddr.json",
+    "blocks/axi4_slave_uart.json",
+    "blocks/axi4_slave_spi.json"
+  ],
+  "instances": [
+    {
+      "instance_name": "u_cpu",
+      "module": "axi4_master_cpu",
+      "description": "CPU master instance – primary system initiator",
+      "position": {
+        "x": -16,
+        "y": 4,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "u_dma",
+      "module": "axi4_master_dma",
+      "description": "DMA engine master instance – bulk data mover",
+      "position": {
+        "x": -16,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "u_gpu",
+      "module": "axi4_master_gpu",
+      "description": "GPU master instance – graphics/compute initiator",
+      "position": {
+        "x": -16,
+        "y": -4,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "u_xbar",
+      "module": "axi4_interconnect",
+      "description": "AXI4 crossbar interconnect – 3-to-4 address-decoded switch fabric",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "u_sram",
+      "module": "axi4_slave_sram",
+      "description": "On-chip SRAM slave instance",
+      "position": {
+        "x": 16,
+        "y": 6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "u_ddr",
+      "module": "axi4_slave_ddr",
+      "description": "DDR controller slave instance",
+      "position": {
+        "x": 16,
+        "y": 2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "u_uart",
+      "module": "axi4_slave_uart",
+      "description": "UART peripheral slave instance",
+      "position": {
+        "x": 16,
+        "y": -2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "u_spi",
+      "module": "axi4_slave_spi",
+      "description": "SPI peripheral slave instance",
+      "position": {
+        "x": 16,
+        "y": -6,
+        "z": 0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "cpu_to_xbar_s0",
+      "type": "axi4_bus",
+      "label": "AXI4 CPU→XBAR_S0",
+      "description": "AXI4 bus from CPU master to interconnect slave port 0",
+      "from_instance": "u_cpu",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "AW": [
+          {
+            "from_port": "m_awid",
+            "to_port": "s0_awid",
+            "wire": "cpu2xb_awid"
+          },
+          {
+            "from_port": "m_awaddr",
+            "to_port": "s0_awaddr",
+            "wire": "cpu2xb_awaddr"
+          },
+          {
+            "from_port": "m_awvalid",
+            "to_port": "s0_awvalid",
+            "wire": "cpu2xb_awvalid"
+          },
+          {
+            "from_port": "m_awready",
+            "to_port": "s0_awready",
+            "wire": "cpu2xb_awready"
+          }
+        ],
+        "W": [
+          {
+            "from_port": "m_wdata",
+            "to_port": "s0_wdata",
+            "wire": "cpu2xb_wdata"
+          },
+          {
+            "from_port": "m_wvalid",
+            "to_port": "s0_wvalid",
+            "wire": "cpu2xb_wvalid"
+          },
+          {
+            "from_port": "m_wready",
+            "to_port": "s0_wready",
+            "wire": "cpu2xb_wready"
+          }
+        ],
+        "B": [
+          {
+            "from_port": "m_bid",
+            "to_port": "s0_bid",
+            "wire": "cpu2xb_bid"
+          },
+          {
+            "from_port": "m_bresp",
+            "to_port": "s0_bresp",
+            "wire": "cpu2xb_bresp"
+          },
+          {
+            "from_port": "m_bvalid",
+            "to_port": "s0_bvalid",
+            "wire": "cpu2xb_bvalid"
+          },
+          {
+            "from_port": "m_bready",
+            "to_port": "s0_bready",
+            "wire": "cpu2xb_bready"
+          }
+        ],
+        "AR": [
+          {
+            "from_port": "m_arid",
+            "to_port": "s0_arid",
+            "wire": "cpu2xb_arid"
+          },
+          {
+            "from_port": "m_araddr",
+            "to_port": "s0_araddr",
+            "wire": "cpu2xb_araddr"
+          },
+          {
+            "from_port": "m_arvalid",
+            "to_port": "s0_arvalid",
+            "wire": "cpu2xb_arvalid"
+          },
+          {
+            "from_port": "m_arready",
+            "to_port": "s0_arready",
+            "wire": "cpu2xb_arready"
+          }
+        ],
+        "R": [
+          {
+            "from_port": "m_rid",
+            "to_port": "s0_rid",
+            "wire": "cpu2xb_rid"
+          },
+          {
+            "from_port": "m_rdata",
+            "to_port": "s0_rdata",
+            "wire": "cpu2xb_rdata"
+          },
+          {
+            "from_port": "m_rvalid",
+            "to_port": "s0_rvalid",
+            "wire": "cpu2xb_rvalid"
+          },
+          {
+            "from_port": "m_rready",
+            "to_port": "s0_rready",
+            "wire": "cpu2xb_rready"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dma_to_xbar_s1",
+      "type": "axi4_bus",
+      "label": "AXI4 DMA→XBAR_S1",
+      "description": "AXI4 bus from DMA engine master to interconnect slave port 1",
+      "from_instance": "u_dma",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "AW": [
+          {
+            "from_port": "m_awid",
+            "to_port": "s1_awid",
+            "wire": "dma2xb_awid"
+          },
+          {
+            "from_port": "m_awaddr",
+            "to_port": "s1_awaddr",
+            "wire": "dma2xb_awaddr"
+          },
+          {
+            "from_port": "m_awvalid",
+            "to_port": "s1_awvalid",
+            "wire": "dma2xb_awvalid"
+          },
+          {
+            "from_port": "m_awready",
+            "to_port": "s1_awready",
+            "wire": "dma2xb_awready"
+          }
+        ],
+        "W": [
+          {
+            "from_port": "m_wdata",
+            "to_port": "s1_wdata",
+            "wire": "dma2xb_wdata"
+          },
+          {
+            "from_port": "m_wvalid",
+            "to_port": "s1_wvalid",
+            "wire": "dma2xb_wvalid"
+          },
+          {
+            "from_port": "m_wready",
+            "to_port": "s1_wready",
+            "wire": "dma2xb_wready"
+          }
+        ],
+        "B": [
+          {
+            "from_port": "m_bid",
+            "to_port": "s1_bid",
+            "wire": "dma2xb_bid"
+          },
+          {
+            "from_port": "m_bresp",
+            "to_port": "s1_bresp",
+            "wire": "dma2xb_bresp"
+          },
+          {
+            "from_port": "m_bvalid",
+            "to_port": "s1_bvalid",
+            "wire": "dma2xb_bvalid"
+          },
+          {
+            "from_port": "m_bready",
+            "to_port": "s1_bready",
+            "wire": "dma2xb_bready"
+          }
+        ],
+        "AR": [
+          {
+            "from_port": "m_arid",
+            "to_port": "s1_arid",
+            "wire": "dma2xb_arid"
+          },
+          {
+            "from_port": "m_araddr",
+            "to_port": "s1_araddr",
+            "wire": "dma2xb_araddr"
+          },
+          {
+            "from_port": "m_arvalid",
+            "to_port": "s1_arvalid",
+            "wire": "dma2xb_arvalid"
+          },
+          {
+            "from_port": "m_arready",
+            "to_port": "s1_arready",
+            "wire": "dma2xb_arready"
+          }
+        ],
+        "R": [
+          {
+            "from_port": "m_rid",
+            "to_port": "s1_rid",
+            "wire": "dma2xb_rid"
+          },
+          {
+            "from_port": "m_rdata",
+            "to_port": "s1_rdata",
+            "wire": "dma2xb_rdata"
+          },
+          {
+            "from_port": "m_rvalid",
+            "to_port": "s1_rvalid",
+            "wire": "dma2xb_rvalid"
+          },
+          {
+            "from_port": "m_rready",
+            "to_port": "s1_rready",
+            "wire": "dma2xb_rready"
+          }
+        ]
+      }
+    },
+    {
+      "id": "gpu_to_xbar_s2",
+      "type": "axi4_bus",
+      "label": "AXI4 GPU→XBAR_S2",
+      "description": "AXI4 bus from GPU master to interconnect slave port 2",
+      "from_instance": "u_gpu",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "AW": [
+          {
+            "from_port": "m_awid",
+            "to_port": "s2_awid",
+            "wire": "gpu2xb_awid"
+          },
+          {
+            "from_port": "m_awaddr",
+            "to_port": "s2_awaddr",
+            "wire": "gpu2xb_awaddr"
+          },
+          {
+            "from_port": "m_awvalid",
+            "to_port": "s2_awvalid",
+            "wire": "gpu2xb_awvalid"
+          },
+          {
+            "from_port": "m_awready",
+            "to_port": "s2_awready",
+            "wire": "gpu2xb_awready"
+          }
+        ],
+        "W": [
+          {
+            "from_port": "m_wdata",
+            "to_port": "s2_wdata",
+            "wire": "gpu2xb_wdata"
+          },
+          {
+            "from_port": "m_wvalid",
+            "to_port": "s2_wvalid",
+            "wire": "gpu2xb_wvalid"
+          },
+          {
+            "from_port": "m_wready",
+            "to_port": "s2_wready",
+            "wire": "gpu2xb_wready"
+          }
+        ],
+        "B": [
+          {
+            "from_port": "m_bid",
+            "to_port": "s2_bid",
+            "wire": "gpu2xb_bid"
+          },
+          {
+            "from_port": "m_bresp",
+            "to_port": "s2_bresp",
+            "wire": "gpu2xb_bresp"
+          },
+          {
+            "from_port": "m_bvalid",
+            "to_port": "s2_bvalid",
+            "wire": "gpu2xb_bvalid"
+          },
+          {
+            "from_port": "m_bready",
+            "to_port": "s2_bready",
+            "wire": "gpu2xb_bready"
+          }
+        ],
+        "AR": [
+          {
+            "from_port": "m_arid",
+            "to_port": "s2_arid",
+            "wire": "gpu2xb_arid"
+          },
+          {
+            "from_port": "m_araddr",
+            "to_port": "s2_araddr",
+            "wire": "gpu2xb_araddr"
+          },
+          {
+            "from_port": "m_arvalid",
+            "to_port": "s2_arvalid",
+            "wire": "gpu2xb_arvalid"
+          },
+          {
+            "from_port": "m_arready",
+            "to_port": "s2_arready",
+            "wire": "gpu2xb_arready"
+          }
+        ],
+        "R": [
+          {
+            "from_port": "m_rid",
+            "to_port": "s2_rid",
+            "wire": "gpu2xb_rid"
+          },
+          {
+            "from_port": "m_rdata",
+            "to_port": "s2_rdata",
+            "wire": "gpu2xb_rdata"
+          },
+          {
+            "from_port": "m_rvalid",
+            "to_port": "s2_rvalid",
+            "wire": "gpu2xb_rvalid"
+          },
+          {
+            "from_port": "m_rready",
+            "to_port": "s2_rready",
+            "wire": "gpu2xb_rready"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_m0_to_sram",
+      "type": "axi4_bus",
+      "label": "AXI4 XBAR_M0→SRAM",
+      "description": "AXI4 bus from interconnect master port 0 to SRAM slave (widened 6-bit ID)",
+      "from_instance": "u_xbar",
+      "to_instance": "u_sram",
+      "channel_signals": {
+        "AW": [
+          {
+            "from_port": "m0_awid",
+            "to_port": "s_awid",
+            "wire": "xb2sram_awid"
+          },
+          {
+            "from_port": "m0_awaddr",
+            "to_port": "s_awaddr",
+            "wire": "xb2sram_awaddr"
+          },
+          {
+            "from_port": "m0_awvalid",
+            "to_port": "s_awvalid",
+            "wire": "xb2sram_awvalid"
+          },
+          {
+            "from_port": "m0_awready",
+            "to_port": "s_awready",
+            "wire": "xb2sram_awready"
+          }
+        ],
+        "W": [
+          {
+            "from_port": "m0_wdata",
+            "to_port": "s_wdata",
+            "wire": "xb2sram_wdata"
+          },
+          {
+            "from_port": "m0_wvalid",
+            "to_port": "s_wvalid",
+            "wire": "xb2sram_wvalid"
+          },
+          {
+            "from_port": "m0_wready",
+            "to_port": "s_wready",
+            "wire": "xb2sram_wready"
+          }
+        ],
+        "B": [
+          {
+            "from_port": "m0_bid",
+            "to_port": "s_bid",
+            "wire": "xb2sram_bid"
+          },
+          {
+            "from_port": "m0_bresp",
+            "to_port": "s_bresp",
+            "wire": "xb2sram_bresp"
+          },
+          {
+            "from_port": "m0_bvalid",
+            "to_port": "s_bvalid",
+            "wire": "xb2sram_bvalid"
+          },
+          {
+            "from_port": "m0_bready",
+            "to_port": "s_bready",
+            "wire": "xb2sram_bready"
+          }
+        ],
+        "AR": [
+          {
+            "from_port": "m0_arid",
+            "to_port": "s_arid",
+            "wire": "xb2sram_arid"
+          },
+          {
+            "from_port": "m0_araddr",
+            "to_port": "s_araddr",
+            "wire": "xb2sram_araddr"
+          },
+          {
+            "from_port": "m0_arvalid",
+            "to_port": "s_arvalid",
+            "wire": "xb2sram_arvalid"
+          },
+          {
+            "from_port": "m0_arready",
+            "to_port": "s_arready",
+            "wire": "xb2sram_arready"
+          }
+        ],
+        "R": [
+          {
+            "from_port": "m0_rid",
+            "to_port": "s_rid",
+            "wire": "xb2sram_rid"
+          },
+          {
+            "from_port": "m0_rdata",
+            "to_port": "s_rdata",
+            "wire": "xb2sram_rdata"
+          },
+          {
+            "from_port": "m0_rvalid",
+            "to_port": "s_rvalid",
+            "wire": "xb2sram_rvalid"
+          },
+          {
+            "from_port": "m0_rready",
+            "to_port": "s_rready",
+            "wire": "xb2sram_rready"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_m1_to_ddr",
+      "type": "axi4_bus",
+      "label": "AXI4 XBAR_M1→DDR",
+      "description": "AXI4 bus from interconnect master port 1 to DDR controller slave (widened 6-bit ID)",
+      "from_instance": "u_xbar",
+      "to_instance": "u_ddr",
+      "channel_signals": {
+        "AW": [
+          {
+            "from_port": "m1_awid",
+            "to_port": "s_awid",
+            "wire": "xb2ddr_awid"
+          },
+          {
+            "from_port": "m1_awaddr",
+            "to_port": "s_awaddr",
+            "wire": "xb2ddr_awaddr"
+          },
+          {
+            "from_port": "m1_awvalid",
+            "to_port": "s_awvalid",
+            "wire": "xb2ddr_awvalid"
+          },
+          {
+            "from_port": "m1_awready",
+            "to_port": "s_awready",
+            "wire": "xb2ddr_awready"
+          }
+        ],
+        "W": [
+          {
+            "from_port": "m1_wdata",
+            "to_port": "s_wdata",
+            "wire": "xb2ddr_wdata"
+          },
+          {
+            "from_port": "m1_wvalid",
+            "to_port": "s_wvalid",
+            "wire": "xb2ddr_wvalid"
+          },
+          {
+            "from_port": "m1_wready",
+            "to_port": "s_wready",
+            "wire": "xb2ddr_wready"
+          }
+        ],
+        "B": [
+          {
+            "from_port": "m1_bid",
+            "to_port": "s_bid",
+            "wire": "xb2ddr_bid"
+          },
+          {
+            "from_port": "m1_bresp",
+            "to_port": "s_bresp",
+            "wire": "xb2ddr_bresp"
+          },
+          {
+            "from_port": "m1_bvalid",
+            "to_port": "s_bvalid",
+            "wire": "xb2ddr_bvalid"
+          },
+          {
+            "from_port": "m1_bready",
+            "to_port": "s_bready",
+            "wire": "xb2ddr_bready"
+          }
+        ],
+        "AR": [
+          {
+            "from_port": "m1_arid",
+            "to_port": "s_arid",
+            "wire": "xb2ddr_arid"
+          },
+          {
+            "from_port": "m1_araddr",
+            "to_port": "s_araddr",
+            "wire": "xb2ddr_araddr"
+          },
+          {
+            "from_port": "m1_arvalid",
+            "to_port": "s_arvalid",
+            "wire": "xb2ddr_arvalid"
+          },
+          {
+            "from_port": "m1_arready",
+            "to_port": "s_arready",
+            "wire": "xb2ddr_arready"
+          }
+        ],
+        "R": [
+          {
+            "from_port": "m1_rid",
+            "to_port": "s_rid",
+            "wire": "xb2ddr_rid"
+          },
+          {
+            "from_port": "m1_rdata",
+            "to_port": "s_rdata",
+            "wire": "xb2ddr_rdata"
+          },
+          {
+            "from_port": "m1_rvalid",
+            "to_port": "s_rvalid",
+            "wire": "xb2ddr_rvalid"
+          },
+          {
+            "from_port": "m1_rready",
+            "to_port": "s_rready",
+            "wire": "xb2ddr_rready"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_m2_to_uart",
+      "type": "axi4_bus",
+      "label": "AXI4 XBAR_M2→UART",
+      "description": "AXI4 bus from interconnect master port 2 to UART peripheral slave (widened 6-bit ID)",
+      "from_instance": "u_xbar",
+      "to_instance": "u_uart",
+      "channel_signals": {
+        "AW": [
+          {
+            "from_port": "m2_awid",
+            "to_port": "s_awid",
+            "wire": "xb2uart_awid"
+          },
+          {
+            "from_port": "m2_awaddr",
+            "to_port": "s_awaddr",
+            "wire": "xb2uart_awaddr"
+          },
+          {
+            "from_port": "m2_awvalid",
+            "to_port": "s_awvalid",
+            "wire": "xb2uart_awvalid"
+          },
+          {
+            "from_port": "m2_awready",
+            "to_port": "s_awready",
+            "wire": "xb2uart_awready"
+          }
+        ],
+        "W": [
+          {
+            "from_port": "m2_wdata",
+            "to_port": "s_wdata",
+            "wire": "xb2uart_wdata"
+          },
+          {
+            "from_port": "m2_wvalid",
+            "to_port": "s_wvalid",
+            "wire": "xb2uart_wvalid"
+          },
+          {
+            "from_port": "m2_wready",
+            "to_port": "s_wready",
+            "wire": "xb2uart_wready"
+          }
+        ],
+        "B": [
+          {
+            "from_port": "m2_bid",
+            "to_port": "s_bid",
+            "wire": "xb2uart_bid"
+          },
+          {
+            "from_port": "m2_bresp",
+            "to_port": "s_bresp",
+            "wire": "xb2uart_bresp"
+          },
+          {
+            "from_port": "m2_bvalid",
+            "to_port": "s_bvalid",
+            "wire": "xb2uart_bvalid"
+          },
+          {
+            "from_port": "m2_bready",
+            "to_port": "s_bready",
+            "wire": "xb2uart_bready"
+          }
+        ],
+        "AR": [
+          {
+            "from_port": "m2_arid",
+            "to_port": "s_arid",
+            "wire": "xb2uart_arid"
+          },
+          {
+            "from_port": "m2_araddr",
+            "to_port": "s_araddr",
+            "wire": "xb2uart_araddr"
+          },
+          {
+            "from_port": "m2_arvalid",
+            "to_port": "s_arvalid",
+            "wire": "xb2uart_arvalid"
+          },
+          {
+            "from_port": "m2_arready",
+            "to_port": "s_arready",
+            "wire": "xb2uart_arready"
+          }
+        ],
+        "R": [
+          {
+            "from_port": "m2_rid",
+            "to_port": "s_rid",
+            "wire": "xb2uart_rid"
+          },
+          {
+            "from_port": "m2_rdata",
+            "to_port": "s_rdata",
+            "wire": "xb2uart_rdata"
+          },
+          {
+            "from_port": "m2_rvalid",
+            "to_port": "s_rvalid",
+            "wire": "xb2uart_rvalid"
+          },
+          {
+            "from_port": "m2_rready",
+            "to_port": "s_rready",
+            "wire": "xb2uart_rready"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_m3_to_spi",
+      "type": "axi4_bus",
+      "label": "AXI4 XBAR_M3→SPI",
+      "description": "AXI4 bus from interconnect master port 3 to SPI peripheral slave (widened 6-bit ID)",
+      "from_instance": "u_xbar",
+      "to_instance": "u_spi",
+      "channel_signals": {
+        "AW": [
+          {
+            "from_port": "m3_awid",
+            "to_port": "s_awid",
+            "wire": "xb2spi_awid"
+          },
+          {
+            "from_port": "m3_awaddr",
+            "to_port": "s_awaddr",
+            "wire": "xb2spi_awaddr"
+          },
+          {
+            "from_port": "m3_awvalid",
+            "to_port": "s_awvalid",
+            "wire": "xb2spi_awvalid"
+          },
+          {
+            "from_port": "m3_awready",
+            "to_port": "s_awready",
+            "wire": "xb2spi_awready"
+          }
+        ],
+        "W": [
+          {
+            "from_port": "m3_wdata",
+            "to_port": "s_wdata",
+            "wire": "xb2spi_wdata"
+          },
+          {
+            "from_port": "m3_wvalid",
+            "to_port": "s_wvalid",
+            "wire": "xb2spi_wvalid"
+          },
+          {
+            "from_port": "m3_wready",
+            "to_port": "s_wready",
+            "wire": "xb2spi_wready"
+          }
+        ],
+        "B": [
+          {
+            "from_port": "m3_bid",
+            "to_port": "s_bid",
+            "wire": "xb2spi_bid"
+          },
+          {
+            "from_port": "m3_bresp",
+            "to_port": "s_bresp",
+            "wire": "xb2spi_bresp"
+          },
+          {
+            "from_port": "m3_bvalid",
+            "to_port": "s_bvalid",
+            "wire": "xb2spi_bvalid"
+          },
+          {
+            "from_port": "m3_bready",
+            "to_port": "s_bready",
+            "wire": "xb2spi_bready"
+          }
+        ],
+        "AR": [
+          {
+            "from_port": "m3_arid",
+            "to_port": "s_arid",
+            "wire": "xb2spi_arid"
+          },
+          {
+            "from_port": "m3_araddr",
+            "to_port": "s_araddr",
+            "wire": "xb2spi_araddr"
+          },
+          {
+            "from_port": "m3_arvalid",
+            "to_port": "s_arvalid",
+            "wire": "xb2spi_arvalid"
+          },
+          {
+            "from_port": "m3_arready",
+            "to_port": "s_arready",
+            "wire": "xb2spi_arready"
+          }
+        ],
+        "R": [
+          {
+            "from_port": "m3_rid",
+            "to_port": "s_rid",
+            "wire": "xb2spi_rid"
+          },
+          {
+            "from_port": "m3_rdata",
+            "to_port": "s_rdata",
+            "wire": "xb2spi_rdata"
+          },
+          {
+            "from_port": "m3_rvalid",
+            "to_port": "s_rvalid",
+            "wire": "xb2spi_rvalid"
+          },
+          {
+            "from_port": "m3_rready",
+            "to_port": "s_rready",
+            "wire": "xb2spi_rready"
+          }
+        ]
+      }
+    }
+  ]
+}

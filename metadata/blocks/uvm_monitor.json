@@ -1,0 +1,37 @@
+{
+  "block_name": "uvm_monitor",
+  "description": "UVM AXI4 monitor. Observes AXI4 interface signals via the virtual interface and broadcasts observed transactions on its analysis port.",
+  "render": {
+    "color": "#FF9800"
+  },
+  "ports": [
+    {
+      "name": "clk",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "System clock"
+    },
+    {
+      "name": "rst_n",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "Active-low reset"
+    },
+    {
+      "name": "vif",
+      "direction": "input",
+      "width": 1,
+      "channel": "VIF",
+      "description": "Virtual interface to DUT"
+    },
+    {
+      "name": "analysis_port",
+      "direction": "output",
+      "width": 1,
+      "channel": "TLM",
+      "description": "Analysis port broadcasting observed transactions"
+    }
+  ]
+}
