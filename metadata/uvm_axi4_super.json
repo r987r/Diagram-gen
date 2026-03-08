@@ -78,20 +78,6 @@
       },
       "ports": [
         {
-          "name": "clk",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL",
-          "description": "System clock"
-        },
-        {
-          "name": "rst_n",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL",
-          "description": "Active-low reset"
-        },
-        {
           "name": "analysis_export",
           "direction": "input",
           "width": 1,
@@ -106,20 +92,6 @@
         "color": "#E53935"
       },
       "ports": [
-        {
-          "name": "clk",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL",
-          "description": "System clock"
-        },
-        {
-          "name": "rst_n",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL",
-          "description": "Active-low reset"
-        },
         {
           "name": "analysis_export",
           "direction": "input",
@@ -1837,31 +1809,7 @@
           "port": "clk"
         },
         {
-          "instance": "cpu_aw_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_aw_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_aw_mon",
-          "port": "clk"
-        },
-        {
           "instance": "cpu_aw_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_w_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_w_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_w_mon",
           "port": "clk"
         },
         {
@@ -1869,31 +1817,7 @@
           "port": "clk"
         },
         {
-          "instance": "cpu_b_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_b_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_b_mon",
-          "port": "clk"
-        },
-        {
           "instance": "cpu_b_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_ar_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_ar_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_ar_mon",
           "port": "clk"
         },
         {
@@ -1901,47 +1825,7 @@
           "port": "clk"
         },
         {
-          "instance": "cpu_r_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_r_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_r_mon",
-          "port": "clk"
-        },
-        {
           "instance": "cpu_r_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_read_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_write_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_read_sb",
-          "port": "clk"
-        },
-        {
-          "instance": "cpu_write_sb",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_aw_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_aw_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_aw_mon",
           "port": "clk"
         },
         {
@@ -1949,31 +1833,7 @@
           "port": "clk"
         },
         {
-          "instance": "dma_w_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_w_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_w_mon",
-          "port": "clk"
-        },
-        {
           "instance": "dma_w_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_b_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_b_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_b_mon",
           "port": "clk"
         },
         {
@@ -1981,31 +1841,7 @@
           "port": "clk"
         },
         {
-          "instance": "dma_ar_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_ar_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_ar_mon",
-          "port": "clk"
-        },
-        {
           "instance": "dma_ar_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_r_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_r_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_r_mon",
           "port": "clk"
         },
         {
@@ -2013,47 +1849,7 @@
           "port": "clk"
         },
         {
-          "instance": "dma_read_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_write_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_read_sb",
-          "port": "clk"
-        },
-        {
-          "instance": "dma_write_sb",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_aw_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_aw_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_aw_mon",
-          "port": "clk"
-        },
-        {
           "instance": "gpu_aw_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_w_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_w_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_w_mon",
           "port": "clk"
         },
         {
@@ -2061,31 +1857,7 @@
           "port": "clk"
         },
         {
-          "instance": "gpu_b_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_b_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_b_mon",
-          "port": "clk"
-        },
-        {
           "instance": "gpu_b_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_ar_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_ar_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_ar_mon",
           "port": "clk"
         },
         {
@@ -2093,47 +1865,7 @@
           "port": "clk"
         },
         {
-          "instance": "gpu_r_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_r_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_r_mon",
-          "port": "clk"
-        },
-        {
           "instance": "gpu_r_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_read_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_write_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_read_sb",
-          "port": "clk"
-        },
-        {
-          "instance": "gpu_write_sb",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_aw_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_aw_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_aw_mon",
           "port": "clk"
         },
         {
@@ -2141,31 +1873,7 @@
           "port": "clk"
         },
         {
-          "instance": "sram_w_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_w_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_w_mon",
-          "port": "clk"
-        },
-        {
           "instance": "sram_w_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_b_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_b_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_b_mon",
           "port": "clk"
         },
         {
@@ -2173,31 +1881,7 @@
           "port": "clk"
         },
         {
-          "instance": "sram_ar_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_ar_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_ar_mon",
-          "port": "clk"
-        },
-        {
           "instance": "sram_ar_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_r_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_r_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_r_mon",
           "port": "clk"
         },
         {
@@ -2205,47 +1889,7 @@
           "port": "clk"
         },
         {
-          "instance": "sram_read_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_write_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_read_sb",
-          "port": "clk"
-        },
-        {
-          "instance": "sram_write_sb",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_aw_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_aw_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_aw_mon",
-          "port": "clk"
-        },
-        {
           "instance": "ddr_aw_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_w_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_w_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_w_mon",
           "port": "clk"
         },
         {
@@ -2253,31 +1897,7 @@
           "port": "clk"
         },
         {
-          "instance": "ddr_b_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_b_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_b_mon",
-          "port": "clk"
-        },
-        {
           "instance": "ddr_b_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_ar_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_ar_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_ar_mon",
           "port": "clk"
         },
         {
@@ -2285,47 +1905,7 @@
           "port": "clk"
         },
         {
-          "instance": "ddr_r_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_r_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_r_mon",
-          "port": "clk"
-        },
-        {
           "instance": "ddr_r_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_read_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_write_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_read_sb",
-          "port": "clk"
-        },
-        {
-          "instance": "ddr_write_sb",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_aw_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_aw_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_aw_mon",
           "port": "clk"
         },
         {
@@ -2333,31 +1913,7 @@
           "port": "clk"
         },
         {
-          "instance": "uart_w_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_w_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_w_mon",
-          "port": "clk"
-        },
-        {
           "instance": "uart_w_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_b_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_b_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_b_mon",
           "port": "clk"
         },
         {
@@ -2365,31 +1921,7 @@
           "port": "clk"
         },
         {
-          "instance": "uart_ar_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_ar_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_ar_mon",
-          "port": "clk"
-        },
-        {
           "instance": "uart_ar_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_r_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_r_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_r_mon",
           "port": "clk"
         },
         {
@@ -2397,47 +1929,7 @@
           "port": "clk"
         },
         {
-          "instance": "uart_read_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_write_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_read_sb",
-          "port": "clk"
-        },
-        {
-          "instance": "uart_write_sb",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_aw_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_aw_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_aw_mon",
-          "port": "clk"
-        },
-        {
           "instance": "spi_aw_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_w_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_w_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_w_mon",
           "port": "clk"
         },
         {
@@ -2445,31 +1937,7 @@
           "port": "clk"
         },
         {
-          "instance": "spi_b_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_b_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_b_mon",
-          "port": "clk"
-        },
-        {
           "instance": "spi_b_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_ar_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_ar_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_ar_mon",
           "port": "clk"
         },
         {
@@ -2477,35 +1945,7 @@
           "port": "clk"
         },
         {
-          "instance": "spi_r_sqr",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_r_drv",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_r_mon",
-          "port": "clk"
-        },
-        {
           "instance": "spi_r_vif",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_read_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_write_seq",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_read_sb",
-          "port": "clk"
-        },
-        {
-          "instance": "spi_write_sb",
           "port": "clk"
         }
       ]
@@ -2524,31 +1964,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "cpu_aw_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_aw_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_aw_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "cpu_aw_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_w_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_w_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_w_mon",
           "port": "rst_n"
         },
         {
@@ -2556,31 +1972,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "cpu_b_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_b_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_b_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "cpu_b_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_ar_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_ar_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_ar_mon",
           "port": "rst_n"
         },
         {
@@ -2588,47 +1980,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "cpu_r_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_r_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_r_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "cpu_r_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_read_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_write_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_read_sb",
-          "port": "rst_n"
-        },
-        {
-          "instance": "cpu_write_sb",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_aw_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_aw_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_aw_mon",
           "port": "rst_n"
         },
         {
@@ -2636,31 +1988,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "dma_w_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_w_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_w_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "dma_w_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_b_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_b_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_b_mon",
           "port": "rst_n"
         },
         {
@@ -2668,31 +1996,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "dma_ar_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_ar_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_ar_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "dma_ar_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_r_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_r_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_r_mon",
           "port": "rst_n"
         },
         {
@@ -2700,47 +2004,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "dma_read_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_write_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_read_sb",
-          "port": "rst_n"
-        },
-        {
-          "instance": "dma_write_sb",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_aw_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_aw_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_aw_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "gpu_aw_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_w_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_w_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_w_mon",
           "port": "rst_n"
         },
         {
@@ -2748,31 +2012,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "gpu_b_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_b_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_b_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "gpu_b_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_ar_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_ar_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_ar_mon",
           "port": "rst_n"
         },
         {
@@ -2780,47 +2020,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "gpu_r_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_r_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_r_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "gpu_r_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_read_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_write_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_read_sb",
-          "port": "rst_n"
-        },
-        {
-          "instance": "gpu_write_sb",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_aw_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_aw_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_aw_mon",
           "port": "rst_n"
         },
         {
@@ -2828,31 +2028,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "sram_w_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_w_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_w_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "sram_w_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_b_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_b_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_b_mon",
           "port": "rst_n"
         },
         {
@@ -2860,31 +2036,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "sram_ar_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_ar_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_ar_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "sram_ar_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_r_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_r_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_r_mon",
           "port": "rst_n"
         },
         {
@@ -2892,47 +2044,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "sram_read_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_write_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_read_sb",
-          "port": "rst_n"
-        },
-        {
-          "instance": "sram_write_sb",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_aw_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_aw_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_aw_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "ddr_aw_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_w_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_w_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_w_mon",
           "port": "rst_n"
         },
         {
@@ -2940,31 +2052,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "ddr_b_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_b_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_b_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "ddr_b_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_ar_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_ar_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_ar_mon",
           "port": "rst_n"
         },
         {
@@ -2972,47 +2060,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "ddr_r_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_r_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_r_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "ddr_r_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_read_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_write_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_read_sb",
-          "port": "rst_n"
-        },
-        {
-          "instance": "ddr_write_sb",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_aw_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_aw_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_aw_mon",
           "port": "rst_n"
         },
         {
@@ -3020,31 +2068,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "uart_w_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_w_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_w_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "uart_w_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_b_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_b_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_b_mon",
           "port": "rst_n"
         },
         {
@@ -3052,31 +2076,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "uart_ar_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_ar_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_ar_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "uart_ar_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_r_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_r_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_r_mon",
           "port": "rst_n"
         },
         {
@@ -3084,47 +2084,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "uart_read_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_write_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_read_sb",
-          "port": "rst_n"
-        },
-        {
-          "instance": "uart_write_sb",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_aw_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_aw_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_aw_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "spi_aw_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_w_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_w_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_w_mon",
           "port": "rst_n"
         },
         {
@@ -3132,31 +2092,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "spi_b_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_b_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_b_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "spi_b_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_ar_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_ar_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_ar_mon",
           "port": "rst_n"
         },
         {
@@ -3164,35 +2100,7 @@
           "port": "rst_n"
         },
         {
-          "instance": "spi_r_sqr",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_r_drv",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_r_mon",
-          "port": "rst_n"
-        },
-        {
           "instance": "spi_r_vif",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_read_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_write_seq",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_read_sb",
-          "port": "rst_n"
-        },
-        {
-          "instance": "spi_write_sb",
           "port": "rst_n"
         }
       ]

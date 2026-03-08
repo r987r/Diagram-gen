@@ -6,20 +6,6 @@
   },
   "ports": [
     {
-      "name": "clk",
-      "direction": "input",
-      "width": 1,
-      "channel": "GLOBAL",
-      "description": "System clock"
-    },
-    {
-      "name": "rst_n",
-      "direction": "input",
-      "width": 1,
-      "channel": "GLOBAL",
-      "description": "Active-low reset"
-    },
-    {
       "name": "seq_item_port",
       "direction": "output",
       "width": 1,

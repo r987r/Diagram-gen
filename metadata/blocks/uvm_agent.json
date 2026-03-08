@@ -6,22 +6,8 @@
   },
   "ports": [
     {
-      "name": "clk",
-      "direction": "input",
-      "width": 1,
-      "channel": "GLOBAL",
-      "description": "System clock"
-    },
-    {
-      "name": "rst_n",
-      "direction": "input",
-      "width": 1,
-      "channel": "GLOBAL",
-      "description": "Active-low reset"
-    },
-    {
       "name": "vif",
-      "direction": "output",
+      "direction": "input",
       "width": 1,
       "channel": "VIF",
       "description": "Virtual interface handle — passed to internal driver and monitor to connect to RTL"
