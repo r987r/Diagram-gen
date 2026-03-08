@@ -873,7 +873,9 @@ async function buildScene(designPath) {
   }
 
   // ── Per-instance CLK and RST stubs (only for instances in fanout) ─
-  // Collect route points for highlight; register hit zones for click
+  // Shared route-point arrays: clicking any clk/rst element highlights the
+  // entire fanout tree (rail + all stubs), which is the intended behaviour
+  // for clock/reset nets.
   const clkRoutePts = [[railL, clkY, 0], [railR, clkY, 0]];
   const rstRoutePts = [[railL, rstY, 0], [railR, rstY, 0]];
 
