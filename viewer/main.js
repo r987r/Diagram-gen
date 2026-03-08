@@ -83,6 +83,9 @@ const pointer = new THREE.Vector2();
 const clickableObjects = [];  // array of THREE.Object3D
 const objectMeta = new Map(); // Object3D → { type, data }
 
+// Currently highlighted selection (added to scene, removed on deselect)
+let currentHighlight = null;
+
 // ═══════════════════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════════════════
@@ -223,6 +226,74 @@ function busHitZone(from, to) {
   return mesh;
 }
 
+/** Check if an axis-aligned segment (x1,y1)→(x2,y2) intersects a box
+ *  centred at (bx,by) with half-extents (bhx,bhy), expanded by pad. */
+function segHitsBox(x1, y1, x2, y2, bx, by, bhx, bhy, pad) {
+  const l = bx - bhx - pad, r = bx + bhx + pad;
+  const b = by - bhy - pad, t = by + bhy + pad;
+  return Math.min(x1, x2) < r && Math.max(x1, x2) > l &&
+         Math.min(y1, y2) < t && Math.max(y1, y2) > b;
+}
+
+/** Compute an L-shaped orthogonal route that avoids obstacle boxes.
+ *  Returns array of [x,y,z] waypoints. */
+function routeConnection(fromX, fromY, toX, toY, exitHorizontal, obstacles) {
+  const PAD = 0.5;
+  const aligned = (Math.abs(fromX - toX) < 0.01) || (Math.abs(fromY - toY) < 0.01);
+
+  if (aligned) {
+    const blocked = obstacles.some(o =>
+      segHitsBox(fromX, fromY, toX, toY, o.x, o.y, o.hw, o.hh, PAD));
+    if (!blocked) return [[fromX, fromY, 0], [toX, toY, 0]];
+    // Detour around obstacles
+    if (Math.abs(fromY - toY) < 0.01) {
+      for (const sign of [1, -1]) {
+        const dy = fromY + sign * 3;
+        if (!obstacles.some(o => segHitsBox(fromX, dy, toX, dy, o.x, o.y, o.hw, o.hh, PAD)))
+          return [[fromX, fromY, 0], [fromX, dy, 0], [toX, dy, 0], [toX, toY, 0]];
+      }
+    } else {
+      for (const sign of [1, -1]) {
+        const dx = fromX + sign * 3;
+        if (!obstacles.some(o => segHitsBox(dx, fromY, dx, toY, o.x, o.y, o.hw, o.hh, PAD)))
+          return [[fromX, fromY, 0], [dx, fromY, 0], [dx, toY, 0], [toX, toY, 0]];
+      }
+    }
+    return [[fromX, fromY, 0], [toX, toY, 0]]; // fallback
+  }
+
+  if (exitHorizontal) {
+    let cornerX = (fromX + toX) / 2;
+    const isBlocked = (cx) => obstacles.some(o =>
+      segHitsBox(cx, Math.min(fromY, toY), cx, Math.max(fromY, toY), o.x, o.y, o.hw, o.hh, PAD));
+    if (isBlocked(cornerX)) {
+      const cands = [];
+      for (const o of obstacles) {
+        cands.push(o.x - o.hw - PAD - 0.5);
+        cands.push(o.x + o.hw + PAD + 0.5);
+      }
+      cands.sort((a, b) => Math.abs(a - cornerX) - Math.abs(b - cornerX));
+      for (const cx of cands) { if (!isBlocked(cx)) { cornerX = cx; break; } }
+    }
+    return [[fromX, fromY, 0], [cornerX, fromY, 0], [cornerX, toY, 0], [toX, toY, 0]];
+  }
+
+  // Vertical first
+  let cornerY = (fromY + toY) / 2;
+  const isBlocked = (cy) => obstacles.some(o =>
+    segHitsBox(Math.min(fromX, toX), cy, Math.max(fromX, toX), cy, o.x, o.y, o.hw, o.hh, PAD));
+  if (isBlocked(cornerY)) {
+    const cands = [];
+    for (const o of obstacles) {
+      cands.push(o.y - o.hh - PAD - 0.5);
+      cands.push(o.y + o.hh + PAD + 0.5);
+    }
+    cands.sort((a, b) => Math.abs(a - cornerY) - Math.abs(b - cornerY));
+    for (const cy of cands) { if (!isBlocked(cy)) { cornerY = cy; break; } }
+  }
+  return [[fromX, fromY, 0], [fromX, cornerY, 0], [toX, cornerY, 0], [toX, toY, 0]];
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // Info Popup
 // ═══════════════════════════════════════════════════════════════════
@@ -333,6 +404,79 @@ function showGroupInfo(grp) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Selection highlight (bright outline around clicked box / connection)
+// ═══════════════════════════════════════════════════════════════════
+
+/** Remove the current highlight overlay from the scene. */
+function clearHighlight() {
+  if (currentHighlight) {
+    currentHighlight.traverse(c => {
+      c.geometry?.dispose();
+      c.material?.dispose?.();
+    });
+    scene.remove(currentHighlight);
+    currentHighlight = null;
+  }
+}
+
+/** Add a bright outline around a clicked instance. */
+function highlightInstance(meta) {
+  clearHighlight();
+  const inst = meta.instance;
+  const hw = meta.halfW ?? HALF;
+  const hh = meta.halfH ?? HALF;
+  const d  = meta.module?.render?.size?.d ?? CUBE;
+  const group = new THREE.Group();
+  const pad = 0.3;
+
+  // Bright wireframe outline (slightly larger than the cube)
+  const geo   = new THREE.BoxGeometry((hw + pad) * 2, (hh + pad) * 2, d + pad * 2);
+  const edges = new THREE.EdgesGeometry(geo);
+  const outline = new THREE.LineSegments(
+    edges, new THREE.LineBasicMaterial({ color: 0xffffff })
+  );
+  outline.position.set(inst.position.x, inst.position.y, inst.position.z);
+  group.add(outline);
+
+  // Semi-transparent glow shell
+  const shell = new THREE.Mesh(
+    new THREE.BoxGeometry((hw + pad) * 2, (hh + pad) * 2, d + pad * 2),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.10, side: THREE.BackSide })
+  );
+  shell.position.set(inst.position.x, inst.position.y, inst.position.z);
+  group.add(shell);
+
+  scene.add(group);
+  currentHighlight = group;
+}
+
+/** Add a thick glow tube along a clicked connection path. */
+function highlightConnection(meta) {
+  clearHighlight();
+  const pts = meta.routePts;
+  if (!pts || pts.length < 2) return;
+
+  const group = new THREE.Group();
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a   = new THREE.Vector3(...pts[i]);
+    const b   = new THREE.Vector3(...pts[i + 1]);
+    const len = a.distanceTo(b);
+    if (len < 0.01) continue;
+    const mid = a.clone().add(b).multiplyScalar(0.5);
+    const dir = b.clone().sub(a).normalize();
+    const tube = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.15, 0.15, len, 8),
+      new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.45 })
+    );
+    tube.position.copy(mid);
+    tube.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+    group.add(tube);
+  }
+  scene.add(group);
+  currentHighlight = group;
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // Overview overlay
 // ═══════════════════════════════════════════════════════════════════
 const overviewOverlay = document.getElementById('overview-overlay');
@@ -380,12 +524,17 @@ renderer.domElement.addEventListener('pointerup', (e) => {
       const meta = objectMeta.get(obj);
       if (meta.type === 'instance') {
         showInstanceInfo(meta.instance, meta.module);
+        highlightInstance(meta);
       } else if (meta.type === 'connection') {
         showConnectionInfo(meta.connection);
+        highlightConnection(meta);
       } else if (meta.type === 'group') {
         showGroupInfo(meta.group);
+        clearHighlight();
       }
     }
+  } else {
+    clearHighlight();
   }
 });
 
@@ -416,6 +565,7 @@ function clearScene() {
   }
   clickableObjects.length = 0;
   objectMeta.clear();
+  currentHighlight = null;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -568,6 +718,8 @@ async function buildScene(designPath) {
       type: 'instance',
       instance: inst,
       module: design.modules[inst.module],
+      halfW: cubeGroup.userData.cubeHalf,
+      halfH: cubeGroup.userData.cubeHalfH ?? cubeGroup.userData.cubeHalf,
     });
   }
 
@@ -704,6 +856,14 @@ async function buildScene(designPath) {
   const busConns = design.connections.filter(c => c.type !== 'clock' && c.type !== 'reset');
   const showBusLabels = busConns.length <= 20;
 
+  // Precompute obstacle data for all instances (used for routing)
+  const allObstacles = instances.map(i => ({
+    name: i.instance_name,
+    x: i.position.x, y: i.position.y,
+    hw: instHalf[i.instance_name] || HALF,
+    hh: instHalfH[i.instance_name] || HALF,
+  }));
+
   for (const conn of design.connections) {
     if (conn.type === 'clock' || conn.type === 'reset') continue;
 
@@ -740,20 +900,11 @@ async function buildScene(designPath) {
 
     const col = connColor[conn.type] ?? AXI4_COL;
 
-    // Build route points: use L-shaped orthogonal routing when not aligned
-    let routePts;
-    const aligned = (Math.abs(fromX - toX) < 0.01) || (Math.abs(fromY - toY) < 0.01);
-    if (aligned) {
-      routePts = [[fromX, fromY, 0], [toX, toY, 0]];
-    } else if (exitHorizontal) {
-      // Horizontal first, then vertical bend
-      const cornerX = (fromX + toX) / 2;
-      routePts = [[fromX, fromY, 0], [cornerX, fromY, 0], [cornerX, toY, 0], [toX, toY, 0]];
-    } else {
-      // Vertical first, then horizontal bend
-      const cornerY = (fromY + toY) / 2;
-      routePts = [[fromX, fromY, 0], [fromX, cornerY, 0], [toX, cornerY, 0], [toX, toY, 0]];
-    }
+    // Build route points: L-shaped routing that avoids unconnected boxes
+    const obstacles = allObstacles.filter(
+      o => o.name !== conn.from_instance && o.name !== conn.to_instance
+    );
+    const routePts = routeConnection(fromX, fromY, toX, toY, exitHorizontal, obstacles);
 
     // Draw connection with arrowhead
     if (routePts.length === 2) {
@@ -777,14 +928,18 @@ async function buildScene(designPath) {
       scene.add(busLabel);
     }
 
-    // Invisible hit zone for click detection
-    const hitZone = busHitZone(
-      [fromX, fromY, 0],
-      [toX, toY, 0]
-    );
-    scene.add(hitZone);
-    clickableObjects.push(hitZone);
-    objectMeta.set(hitZone, { type: 'connection', connection: conn });
+    // Invisible hit zones for click detection (one per route segment)
+    for (let i = 0; i < routePts.length - 1; i++) {
+      const segLen = Math.hypot(
+        routePts[i+1][0] - routePts[i][0],
+        routePts[i+1][1] - routePts[i][1],
+        routePts[i+1][2] - routePts[i][2]);
+      if (segLen < 0.01) continue;
+      const hitZone = busHitZone(routePts[i], routePts[i + 1]);
+      scene.add(hitZone);
+      clickableObjects.push(hitZone);
+      objectMeta.set(hitZone, { type: 'connection', connection: conn, routePts });
+    }
   }
 
   // ── Testbench (tb_top) wireframe ──────────────────────────────
