@@ -25,6 +25,9 @@ const FACE_COVERAGE = 0.7;    // fraction of face width used for signal spreadin
 const CAM_DIST_SCALE = 1.5;   // camera distance multiplier relative to scene size
 const CAM_MIN_DIST   = 25;    // minimum camera distance on scene load
 const CAM_Y_OFFSET   = 0.35;  // camera Y-offset ratio above scene centre
+const BUNDLE_Z_SPACING    = 0.5;   // Z-axis spacing between bundled connections
+const BUNDLE_BASE_RADIUS  = 0.15;  // base radius of bundle pipe
+const BUNDLE_RADIUS_INCR  = 0.08;  // additional radius per connection in bundle
 
 // ── Scene ────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -1212,8 +1215,8 @@ async function buildScene(designPath) {
     const bCount = bundleCounts[bKey] || 1;
     const bIdx   = bundleNextIdx[bKey] || 0;
     bundleNextIdx[bKey] = bIdx + 1;
-    // Centre the bundle around Z=0; spacing = 0.5 per connection
-    const zOff = bCount <= 1 ? 0 : -((bCount - 1) * 0.5) / 2 + bIdx * 0.5;
+    // Centre the bundle around Z=0
+    const zOff = bCount <= 1 ? 0 : -((bCount - 1) * BUNDLE_Z_SPACING) / 2 + bIdx * BUNDLE_Z_SPACING;
 
     // Build route points: L-shaped routing that avoids unconnected boxes
     const obstacles = allObstacles.filter(
@@ -1271,14 +1274,14 @@ async function buildScene(designPath) {
   for (const [key, conns] of Object.entries(bundleIndexMap)) {
     if (conns.length <= 1) continue;
     const [fromName, toName] = key.split('::');
-    const fromInst = instByName.get(fromName);
-    const toInst   = instByName.get(toName);
-    if (!fromInst || !toInst) continue;
+    const srcInst = instByName.get(fromName);
+    const dstInst = instByName.get(toName);
+    if (!srcInst || !dstInst) continue;
 
     const n = conns.length;
-    const radius = 0.15 + 0.08 * n;
-    const a = new THREE.Vector3(fromInst.position.x, fromInst.position.y, fromInst.position.z);
-    const b = new THREE.Vector3(toInst.position.x, toInst.position.y, toInst.position.z);
+    const radius = BUNDLE_BASE_RADIUS + BUNDLE_RADIUS_INCR * n;
+    const a = new THREE.Vector3(srcInst.position.x, srcInst.position.y, srcInst.position.z);
+    const b = new THREE.Vector3(dstInst.position.x, dstInst.position.y, dstInst.position.z);
     const mid = a.clone().add(b).multiplyScalar(0.5);
     const len = a.distanceTo(b);
     if (len < 0.01) continue;
