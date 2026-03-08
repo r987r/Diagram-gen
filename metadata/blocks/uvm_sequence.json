@@ -24,7 +24,7 @@
       "direction": "output",
       "width": 1,
       "channel": "TLM",
-      "description": "Sequence item port (to sequencer)"
+      "description": "Sequence item TLM port (connects to sequencer's seq_item_export)"
     }
   ]
 }

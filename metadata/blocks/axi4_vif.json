@@ -1,6 +1,6 @@
 {
   "block_name": "axi4_vif",
-  "description": "AXI4 virtual interface. SystemVerilog interface that bundles AXI4 channel signals. Connects the UVM driver and monitor to the RTL DUT. The driver drives signals through the interface; the monitor observes them.",
+  "description": "AXI4 virtual interface — bundles AXI4 signals and provides modports for driver, monitor, and DUT connections.",
   "render": {
     "color": "#795548"
   },
