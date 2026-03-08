@@ -14,7 +14,7 @@ import { OrbitControls }                       from 'three/addons/controls/Orbit
 import { CSS2DRenderer, CSS2DObject }          from 'three/addons/renderers/CSS2DRenderer.js';
 
 // ── Constants ────────────────────────────────────────────────────────
-const CUBE      = 3;          // cube side length
+const CUBE      = 4;          // cube side length
 const HALF      = CUBE / 2;
 const CLK_COL   = 0x00E676;   // bright green
 const RST_COL   = 0xFF5252;   // red
@@ -26,11 +26,11 @@ const CAM_AUTO_FIT = 20;      // scene size threshold for auto camera refit
 // ── Scene ────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(BG_COL);
-scene.fog = new THREE.FogExp2(BG_COL, 0.008);
+scene.fog = new THREE.FogExp2(BG_COL, 0.003);
 
 // ── Camera ───────────────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(
-  55, window.innerWidth / window.innerHeight, 0.1, 600
+  55, window.innerWidth / window.innerHeight, 0.1, 2000
 );
 camera.position.set(0, 13, 30);
 
@@ -56,8 +56,8 @@ controls.enableDamping    = true;
 controls.dampingFactor    = 0.06;
 controls.autoRotate       = true;
 controls.autoRotateSpeed  = 0.4;
-controls.minDistance      = 8;
-controls.maxDistance      = 200;
+controls.minDistance      = 3;
+controls.maxDistance      = 800;
 controls.target.set(0, 0, 0);
 
 // ── Lights ───────────────────────────────────────────────────────────
@@ -70,7 +70,7 @@ fill.position.set(-12, -6, -10);
 scene.add(fill);
 
 // ── Ground grid ──────────────────────────────────────────────────────
-const grid = new THREE.GridHelper(200, 100, 0x1a1a3a, 0x1a1a3a);
+const grid = new THREE.GridHelper(400, 200, 0x1a1a3a, 0x1a1a3a);
 grid.position.y = -5.5;
 scene.add(grid);
 
@@ -85,6 +85,10 @@ const objectMeta = new Map(); // Object3D → { type, data }
 
 // Currently highlighted selection (added to scene, removed on deselect)
 let currentHighlight = null;
+
+// LOD: objects whose visibility depends on camera distance
+// Each entry: { obj: THREE.Object3D, maxDist: number }
+const lodObjects = [];
 
 // ═══════════════════════════════════════════════════════════════════
 // Helpers
@@ -620,6 +624,7 @@ function clearScene() {
   }
   clickableObjects.length = 0;
   objectMeta.clear();
+  lodObjects.length = 0;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -948,10 +953,6 @@ async function buildScene(designPath) {
     }
   }
 
-  // Hide bus labels when there are many connections to reduce clutter
-  const busConns = design.connections.filter(c => c.type !== 'clock' && c.type !== 'reset');
-  const showBusLabels = busConns.length <= 20;
-
   // Precompute obstacle data for all instances (used for routing)
   const allObstacles = instances.map(i => ({
     name: i.instance_name,
@@ -959,6 +960,45 @@ async function buildScene(designPath) {
     hw: instHalf[i.instance_name] || HALF,
     hh: instHalfH[i.instance_name] || HALF,
   }));
+
+  // ── Precompute per-face connection counts for signal separation ──
+  // For each instance face (left/right/top/bottom), count how many bus
+  // connections exit through it, and assign each connection a sequential
+  // index so they can be offset along the face to avoid overlap.
+  const faceCount = {};   // "instName:face" → total count
+  const faceIndex = {};   // "instName:face" → next index to assign
+  for (const conn of design.connections) {
+    if (conn.type === 'clock' || conn.type === 'reset') continue;
+    const fi = instances.find(i => i.instance_name === conn.from_instance);
+    const ti = instances.find(i => i.instance_name === conn.to_instance);
+    if (!fi || !ti) continue;
+    const ddx = ti.position.x - fi.position.x;
+    const ddy = ti.position.y - fi.position.y;
+    if (Math.abs(ddx) >= Math.abs(ddy)) {
+      const fromFace = conn.from_instance + ':' + (ddx >= 0 ? 'right' : 'left');
+      const toFace   = conn.to_instance   + ':' + (ddx >= 0 ? 'left'  : 'right');
+      faceCount[fromFace] = (faceCount[fromFace] || 0) + 1;
+      faceCount[toFace]   = (faceCount[toFace]   || 0) + 1;
+    } else {
+      const fromFace = conn.from_instance + ':' + (ddy >= 0 ? 'top'    : 'bottom');
+      const toFace   = conn.to_instance   + ':' + (ddy >= 0 ? 'bottom' : 'top');
+      faceCount[fromFace] = (faceCount[fromFace] || 0) + 1;
+      faceCount[toFace]   = (faceCount[toFace]   || 0) + 1;
+    }
+  }
+  for (const key of Object.keys(faceCount)) faceIndex[key] = 0;
+
+  /** Compute offset along a face so multiple connections spread evenly.
+   *  Returns an offset to add to the coordinate perpendicular to the
+   *  face normal. `half` is the half-extent of that dimension. */
+  function faceOffset(faceKey, half) {
+    const total = faceCount[faceKey] || 1;
+    const idx   = faceIndex[faceKey] || 0;
+    faceIndex[faceKey] = idx + 1;
+    if (total <= 1) return 0;
+    const span = half * 2 * 0.7;
+    return -span / 2 + (idx / (total - 1)) * span;
+  }
 
   for (const conn of design.connections) {
     if (conn.type === 'clock' || conn.type === 'reset') continue;
@@ -979,18 +1019,24 @@ async function buildScene(designPath) {
     if (Math.abs(dx) >= Math.abs(dy)) {
       // Horizontal connection (exit from left/right face)
       exitHorizontal = true;
+      const fromFace = conn.from_instance + ':' + (dx >= 0 ? 'right' : 'left');
+      const toFace   = conn.to_instance   + ':' + (dx >= 0 ? 'left'  : 'right');
+      const fromHy = instHalfH[conn.from_instance] || HALF;
+      const toHy   = instHalfH[conn.to_instance]   || HALF;
       fromX = fromInst.position.x + (dx >= 0 ? fromH : -fromH);
-      fromY = fromInst.position.y;
+      fromY = fromInst.position.y + faceOffset(fromFace, fromHy);
       toX   = toInst.position.x   + (dx >= 0 ? -toH  :  toH);
-      toY   = toInst.position.y;
+      toY   = toInst.position.y   + faceOffset(toFace, toHy);
     } else {
       // Vertical connection (exit from top/bottom face)
       exitHorizontal = false;
       const fromHy = instHalfH[conn.from_instance] || HALF;
       const toHy   = instHalfH[conn.to_instance]   || HALF;
-      fromX = fromInst.position.x;
+      const fromFace = conn.from_instance + ':' + (dy >= 0 ? 'top'    : 'bottom');
+      const toFace   = conn.to_instance   + ':' + (dy >= 0 ? 'bottom' : 'top');
+      fromX = fromInst.position.x + faceOffset(fromFace, fromH);
       fromY = fromInst.position.y + (dy >= 0 ? fromHy : -fromHy);
-      toX   = toInst.position.x;
+      toX   = toInst.position.x   + faceOffset(toFace, toH);
       toY   = toInst.position.y   + (dy >= 0 ? -toHy  :  toHy);
     }
 
@@ -1009,19 +1055,24 @@ async function buildScene(designPath) {
       scene.add(arrowPath(routePts, col));
     }
 
-    // Port dots
-    scene.add(portDot([fromX, fromY, 0], col, 0.16));
-    scene.add(portDot([toX,   toY, 0], col, 0.16));
+    // Port dots (registered for LOD — hide when far away)
+    const fromDot = portDot([fromX, fromY, 0], col, 0.16);
+    const toDot   = portDot([toX,   toY, 0], col, 0.16);
+    scene.add(fromDot);
+    scene.add(toDot);
+    lodObjects.push({ obj: fromDot, maxDist: 80 });
+    lodObjects.push({ obj: toDot,   maxDist: 80 });
 
-    // Bus label (only for small designs)
+    // Bus label (registered for LOD — only visible when close)
     const midX  = (fromX + toX) / 2;
     const midY  = (fromY + toY) / 2;
-    if (showBusLabels && conn.label) {
+    if (conn.label) {
       const busLabel = makeLabel(
         `<span class="bus-label-text">${conn.label}</span>`, 'bus-label-obj'
       );
       busLabel.position.set(midX, midY + 0.9, 0);
       scene.add(busLabel);
+      lodObjects.push({ obj: busLabel, maxDist: 60 });
     }
 
     // Invisible hit zones for click detection (one per route segment)
@@ -1058,15 +1109,15 @@ async function buildScene(designPath) {
   tbLabel.position.set(tbL + 0.8, tbT + 0.35, 0);
   scene.add(tbLabel);
 
-  // ── Adjust camera for larger designs ──────────────────────────
+  // ── Adjust camera to fit the design ─────────────────────────────
+  // Always centre on the scene centroid, scaling distance to fit.
   const sceneWidth  = (xMax - xMin) + 6;
   const sceneHeight = (rstY - clkY) + 4;
   const maxDim = Math.max(sceneWidth, sceneHeight);
-  if (maxDim > CAM_AUTO_FIT) {
-    camera.position.set(tbCX, tbCY + maxDim * 0.5, maxDim * 1.5);
-    controls.target.set(tbCX, tbCY, 0);
-    controls.update();
-  }
+  const camDist = Math.max(maxDim * 1.5, 25);  // at least 25 so small designs aren't too close
+  camera.position.set(tbCX, tbCY + maxDim * 0.35, camDist);
+  controls.target.set(tbCX, tbCY, 0);
+  controls.update();
 
   // ── Populate overview overlay ─────────────────────────────────
   document.getElementById('panel-design-name').textContent = design.design_name;
@@ -1170,9 +1221,18 @@ window.addEventListener('resize', () => {
 // ═══════════════════════════════════════════════════════════════════
 // Animation loop
 // ═══════════════════════════════════════════════════════════════════
+const _lodTmpVec = new THREE.Vector3();
 (function animate() {
   requestAnimationFrame(animate);
   controls.update();
+
+  // ── Dynamic LOD: toggle visibility based on camera distance ───
+  const camPos = camera.position;
+  for (const entry of lodObjects) {
+    const d = camPos.distanceTo(entry.obj.getWorldPosition(_lodTmpVec));
+    entry.obj.visible = d <= entry.maxDist;
+  }
+
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 })();
