@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  axi4-diagram:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: axi4-diagram:latest
+    container_name: axi4-diagram
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 15s
+      timeout:  5s
+      retries:  3
+      start_period: 5s

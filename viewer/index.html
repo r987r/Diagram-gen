@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AXI4 Interconnect — 3D Diagram</title>
+
+  <!--
+    Three.js vendor files are served from /vendor/ (copied during Docker build).
+    The importmap lets ES-module bare specifiers ("three", "three/addons/…")
+    resolve to those local paths so no internet access is needed at runtime.
+  -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three":          "/vendor/three/build/three.module.js",
+      "three/addons/":  "/vendor/three/examples/jsm/"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Top bar ──────────────────────────────────────────────── -->
+  <header id="topbar">
+    <span id="design-title">AXI4 Interconnect</span>
+    <span id="design-subtitle">Master → Repeater → Slave</span>
+    <span id="controls-hint">🖱 Drag to orbit · Scroll to zoom · Right-drag to pan</span>
+  </header>
+
+  <!-- ── Side panel ───────────────────────────────────────────── -->
+  <aside id="panel">
+    <h2 id="panel-design-name">Loading…</h2>
+    <p  id="panel-desc"></p>
+
+    <section class="panel-section">
+      <h3>Instances</h3>
+      <ul id="instance-list"></ul>
+    </section>
+
+    <section class="panel-section">
+      <h3>Legend</h3>
+      <ul id="legend">
+        <li><span class="dot" style="background:#00E676"></span> CLK (bottom of cube)</li>
+        <li><span class="dot" style="background:#FF5252"></span> RST_N (top of cube)</li>
+        <li><span class="dot" style="background:#FFC107"></span> AXI4 Bus</li>
+        <li><span class="dot" style="background:#2196F3"></span> AXI4 Master</li>
+        <li><span class="dot" style="background:#9C27B0"></span> AXI4 Repeater</li>
+        <li><span class="dot" style="background:#4CAF50"></span> AXI4 Slave</li>
+        <li><span class="dot" style="background:#546E7A; outline:1px dashed #546E7A"></span> tb_top (testbench)</li>
+      </ul>
+    </section>
+
+    <section class="panel-section">
+      <h3>Parameters</h3>
+      <table id="param-table"></table>
+    </section>
+  </aside>
+
+  <!-- ── Three.js canvas fills the viewport ───────────────────── -->
+  <canvas id="canvas"></canvas>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

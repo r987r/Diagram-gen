@@ -1,0 +1,223 @@
+/* ═══════════════════════════════════════════════════════════════
+   AXI4 3D Diagram Viewer — style.css
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Reset / base ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin:  0;
+  padding: 0;
+  width:   100%;
+  height:  100%;
+  overflow: hidden;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: #0d0d1a;
+  color: #e0e0e0;
+}
+
+/* ── WebGL canvas (full viewport behind everything) ──────────── */
+#canvas {
+  display:  block;
+  position: fixed;
+  top: 0; left: 0;
+  width:  100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* ── Top bar ─────────────────────────────────────────────────── */
+#topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.55rem 1.2rem;
+  background: rgba(13, 13, 26, 0.85);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+#design-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+
+#design-subtitle {
+  font-size: 0.85rem;
+  color: #90caf9;
+}
+
+#controls-hint {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #607d8b;
+}
+
+/* ── Side panel ──────────────────────────────────────────────── */
+#panel {
+  position: fixed;
+  top: 46px; right: 0;
+  z-index: 10;
+  width: 270px;
+  height: calc(100vh - 46px);
+  overflow-y: auto;
+  padding: 1rem;
+  background: rgba(13, 13, 26, 0.88);
+  backdrop-filter: blur(6px);
+  border-left: 1px solid rgba(255,255,255,0.07);
+  font-size: 0.82rem;
+}
+
+#panel h2 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  color: #90caf9;
+  word-break: break-word;
+}
+
+#panel p { margin: 0 0 0.8rem; color: #9e9e9e; line-height: 1.5; }
+
+.panel-section { margin-top: 1rem; }
+
+.panel-section h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #546e7a;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding-bottom: 0.25rem;
+}
+
+/* Instance list */
+#instance-list {
+  list-style: none;
+  margin: 0; padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#instance-list li {
+  padding: 0.45rem 0.6rem;
+  border-left: 3px solid #546e7a;
+  background: rgba(255,255,255,0.04);
+  border-radius: 0 4px 4px 0;
+  line-height: 1.45;
+}
+
+#instance-list li strong { color: #fff; font-size: 0.85rem; }
+#instance-list li em     { color: #90caf9; font-style: normal; }
+#instance-list li small  { color: #78909c; }
+
+/* Legend */
+#legend {
+  list-style: none;
+  margin: 0; padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+#legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #bdbdbd;
+}
+
+.dot {
+  display: inline-block;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Parameter table */
+#param-table { width: 100%; border-collapse: collapse; }
+#param-table td { padding: 0.25rem 0.4rem; }
+.pk { color: #78909c; }
+.pv { color: #fff; font-weight: 600; text-align: right; font-family: monospace; }
+
+/* ── CSS2D floating labels ────────────────────────────────────── */
+
+/* Cube instance label (above each cube) */
+.cube-label {
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.inst-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 6px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.7);
+  white-space: nowrap;
+}
+
+.mod-name {
+  font-size: 0.68rem;
+  color: #b0bec5;
+  text-shadow: 0 0 6px rgba(0,0,0,0.9);
+  white-space: nowrap;
+}
+
+/* Clock / reset rail labels */
+.rail-label-obj {
+  pointer-events: none;
+  user-select: none;
+  transform: translateX(-100%);
+}
+
+.rail-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  text-shadow: 0 0 4px rgba(0,0,0,1);
+}
+
+.clk-text { color: #00E676; }
+.rst-text { color: #FF5252; }
+
+/* AXI4 bus label (between cubes) */
+.bus-label-obj {
+  pointer-events: none;
+  user-select: none;
+  text-align: center;
+}
+
+.bus-label-text {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #FFC107;
+  text-shadow: 0 0 6px rgba(0,0,0,0.9);
+  white-space: nowrap;
+  background: rgba(13,13,26,0.6);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+}
+
+/* Testbench label */
+.tb-label-obj {
+  pointer-events: none;
+  user-select: none;
+}
+
+.tb-label-text {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #78909c;
+  text-shadow: 0 0 6px rgba(0,0,0,0.9);
+  letter-spacing: 0.06em;
+  background: rgba(13,13,26,0.55);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+}

@@ -1,0 +1,389 @@
+{
+  "design_name": "axi4_master_repeater_slave",
+  "version": "1.0.0",
+  "description": "AXI4 Master connected to an AXI4 Repeater Pipeline connected to an AXI4 Slave. All modules are instantiated inside the tb_top testbench. CLK connects at the bottom face of each instance cube; RST_N connects at the top face.",
+  "parameters": {
+    "DATA_WIDTH": 64,
+    "ADDR_WIDTH": 32,
+    "ID_WIDTH": 4,
+    "STRB_WIDTH": 8
+  },
+
+  "testbench": {
+    "module_name": "tb_top",
+    "description": "Top-level testbench. Declares clk and rst_n and drives them to all DUT instances.",
+    "global_signals": [
+      {
+        "name": "clk",
+        "width": 1,
+        "type": "reg",
+        "description": "System clock. Connects to the BOTTOM port of every instance cube.",
+        "render": { "face": "bottom", "color": "#00E676" }
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "type": "reg",
+        "description": "Active-low synchronous reset. Connects to the TOP port of every instance cube.",
+        "render": { "face": "top", "color": "#FF5252" }
+      }
+    ]
+  },
+
+  "modules": {
+    "axi4_master": {
+      "description": "AXI4 Master. Initiates read and write transactions on the AXI4 bus.",
+      "render": { "color": "#2196F3" },
+      "ports": [
+        { "name": "clk",       "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "System clock" },
+        { "name": "rst_n",     "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "Active-low reset" },
+
+        { "name": "m_awid",    "direction": "output", "width": 4,  "channel": "AW", "description": "Write address ID" },
+        { "name": "m_awaddr",  "direction": "output", "width": 32, "channel": "AW", "description": "Write address" },
+        { "name": "m_awlen",   "direction": "output", "width": 8,  "channel": "AW", "description": "Burst length" },
+        { "name": "m_awsize",  "direction": "output", "width": 3,  "channel": "AW", "description": "Burst size" },
+        { "name": "m_awburst", "direction": "output", "width": 2,  "channel": "AW", "description": "Burst type (FIXED/INCR/WRAP)" },
+        { "name": "m_awlock",  "direction": "output", "width": 1,  "channel": "AW", "description": "Lock type" },
+        { "name": "m_awcache", "direction": "output", "width": 4,  "channel": "AW", "description": "Cache type" },
+        { "name": "m_awprot",  "direction": "output", "width": 3,  "channel": "AW", "description": "Protection type" },
+        { "name": "m_awqos",   "direction": "output", "width": 4,  "channel": "AW", "description": "QoS value" },
+        { "name": "m_awvalid", "direction": "output", "width": 1,  "channel": "AW", "description": "Write address valid" },
+        { "name": "m_awready", "direction": "input",  "width": 1,  "channel": "AW", "description": "Write address ready" },
+
+        { "name": "m_wdata",   "direction": "output", "width": 64, "channel": "W",  "description": "Write data" },
+        { "name": "m_wstrb",   "direction": "output", "width": 8,  "channel": "W",  "description": "Write byte strobes" },
+        { "name": "m_wlast",   "direction": "output", "width": 1,  "channel": "W",  "description": "Write last beat" },
+        { "name": "m_wvalid",  "direction": "output", "width": 1,  "channel": "W",  "description": "Write data valid" },
+        { "name": "m_wready",  "direction": "input",  "width": 1,  "channel": "W",  "description": "Write data ready" },
+
+        { "name": "m_bid",     "direction": "input",  "width": 4,  "channel": "B",  "description": "Write response ID" },
+        { "name": "m_bresp",   "direction": "input",  "width": 2,  "channel": "B",  "description": "Write response (OKAY/EXOKAY/SLVERR/DECERR)" },
+        { "name": "m_bvalid",  "direction": "input",  "width": 1,  "channel": "B",  "description": "Write response valid" },
+        { "name": "m_bready",  "direction": "output", "width": 1,  "channel": "B",  "description": "Write response ready" },
+
+        { "name": "m_arid",    "direction": "output", "width": 4,  "channel": "AR", "description": "Read address ID" },
+        { "name": "m_araddr",  "direction": "output", "width": 32, "channel": "AR", "description": "Read address" },
+        { "name": "m_arlen",   "direction": "output", "width": 8,  "channel": "AR", "description": "Burst length" },
+        { "name": "m_arsize",  "direction": "output", "width": 3,  "channel": "AR", "description": "Burst size" },
+        { "name": "m_arburst", "direction": "output", "width": 2,  "channel": "AR", "description": "Burst type" },
+        { "name": "m_arlock",  "direction": "output", "width": 1,  "channel": "AR", "description": "Lock type" },
+        { "name": "m_arcache", "direction": "output", "width": 4,  "channel": "AR", "description": "Cache type" },
+        { "name": "m_arprot",  "direction": "output", "width": 3,  "channel": "AR", "description": "Protection type" },
+        { "name": "m_arqos",   "direction": "output", "width": 4,  "channel": "AR", "description": "QoS value" },
+        { "name": "m_arvalid", "direction": "output", "width": 1,  "channel": "AR", "description": "Read address valid" },
+        { "name": "m_arready", "direction": "input",  "width": 1,  "channel": "AR", "description": "Read address ready" },
+
+        { "name": "m_rid",     "direction": "input",  "width": 4,  "channel": "R",  "description": "Read data ID" },
+        { "name": "m_rdata",   "direction": "input",  "width": 64, "channel": "R",  "description": "Read data" },
+        { "name": "m_rresp",   "direction": "input",  "width": 2,  "channel": "R",  "description": "Read response" },
+        { "name": "m_rlast",   "direction": "input",  "width": 1,  "channel": "R",  "description": "Read last beat" },
+        { "name": "m_rvalid",  "direction": "input",  "width": 1,  "channel": "R",  "description": "Read data valid" },
+        { "name": "m_rready",  "direction": "output", "width": 1,  "channel": "R",  "description": "Read data ready" }
+      ]
+    },
+
+    "axi4_repeater": {
+      "description": "AXI4 Repeater Pipeline. Registers all five AXI4 channels (AW/W/B/AR/R) to add one pipeline stage, improving timing closure. Presents a slave-side interface (s_*) toward the master and a master-side interface (m_*) toward the slave.",
+      "render": { "color": "#9C27B0" },
+      "ports": [
+        { "name": "clk",       "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "System clock" },
+        { "name": "rst_n",     "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "Active-low reset" },
+
+        { "name": "s_awid",    "direction": "input",  "width": 4,  "channel": "AW", "side": "slave",  "description": "Slave-side write address ID (from master)" },
+        { "name": "s_awaddr",  "direction": "input",  "width": 32, "channel": "AW", "side": "slave" },
+        { "name": "s_awlen",   "direction": "input",  "width": 8,  "channel": "AW", "side": "slave" },
+        { "name": "s_awsize",  "direction": "input",  "width": 3,  "channel": "AW", "side": "slave" },
+        { "name": "s_awburst", "direction": "input",  "width": 2,  "channel": "AW", "side": "slave" },
+        { "name": "s_awlock",  "direction": "input",  "width": 1,  "channel": "AW", "side": "slave" },
+        { "name": "s_awcache", "direction": "input",  "width": 4,  "channel": "AW", "side": "slave" },
+        { "name": "s_awprot",  "direction": "input",  "width": 3,  "channel": "AW", "side": "slave" },
+        { "name": "s_awqos",   "direction": "input",  "width": 4,  "channel": "AW", "side": "slave" },
+        { "name": "s_awvalid", "direction": "input",  "width": 1,  "channel": "AW", "side": "slave" },
+        { "name": "s_awready", "direction": "output", "width": 1,  "channel": "AW", "side": "slave" },
+
+        { "name": "s_wdata",   "direction": "input",  "width": 64, "channel": "W",  "side": "slave" },
+        { "name": "s_wstrb",   "direction": "input",  "width": 8,  "channel": "W",  "side": "slave" },
+        { "name": "s_wlast",   "direction": "input",  "width": 1,  "channel": "W",  "side": "slave" },
+        { "name": "s_wvalid",  "direction": "input",  "width": 1,  "channel": "W",  "side": "slave" },
+        { "name": "s_wready",  "direction": "output", "width": 1,  "channel": "W",  "side": "slave" },
+
+        { "name": "s_bid",     "direction": "output", "width": 4,  "channel": "B",  "side": "slave" },
+        { "name": "s_bresp",   "direction": "output", "width": 2,  "channel": "B",  "side": "slave" },
+        { "name": "s_bvalid",  "direction": "output", "width": 1,  "channel": "B",  "side": "slave" },
+        { "name": "s_bready",  "direction": "input",  "width": 1,  "channel": "B",  "side": "slave" },
+
+        { "name": "s_arid",    "direction": "input",  "width": 4,  "channel": "AR", "side": "slave" },
+        { "name": "s_araddr",  "direction": "input",  "width": 32, "channel": "AR", "side": "slave" },
+        { "name": "s_arlen",   "direction": "input",  "width": 8,  "channel": "AR", "side": "slave" },
+        { "name": "s_arsize",  "direction": "input",  "width": 3,  "channel": "AR", "side": "slave" },
+        { "name": "s_arburst", "direction": "input",  "width": 2,  "channel": "AR", "side": "slave" },
+        { "name": "s_arlock",  "direction": "input",  "width": 1,  "channel": "AR", "side": "slave" },
+        { "name": "s_arcache", "direction": "input",  "width": 4,  "channel": "AR", "side": "slave" },
+        { "name": "s_arprot",  "direction": "input",  "width": 3,  "channel": "AR", "side": "slave" },
+        { "name": "s_arqos",   "direction": "input",  "width": 4,  "channel": "AR", "side": "slave" },
+        { "name": "s_arvalid", "direction": "input",  "width": 1,  "channel": "AR", "side": "slave" },
+        { "name": "s_arready", "direction": "output", "width": 1,  "channel": "AR", "side": "slave" },
+
+        { "name": "s_rid",     "direction": "output", "width": 4,  "channel": "R",  "side": "slave" },
+        { "name": "s_rdata",   "direction": "output", "width": 64, "channel": "R",  "side": "slave" },
+        { "name": "s_rresp",   "direction": "output", "width": 2,  "channel": "R",  "side": "slave" },
+        { "name": "s_rlast",   "direction": "output", "width": 1,  "channel": "R",  "side": "slave" },
+        { "name": "s_rvalid",  "direction": "output", "width": 1,  "channel": "R",  "side": "slave" },
+        { "name": "s_rready",  "direction": "input",  "width": 1,  "channel": "R",  "side": "slave" },
+
+        { "name": "m_awid",    "direction": "output", "width": 4,  "channel": "AW", "side": "master", "description": "Master-side write address ID (to slave)" },
+        { "name": "m_awaddr",  "direction": "output", "width": 32, "channel": "AW", "side": "master" },
+        { "name": "m_awlen",   "direction": "output", "width": 8,  "channel": "AW", "side": "master" },
+        { "name": "m_awsize",  "direction": "output", "width": 3,  "channel": "AW", "side": "master" },
+        { "name": "m_awburst", "direction": "output", "width": 2,  "channel": "AW", "side": "master" },
+        { "name": "m_awlock",  "direction": "output", "width": 1,  "channel": "AW", "side": "master" },
+        { "name": "m_awcache", "direction": "output", "width": 4,  "channel": "AW", "side": "master" },
+        { "name": "m_awprot",  "direction": "output", "width": 3,  "channel": "AW", "side": "master" },
+        { "name": "m_awqos",   "direction": "output", "width": 4,  "channel": "AW", "side": "master" },
+        { "name": "m_awvalid", "direction": "output", "width": 1,  "channel": "AW", "side": "master" },
+        { "name": "m_awready", "direction": "input",  "width": 1,  "channel": "AW", "side": "master" },
+
+        { "name": "m_wdata",   "direction": "output", "width": 64, "channel": "W",  "side": "master" },
+        { "name": "m_wstrb",   "direction": "output", "width": 8,  "channel": "W",  "side": "master" },
+        { "name": "m_wlast",   "direction": "output", "width": 1,  "channel": "W",  "side": "master" },
+        { "name": "m_wvalid",  "direction": "output", "width": 1,  "channel": "W",  "side": "master" },
+        { "name": "m_wready",  "direction": "input",  "width": 1,  "channel": "W",  "side": "master" },
+
+        { "name": "m_bid",     "direction": "input",  "width": 4,  "channel": "B",  "side": "master" },
+        { "name": "m_bresp",   "direction": "input",  "width": 2,  "channel": "B",  "side": "master" },
+        { "name": "m_bvalid",  "direction": "input",  "width": 1,  "channel": "B",  "side": "master" },
+        { "name": "m_bready",  "direction": "output", "width": 1,  "channel": "B",  "side": "master" },
+
+        { "name": "m_arid",    "direction": "output", "width": 4,  "channel": "AR", "side": "master" },
+        { "name": "m_araddr",  "direction": "output", "width": 32, "channel": "AR", "side": "master" },
+        { "name": "m_arlen",   "direction": "output", "width": 8,  "channel": "AR", "side": "master" },
+        { "name": "m_arsize",  "direction": "output", "width": 3,  "channel": "AR", "side": "master" },
+        { "name": "m_arburst", "direction": "output", "width": 2,  "channel": "AR", "side": "master" },
+        { "name": "m_arlock",  "direction": "output", "width": 1,  "channel": "AR", "side": "master" },
+        { "name": "m_arcache", "direction": "output", "width": 4,  "channel": "AR", "side": "master" },
+        { "name": "m_arprot",  "direction": "output", "width": 3,  "channel": "AR", "side": "master" },
+        { "name": "m_arqos",   "direction": "output", "width": 4,  "channel": "AR", "side": "master" },
+        { "name": "m_arvalid", "direction": "output", "width": 1,  "channel": "AR", "side": "master" },
+        { "name": "m_arready", "direction": "input",  "width": 1,  "channel": "AR", "side": "master" },
+
+        { "name": "m_rid",     "direction": "input",  "width": 4,  "channel": "R",  "side": "master" },
+        { "name": "m_rdata",   "direction": "input",  "width": 64, "channel": "R",  "side": "master" },
+        { "name": "m_rresp",   "direction": "input",  "width": 2,  "channel": "R",  "side": "master" },
+        { "name": "m_rlast",   "direction": "input",  "width": 1,  "channel": "R",  "side": "master" },
+        { "name": "m_rvalid",  "direction": "input",  "width": 1,  "channel": "R",  "side": "master" },
+        { "name": "m_rready",  "direction": "output", "width": 1,  "channel": "R",  "side": "master" }
+      ]
+    },
+
+    "axi4_slave": {
+      "description": "AXI4 Slave. Receives and services read and write transactions from the AXI4 bus.",
+      "render": { "color": "#4CAF50" },
+      "ports": [
+        { "name": "clk",      "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "System clock" },
+        { "name": "rst_n",    "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "Active-low reset" },
+
+        { "name": "s_awid",    "direction": "input",  "width": 4,  "channel": "AW", "description": "Write address ID" },
+        { "name": "s_awaddr",  "direction": "input",  "width": 32, "channel": "AW", "description": "Write address" },
+        { "name": "s_awlen",   "direction": "input",  "width": 8,  "channel": "AW", "description": "Burst length" },
+        { "name": "s_awsize",  "direction": "input",  "width": 3,  "channel": "AW", "description": "Burst size" },
+        { "name": "s_awburst", "direction": "input",  "width": 2,  "channel": "AW", "description": "Burst type" },
+        { "name": "s_awlock",  "direction": "input",  "width": 1,  "channel": "AW", "description": "Lock type" },
+        { "name": "s_awcache", "direction": "input",  "width": 4,  "channel": "AW", "description": "Cache type" },
+        { "name": "s_awprot",  "direction": "input",  "width": 3,  "channel": "AW", "description": "Protection type" },
+        { "name": "s_awqos",   "direction": "input",  "width": 4,  "channel": "AW", "description": "QoS value" },
+        { "name": "s_awvalid", "direction": "input",  "width": 1,  "channel": "AW", "description": "Write address valid" },
+        { "name": "s_awready", "direction": "output", "width": 1,  "channel": "AW", "description": "Write address ready" },
+
+        { "name": "s_wdata",   "direction": "input",  "width": 64, "channel": "W",  "description": "Write data" },
+        { "name": "s_wstrb",   "direction": "input",  "width": 8,  "channel": "W",  "description": "Write byte strobes" },
+        { "name": "s_wlast",   "direction": "input",  "width": 1,  "channel": "W",  "description": "Write last beat" },
+        { "name": "s_wvalid",  "direction": "input",  "width": 1,  "channel": "W",  "description": "Write data valid" },
+        { "name": "s_wready",  "direction": "output", "width": 1,  "channel": "W",  "description": "Write data ready" },
+
+        { "name": "s_bid",     "direction": "output", "width": 4,  "channel": "B",  "description": "Write response ID" },
+        { "name": "s_bresp",   "direction": "output", "width": 2,  "channel": "B",  "description": "Write response" },
+        { "name": "s_bvalid",  "direction": "output", "width": 1,  "channel": "B",  "description": "Write response valid" },
+        { "name": "s_bready",  "direction": "input",  "width": 1,  "channel": "B",  "description": "Write response ready" },
+
+        { "name": "s_arid",    "direction": "input",  "width": 4,  "channel": "AR", "description": "Read address ID" },
+        { "name": "s_araddr",  "direction": "input",  "width": 32, "channel": "AR", "description": "Read address" },
+        { "name": "s_arlen",   "direction": "input",  "width": 8,  "channel": "AR", "description": "Burst length" },
+        { "name": "s_arsize",  "direction": "input",  "width": 3,  "channel": "AR", "description": "Burst size" },
+        { "name": "s_arburst", "direction": "input",  "width": 2,  "channel": "AR", "description": "Burst type" },
+        { "name": "s_arlock",  "direction": "input",  "width": 1,  "channel": "AR", "description": "Lock type" },
+        { "name": "s_arcache", "direction": "input",  "width": 4,  "channel": "AR", "description": "Cache type" },
+        { "name": "s_arprot",  "direction": "input",  "width": 3,  "channel": "AR", "description": "Protection type" },
+        { "name": "s_arqos",   "direction": "input",  "width": 4,  "channel": "AR", "description": "QoS value" },
+        { "name": "s_arvalid", "direction": "input",  "width": 1,  "channel": "AR", "description": "Read address valid" },
+        { "name": "s_arready", "direction": "output", "width": 1,  "channel": "AR", "description": "Read address ready" },
+
+        { "name": "s_rid",     "direction": "output", "width": 4,  "channel": "R",  "description": "Read data ID" },
+        { "name": "s_rdata",   "direction": "output", "width": 64, "channel": "R",  "description": "Read data" },
+        { "name": "s_rresp",   "direction": "output", "width": 2,  "channel": "R",  "description": "Read response" },
+        { "name": "s_rlast",   "direction": "output", "width": 1,  "channel": "R",  "description": "Read last beat" },
+        { "name": "s_rvalid",  "direction": "output", "width": 1,  "channel": "R",  "description": "Read data valid" },
+        { "name": "s_rready",  "direction": "input",  "width": 1,  "channel": "R",  "description": "Read data ready" }
+      ]
+    }
+  },
+
+  "instances": [
+    {
+      "instance_name": "u_master",
+      "module": "axi4_master",
+      "description": "AXI4 Master instance",
+      "position": { "x": -8, "y": 0, "z": 0 }
+    },
+    {
+      "instance_name": "u_repeater",
+      "module": "axi4_repeater",
+      "description": "AXI4 Repeater Pipeline instance",
+      "position": { "x": 0, "y": 0, "z": 0 }
+    },
+    {
+      "instance_name": "u_slave",
+      "module": "axi4_slave",
+      "description": "AXI4 Slave instance",
+      "position": { "x": 8, "y": 0, "z": 0 }
+    }
+  ],
+
+  "connections": [
+    {
+      "id": "clk_fanout",
+      "type": "clock",
+      "description": "System clock from testbench to all instances (enters at BOTTOM of each cube)",
+      "from": { "instance": "tb_top", "port": "clk" },
+      "to": [
+        { "instance": "u_master",   "port": "clk" },
+        { "instance": "u_repeater", "port": "clk" },
+        { "instance": "u_slave",    "port": "clk" }
+      ]
+    },
+    {
+      "id": "rst_fanout",
+      "type": "reset",
+      "description": "Active-low reset from testbench to all instances (enters at TOP of each cube)",
+      "from": { "instance": "tb_top", "port": "rst_n" },
+      "to": [
+        { "instance": "u_master",   "port": "rst_n" },
+        { "instance": "u_repeater", "port": "rst_n" },
+        { "instance": "u_slave",    "port": "rst_n" }
+      ]
+    },
+    {
+      "id": "master_to_repeater",
+      "type": "axi4_bus",
+      "label": "AXI4  M→R",
+      "description": "Full AXI4 bus: u_master (master) drives u_repeater (slave-side interface)",
+      "from_instance": "u_master",
+      "to_instance": "u_repeater",
+      "channel_signals": {
+        "AW": [
+          { "from_port": "m_awid",    "to_port": "s_awid",    "wire": "m2r_awid"    },
+          { "from_port": "m_awaddr",  "to_port": "s_awaddr",  "wire": "m2r_awaddr"  },
+          { "from_port": "m_awlen",   "to_port": "s_awlen",   "wire": "m2r_awlen"   },
+          { "from_port": "m_awsize",  "to_port": "s_awsize",  "wire": "m2r_awsize"  },
+          { "from_port": "m_awburst", "to_port": "s_awburst", "wire": "m2r_awburst" },
+          { "from_port": "m_awlock",  "to_port": "s_awlock",  "wire": "m2r_awlock"  },
+          { "from_port": "m_awcache", "to_port": "s_awcache", "wire": "m2r_awcache" },
+          { "from_port": "m_awprot",  "to_port": "s_awprot",  "wire": "m2r_awprot"  },
+          { "from_port": "m_awqos",   "to_port": "s_awqos",   "wire": "m2r_awqos"   },
+          { "from_port": "m_awvalid", "to_port": "s_awvalid", "wire": "m2r_awvalid" },
+          { "from_port": "m_awready", "to_port": "s_awready", "wire": "m2r_awready" }
+        ],
+        "W": [
+          { "from_port": "m_wdata",  "to_port": "s_wdata",  "wire": "m2r_wdata"  },
+          { "from_port": "m_wstrb",  "to_port": "s_wstrb",  "wire": "m2r_wstrb"  },
+          { "from_port": "m_wlast",  "to_port": "s_wlast",  "wire": "m2r_wlast"  },
+          { "from_port": "m_wvalid", "to_port": "s_wvalid", "wire": "m2r_wvalid" },
+          { "from_port": "m_wready", "to_port": "s_wready", "wire": "m2r_wready" }
+        ],
+        "B": [
+          { "from_port": "m_bid",    "to_port": "s_bid",    "wire": "m2r_bid"    },
+          { "from_port": "m_bresp",  "to_port": "s_bresp",  "wire": "m2r_bresp"  },
+          { "from_port": "m_bvalid", "to_port": "s_bvalid", "wire": "m2r_bvalid" },
+          { "from_port": "m_bready", "to_port": "s_bready", "wire": "m2r_bready" }
+        ],
+        "AR": [
+          { "from_port": "m_arid",    "to_port": "s_arid",    "wire": "m2r_arid"    },
+          { "from_port": "m_araddr",  "to_port": "s_araddr",  "wire": "m2r_araddr"  },
+          { "from_port": "m_arlen",   "to_port": "s_arlen",   "wire": "m2r_arlen"   },
+          { "from_port": "m_arsize",  "to_port": "s_arsize",  "wire": "m2r_arsize"  },
+          { "from_port": "m_arburst", "to_port": "s_arburst", "wire": "m2r_arburst" },
+          { "from_port": "m_arlock",  "to_port": "s_arlock",  "wire": "m2r_arlock"  },
+          { "from_port": "m_arcache", "to_port": "s_arcache", "wire": "m2r_arcache" },
+          { "from_port": "m_arprot",  "to_port": "s_arprot",  "wire": "m2r_arprot"  },
+          { "from_port": "m_arqos",   "to_port": "s_arqos",   "wire": "m2r_arqos"   },
+          { "from_port": "m_arvalid", "to_port": "s_arvalid", "wire": "m2r_arvalid" },
+          { "from_port": "m_arready", "to_port": "s_arready", "wire": "m2r_arready" }
+        ],
+        "R": [
+          { "from_port": "m_rid",    "to_port": "s_rid",    "wire": "m2r_rid"    },
+          { "from_port": "m_rdata",  "to_port": "s_rdata",  "wire": "m2r_rdata"  },
+          { "from_port": "m_rresp",  "to_port": "s_rresp",  "wire": "m2r_rresp"  },
+          { "from_port": "m_rlast",  "to_port": "s_rlast",  "wire": "m2r_rlast"  },
+          { "from_port": "m_rvalid", "to_port": "s_rvalid", "wire": "m2r_rvalid" },
+          { "from_port": "m_rready", "to_port": "s_rready", "wire": "m2r_rready" }
+        ]
+      }
+    },
+    {
+      "id": "repeater_to_slave",
+      "type": "axi4_bus",
+      "label": "AXI4  R→S",
+      "description": "Full AXI4 bus: u_repeater (master-side interface) drives u_slave",
+      "from_instance": "u_repeater",
+      "to_instance": "u_slave",
+      "channel_signals": {
+        "AW": [
+          { "from_port": "m_awid",    "to_port": "s_awid",    "wire": "r2s_awid"    },
+          { "from_port": "m_awaddr",  "to_port": "s_awaddr",  "wire": "r2s_awaddr"  },
+          { "from_port": "m_awlen",   "to_port": "s_awlen",   "wire": "r2s_awlen"   },
+          { "from_port": "m_awsize",  "to_port": "s_awsize",  "wire": "r2s_awsize"  },
+          { "from_port": "m_awburst", "to_port": "s_awburst", "wire": "r2s_awburst" },
+          { "from_port": "m_awlock",  "to_port": "s_awlock",  "wire": "r2s_awlock"  },
+          { "from_port": "m_awcache", "to_port": "s_awcache", "wire": "r2s_awcache" },
+          { "from_port": "m_awprot",  "to_port": "s_awprot",  "wire": "r2s_awprot"  },
+          { "from_port": "m_awqos",   "to_port": "s_awqos",   "wire": "r2s_awqos"   },
+          { "from_port": "m_awvalid", "to_port": "s_awvalid", "wire": "r2s_awvalid" },
+          { "from_port": "m_awready", "to_port": "s_awready", "wire": "r2s_awready" }
+        ],
+        "W": [
+          { "from_port": "m_wdata",  "to_port": "s_wdata",  "wire": "r2s_wdata"  },
+          { "from_port": "m_wstrb",  "to_port": "s_wstrb",  "wire": "r2s_wstrb"  },
+          { "from_port": "m_wlast",  "to_port": "s_wlast",  "wire": "r2s_wlast"  },
+          { "from_port": "m_wvalid", "to_port": "s_wvalid", "wire": "r2s_wvalid" },
+          { "from_port": "m_wready", "to_port": "s_wready", "wire": "r2s_wready" }
+        ],
+        "B": [
+          { "from_port": "m_bid",    "to_port": "s_bid",    "wire": "r2s_bid"    },
+          { "from_port": "m_bresp",  "to_port": "s_bresp",  "wire": "r2s_bresp"  },
+          { "from_port": "m_bvalid", "to_port": "s_bvalid", "wire": "r2s_bvalid" },
+          { "from_port": "m_bready", "to_port": "s_bready", "wire": "r2s_bready" }
+        ],
+        "AR": [
+          { "from_port": "m_arid",    "to_port": "s_arid",    "wire": "r2s_arid"    },
+          { "from_port": "m_araddr",  "to_port": "s_araddr",  "wire": "r2s_araddr"  },
+          { "from_port": "m_arlen",   "to_port": "s_arlen",   "wire": "r2s_arlen"   },
+          { "from_port": "m_arsize",  "to_port": "s_arsize",  "wire": "r2s_arsize"  },
+          { "from_port": "m_arburst", "to_port": "s_arburst", "wire": "r2s_arburst" },
+          { "from_port": "m_arlock",  "to_port": "s_arlock",  "wire": "r2s_arlock"  },
+          { "from_port": "m_arcache", "to_port": "s_arcache", "wire": "r2s_arcache" },
+          { "from_port": "m_arprot",  "to_port": "s_arprot",  "wire": "r2s_arprot"  },
+          { "from_port": "m_arqos",   "to_port": "s_arqos",   "wire": "r2s_arqos"   },
+          { "from_port": "m_arvalid", "to_port": "s_arvalid", "wire": "r2s_arvalid" },
+          { "from_port": "m_arready", "to_port": "s_arready", "wire": "r2s_arready" }
+        ],
+        "R": [
+          { "from_port": "m_rid",    "to_port": "s_rid",    "wire": "r2s_rid"    },
+          { "from_port": "m_rdata",  "to_port": "s_rdata",  "wire": "r2s_rdata"  },
+          { "from_port": "m_rresp",  "to_port": "s_rresp",  "wire": "r2s_rresp"  },
+          { "from_port": "m_rlast",  "to_port": "s_rlast",  "wire": "r2s_rlast"  },
+          { "from_port": "m_rvalid", "to_port": "s_rvalid", "wire": "r2s_rvalid" },
+          { "from_port": "m_rready", "to_port": "s_rready", "wire": "r2s_rready" }
+        ]
+      }
+    }
+  ]
+}
