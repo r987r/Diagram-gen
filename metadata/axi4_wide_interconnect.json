@@ -1,0 +1,820 @@
+{
+  "design_name": "axi4_wide_interconnect",
+  "version": "1.0.0",
+  "description": "Scalable multi-master, multi-slave AXI4 interconnect design. Three AXI4 masters (CPU, DMA, GPU) connect through an AXI4 crossbar/interconnect to four AXI4 slaves (SRAM, DDR Controller, UART, SPI). The interconnect widens the ID field from 4 bits to 6 bits by appending a 2-bit source identifier on the master-side output ports.",
+  "parameters": {
+    "DATA_WIDTH": 64,
+    "ADDR_WIDTH": 32,
+    "ID_WIDTH": 4,
+    "ID_WIDTH_OUT": 6,
+    "STRB_WIDTH": 8,
+    "NUM_MASTERS": 3,
+    "NUM_SLAVES": 4
+  },
+
+  "testbench": {
+    "module_name": "tb_top",
+    "description": "Top-level testbench. Declares clk and rst_n and drives them to all DUT instances.",
+    "global_signals": [
+      {
+        "name": "clk",
+        "width": 1,
+        "type": "reg",
+        "description": "System clock. Connects to the BOTTOM port of every instance cube.",
+        "render": { "face": "bottom", "color": "#00E676" }
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "type": "reg",
+        "description": "Active-low synchronous reset. Connects to the TOP port of every instance cube.",
+        "render": { "face": "top", "color": "#FF5252" }
+      }
+    ]
+  },
+
+  "modules": {
+    "axi4_master_cpu": {
+      "description": "AXI4 CPU Master. Generates instruction-fetch and data read/write transactions. Acts as the primary system initiator with full burst and cache-line support.",
+      "render": { "color": "#2196F3" },
+      "ports": [
+        { "name": "clk",       "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "System clock" },
+        { "name": "rst_n",     "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "Active-low reset" },
+
+        { "name": "m_awid",    "direction": "output", "width": 4,  "channel": "AW", "description": "Write address ID" },
+        { "name": "m_awaddr",  "direction": "output", "width": 32, "channel": "AW", "description": "Write address" },
+        { "name": "m_awlen",   "direction": "output", "width": 8,  "channel": "AW", "description": "Burst length" },
+        { "name": "m_awvalid", "direction": "output", "width": 1,  "channel": "AW", "description": "Write address valid" },
+        { "name": "m_awready", "direction": "input",  "width": 1,  "channel": "AW", "description": "Write address ready" },
+
+        { "name": "m_wdata",   "direction": "output", "width": 64, "channel": "W",  "description": "Write data" },
+        { "name": "m_wstrb",   "direction": "output", "width": 8,  "channel": "W",  "description": "Write byte strobes" },
+        { "name": "m_wvalid",  "direction": "output", "width": 1,  "channel": "W",  "description": "Write data valid" },
+        { "name": "m_wready",  "direction": "input",  "width": 1,  "channel": "W",  "description": "Write data ready" },
+
+        { "name": "m_bid",     "direction": "input",  "width": 4,  "channel": "B",  "description": "Write response ID" },
+        { "name": "m_bresp",   "direction": "input",  "width": 2,  "channel": "B",  "description": "Write response" },
+        { "name": "m_bvalid",  "direction": "input",  "width": 1,  "channel": "B",  "description": "Write response valid" },
+        { "name": "m_bready",  "direction": "output", "width": 1,  "channel": "B",  "description": "Write response ready" },
+
+        { "name": "m_arid",    "direction": "output", "width": 4,  "channel": "AR", "description": "Read address ID" },
+        { "name": "m_araddr",  "direction": "output", "width": 32, "channel": "AR", "description": "Read address" },
+        { "name": "m_arlen",   "direction": "output", "width": 8,  "channel": "AR", "description": "Burst length" },
+        { "name": "m_arvalid", "direction": "output", "width": 1,  "channel": "AR", "description": "Read address valid" },
+        { "name": "m_arready", "direction": "input",  "width": 1,  "channel": "AR", "description": "Read address ready" },
+
+        { "name": "m_rid",     "direction": "input",  "width": 4,  "channel": "R",  "description": "Read data ID" },
+        { "name": "m_rdata",   "direction": "input",  "width": 64, "channel": "R",  "description": "Read data" },
+        { "name": "m_rvalid",  "direction": "input",  "width": 1,  "channel": "R",  "description": "Read data valid" },
+        { "name": "m_rready",  "direction": "output", "width": 1,  "channel": "R",  "description": "Read data ready" }
+      ]
+    },
+
+    "axi4_master_dma": {
+      "description": "AXI4 DMA Engine Master. Performs high-throughput bulk data transfers between memory-mapped peripherals and main memory without CPU intervention. Supports large burst lengths for maximum bus utilization.",
+      "render": { "color": "#00BCD4" },
+      "ports": [
+        { "name": "clk",       "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "System clock" },
+        { "name": "rst_n",     "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "Active-low reset" },
+
+        { "name": "m_awid",    "direction": "output", "width": 4,  "channel": "AW", "description": "Write address ID" },
+        { "name": "m_awaddr",  "direction": "output", "width": 32, "channel": "AW", "description": "Write address" },
+        { "name": "m_awlen",   "direction": "output", "width": 8,  "channel": "AW", "description": "Burst length" },
+        { "name": "m_awvalid", "direction": "output", "width": 1,  "channel": "AW", "description": "Write address valid" },
+        { "name": "m_awready", "direction": "input",  "width": 1,  "channel": "AW", "description": "Write address ready" },
+
+        { "name": "m_wdata",   "direction": "output", "width": 64, "channel": "W",  "description": "Write data" },
+        { "name": "m_wstrb",   "direction": "output", "width": 8,  "channel": "W",  "description": "Write byte strobes" },
+        { "name": "m_wvalid",  "direction": "output", "width": 1,  "channel": "W",  "description": "Write data valid" },
+        { "name": "m_wready",  "direction": "input",  "width": 1,  "channel": "W",  "description": "Write data ready" },
+
+        { "name": "m_bid",     "direction": "input",  "width": 4,  "channel": "B",  "description": "Write response ID" },
+        { "name": "m_bresp",   "direction": "input",  "width": 2,  "channel": "B",  "description": "Write response" },
+        { "name": "m_bvalid",  "direction": "input",  "width": 1,  "channel": "B",  "description": "Write response valid" },
+        { "name": "m_bready",  "direction": "output", "width": 1,  "channel": "B",  "description": "Write response ready" },
+
+        { "name": "m_arid",    "direction": "output", "width": 4,  "channel": "AR", "description": "Read address ID" },
+        { "name": "m_araddr",  "direction": "output", "width": 32, "channel": "AR", "description": "Read address" },
+        { "name": "m_arlen",   "direction": "output", "width": 8,  "channel": "AR", "description": "Burst length" },
+        { "name": "m_arvalid", "direction": "output", "width": 1,  "channel": "AR", "description": "Read address valid" },
+        { "name": "m_arready", "direction": "input",  "width": 1,  "channel": "AR", "description": "Read address ready" },
+
+        { "name": "m_rid",     "direction": "input",  "width": 4,  "channel": "R",  "description": "Read data ID" },
+        { "name": "m_rdata",   "direction": "input",  "width": 64, "channel": "R",  "description": "Read data" },
+        { "name": "m_rvalid",  "direction": "input",  "width": 1,  "channel": "R",  "description": "Read data valid" },
+        { "name": "m_rready",  "direction": "output", "width": 1,  "channel": "R",  "description": "Read data ready" }
+      ]
+    },
+
+    "axi4_master_gpu": {
+      "description": "AXI4 GPU Master. Issues texture-fetch reads and frame-buffer writes with high bandwidth requirements. Generates wide bursts targeting the DDR controller and SRAM for render-target access.",
+      "render": { "color": "#673AB7" },
+      "ports": [
+        { "name": "clk",       "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "System clock" },
+        { "name": "rst_n",     "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "Active-low reset" },
+
+        { "name": "m_awid",    "direction": "output", "width": 4,  "channel": "AW", "description": "Write address ID" },
+        { "name": "m_awaddr",  "direction": "output", "width": 32, "channel": "AW", "description": "Write address" },
+        { "name": "m_awlen",   "direction": "output", "width": 8,  "channel": "AW", "description": "Burst length" },
+        { "name": "m_awvalid", "direction": "output", "width": 1,  "channel": "AW", "description": "Write address valid" },
+        { "name": "m_awready", "direction": "input",  "width": 1,  "channel": "AW", "description": "Write address ready" },
+
+        { "name": "m_wdata",   "direction": "output", "width": 64, "channel": "W",  "description": "Write data" },
+        { "name": "m_wstrb",   "direction": "output", "width": 8,  "channel": "W",  "description": "Write byte strobes" },
+        { "name": "m_wvalid",  "direction": "output", "width": 1,  "channel": "W",  "description": "Write data valid" },
+        { "name": "m_wready",  "direction": "input",  "width": 1,  "channel": "W",  "description": "Write data ready" },
+
+        { "name": "m_bid",     "direction": "input",  "width": 4,  "channel": "B",  "description": "Write response ID" },
+        { "name": "m_bresp",   "direction": "input",  "width": 2,  "channel": "B",  "description": "Write response" },
+        { "name": "m_bvalid",  "direction": "input",  "width": 1,  "channel": "B",  "description": "Write response valid" },
+        { "name": "m_bready",  "direction": "output", "width": 1,  "channel": "B",  "description": "Write response ready" },
+
+        { "name": "m_arid",    "direction": "output", "width": 4,  "channel": "AR", "description": "Read address ID" },
+        { "name": "m_araddr",  "direction": "output", "width": 32, "channel": "AR", "description": "Read address" },
+        { "name": "m_arlen",   "direction": "output", "width": 8,  "channel": "AR", "description": "Burst length" },
+        { "name": "m_arvalid", "direction": "output", "width": 1,  "channel": "AR", "description": "Read address valid" },
+        { "name": "m_arready", "direction": "input",  "width": 1,  "channel": "AR", "description": "Read address ready" },
+
+        { "name": "m_rid",     "direction": "input",  "width": 4,  "channel": "R",  "description": "Read data ID" },
+        { "name": "m_rdata",   "direction": "input",  "width": 64, "channel": "R",  "description": "Read data" },
+        { "name": "m_rvalid",  "direction": "input",  "width": 1,  "channel": "R",  "description": "Read data valid" },
+        { "name": "m_rready",  "direction": "output", "width": 1,  "channel": "R",  "description": "Read data ready" }
+      ]
+    },
+
+    "axi4_interconnect": {
+      "description": "AXI4 Crossbar Interconnect. Routes transactions from 3 slave-side input ports (s0, s1, s2) to 4 master-side output ports (m0, m1, m2, m3) based on address decoding. Appends a 2-bit source identifier to the ID field, widening it from 4 bits (input) to 6 bits (output) so that responses can be routed back to the correct master.",
+      "render": { "color": "#FF9800" },
+      "ports": [
+        { "name": "clk",        "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "System clock" },
+        { "name": "rst_n",      "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "Active-low reset" },
+
+        { "name": "s0_awid",    "direction": "input",  "width": 4,  "channel": "AW", "side": "slave",  "description": "Slave port 0 write address ID (from CPU)" },
+        { "name": "s0_awaddr",  "direction": "input",  "width": 32, "channel": "AW", "side": "slave",  "description": "Slave port 0 write address" },
+        { "name": "s0_awvalid", "direction": "input",  "width": 1,  "channel": "AW", "side": "slave",  "description": "Slave port 0 write address valid" },
+        { "name": "s0_awready", "direction": "output", "width": 1,  "channel": "AW", "side": "slave",  "description": "Slave port 0 write address ready" },
+
+        { "name": "s0_wdata",   "direction": "input",  "width": 64, "channel": "W",  "side": "slave",  "description": "Slave port 0 write data" },
+        { "name": "s0_wvalid",  "direction": "input",  "width": 1,  "channel": "W",  "side": "slave",  "description": "Slave port 0 write data valid" },
+        { "name": "s0_wready",  "direction": "output", "width": 1,  "channel": "W",  "side": "slave",  "description": "Slave port 0 write data ready" },
+
+        { "name": "s0_bid",     "direction": "output", "width": 4,  "channel": "B",  "side": "slave",  "description": "Slave port 0 write response ID" },
+        { "name": "s0_bresp",   "direction": "output", "width": 2,  "channel": "B",  "side": "slave",  "description": "Slave port 0 write response" },
+        { "name": "s0_bvalid",  "direction": "output", "width": 1,  "channel": "B",  "side": "slave",  "description": "Slave port 0 write response valid" },
+        { "name": "s0_bready",  "direction": "input",  "width": 1,  "channel": "B",  "side": "slave",  "description": "Slave port 0 write response ready" },
+
+        { "name": "s0_arid",    "direction": "input",  "width": 4,  "channel": "AR", "side": "slave",  "description": "Slave port 0 read address ID" },
+        { "name": "s0_araddr",  "direction": "input",  "width": 32, "channel": "AR", "side": "slave",  "description": "Slave port 0 read address" },
+        { "name": "s0_arvalid", "direction": "input",  "width": 1,  "channel": "AR", "side": "slave",  "description": "Slave port 0 read address valid" },
+        { "name": "s0_arready", "direction": "output", "width": 1,  "channel": "AR", "side": "slave",  "description": "Slave port 0 read address ready" },
+
+        { "name": "s0_rid",     "direction": "output", "width": 4,  "channel": "R",  "side": "slave",  "description": "Slave port 0 read data ID" },
+        { "name": "s0_rdata",   "direction": "output", "width": 64, "channel": "R",  "side": "slave",  "description": "Slave port 0 read data" },
+        { "name": "s0_rvalid",  "direction": "output", "width": 1,  "channel": "R",  "side": "slave",  "description": "Slave port 0 read data valid" },
+        { "name": "s0_rready",  "direction": "input",  "width": 1,  "channel": "R",  "side": "slave",  "description": "Slave port 0 read data ready" },
+
+        { "name": "s1_awid",    "direction": "input",  "width": 4,  "channel": "AW", "side": "slave",  "description": "Slave port 1 write address ID (from DMA)" },
+        { "name": "s1_awaddr",  "direction": "input",  "width": 32, "channel": "AW", "side": "slave",  "description": "Slave port 1 write address" },
+        { "name": "s1_awvalid", "direction": "input",  "width": 1,  "channel": "AW", "side": "slave",  "description": "Slave port 1 write address valid" },
+        { "name": "s1_awready", "direction": "output", "width": 1,  "channel": "AW", "side": "slave",  "description": "Slave port 1 write address ready" },
+
+        { "name": "s1_wdata",   "direction": "input",  "width": 64, "channel": "W",  "side": "slave",  "description": "Slave port 1 write data" },
+        { "name": "s1_wvalid",  "direction": "input",  "width": 1,  "channel": "W",  "side": "slave",  "description": "Slave port 1 write data valid" },
+        { "name": "s1_wready",  "direction": "output", "width": 1,  "channel": "W",  "side": "slave",  "description": "Slave port 1 write data ready" },
+
+        { "name": "s1_bid",     "direction": "output", "width": 4,  "channel": "B",  "side": "slave",  "description": "Slave port 1 write response ID" },
+        { "name": "s1_bresp",   "direction": "output", "width": 2,  "channel": "B",  "side": "slave",  "description": "Slave port 1 write response" },
+        { "name": "s1_bvalid",  "direction": "output", "width": 1,  "channel": "B",  "side": "slave",  "description": "Slave port 1 write response valid" },
+        { "name": "s1_bready",  "direction": "input",  "width": 1,  "channel": "B",  "side": "slave",  "description": "Slave port 1 write response ready" },
+
+        { "name": "s1_arid",    "direction": "input",  "width": 4,  "channel": "AR", "side": "slave",  "description": "Slave port 1 read address ID" },
+        { "name": "s1_araddr",  "direction": "input",  "width": 32, "channel": "AR", "side": "slave",  "description": "Slave port 1 read address" },
+        { "name": "s1_arvalid", "direction": "input",  "width": 1,  "channel": "AR", "side": "slave",  "description": "Slave port 1 read address valid" },
+        { "name": "s1_arready", "direction": "output", "width": 1,  "channel": "AR", "side": "slave",  "description": "Slave port 1 read address ready" },
+
+        { "name": "s1_rid",     "direction": "output", "width": 4,  "channel": "R",  "side": "slave",  "description": "Slave port 1 read data ID" },
+        { "name": "s1_rdata",   "direction": "output", "width": 64, "channel": "R",  "side": "slave",  "description": "Slave port 1 read data" },
+        { "name": "s1_rvalid",  "direction": "output", "width": 1,  "channel": "R",  "side": "slave",  "description": "Slave port 1 read data valid" },
+        { "name": "s1_rready",  "direction": "input",  "width": 1,  "channel": "R",  "side": "slave",  "description": "Slave port 1 read data ready" },
+
+        { "name": "s2_awid",    "direction": "input",  "width": 4,  "channel": "AW", "side": "slave",  "description": "Slave port 2 write address ID (from GPU)" },
+        { "name": "s2_awaddr",  "direction": "input",  "width": 32, "channel": "AW", "side": "slave",  "description": "Slave port 2 write address" },
+        { "name": "s2_awvalid", "direction": "input",  "width": 1,  "channel": "AW", "side": "slave",  "description": "Slave port 2 write address valid" },
+        { "name": "s2_awready", "direction": "output", "width": 1,  "channel": "AW", "side": "slave",  "description": "Slave port 2 write address ready" },
+
+        { "name": "s2_wdata",   "direction": "input",  "width": 64, "channel": "W",  "side": "slave",  "description": "Slave port 2 write data" },
+        { "name": "s2_wvalid",  "direction": "input",  "width": 1,  "channel": "W",  "side": "slave",  "description": "Slave port 2 write data valid" },
+        { "name": "s2_wready",  "direction": "output", "width": 1,  "channel": "W",  "side": "slave",  "description": "Slave port 2 write data ready" },
+
+        { "name": "s2_bid",     "direction": "output", "width": 4,  "channel": "B",  "side": "slave",  "description": "Slave port 2 write response ID" },
+        { "name": "s2_bresp",   "direction": "output", "width": 2,  "channel": "B",  "side": "slave",  "description": "Slave port 2 write response" },
+        { "name": "s2_bvalid",  "direction": "output", "width": 1,  "channel": "B",  "side": "slave",  "description": "Slave port 2 write response valid" },
+        { "name": "s2_bready",  "direction": "input",  "width": 1,  "channel": "B",  "side": "slave",  "description": "Slave port 2 write response ready" },
+
+        { "name": "s2_arid",    "direction": "input",  "width": 4,  "channel": "AR", "side": "slave",  "description": "Slave port 2 read address ID" },
+        { "name": "s2_araddr",  "direction": "input",  "width": 32, "channel": "AR", "side": "slave",  "description": "Slave port 2 read address" },
+        { "name": "s2_arvalid", "direction": "input",  "width": 1,  "channel": "AR", "side": "slave",  "description": "Slave port 2 read address valid" },
+        { "name": "s2_arready", "direction": "output", "width": 1,  "channel": "AR", "side": "slave",  "description": "Slave port 2 read address ready" },
+
+        { "name": "s2_rid",     "direction": "output", "width": 4,  "channel": "R",  "side": "slave",  "description": "Slave port 2 read data ID" },
+        { "name": "s2_rdata",   "direction": "output", "width": 64, "channel": "R",  "side": "slave",  "description": "Slave port 2 read data" },
+        { "name": "s2_rvalid",  "direction": "output", "width": 1,  "channel": "R",  "side": "slave",  "description": "Slave port 2 read data valid" },
+        { "name": "s2_rready",  "direction": "input",  "width": 1,  "channel": "R",  "side": "slave",  "description": "Slave port 2 read data ready" },
+
+        { "name": "m0_awid",    "direction": "output", "width": 6,  "channel": "AW", "side": "master", "description": "Master port 0 write address ID (widened, to SRAM)" },
+        { "name": "m0_awaddr",  "direction": "output", "width": 32, "channel": "AW", "side": "master", "description": "Master port 0 write address" },
+        { "name": "m0_awvalid", "direction": "output", "width": 1,  "channel": "AW", "side": "master", "description": "Master port 0 write address valid" },
+        { "name": "m0_awready", "direction": "input",  "width": 1,  "channel": "AW", "side": "master", "description": "Master port 0 write address ready" },
+
+        { "name": "m0_wdata",   "direction": "output", "width": 64, "channel": "W",  "side": "master", "description": "Master port 0 write data" },
+        { "name": "m0_wvalid",  "direction": "output", "width": 1,  "channel": "W",  "side": "master", "description": "Master port 0 write data valid" },
+        { "name": "m0_wready",  "direction": "input",  "width": 1,  "channel": "W",  "side": "master", "description": "Master port 0 write data ready" },
+
+        { "name": "m0_bid",     "direction": "input",  "width": 6,  "channel": "B",  "side": "master", "description": "Master port 0 write response ID (widened)" },
+        { "name": "m0_bresp",   "direction": "input",  "width": 2,  "channel": "B",  "side": "master", "description": "Master port 0 write response" },
+        { "name": "m0_bvalid",  "direction": "input",  "width": 1,  "channel": "B",  "side": "master", "description": "Master port 0 write response valid" },
+        { "name": "m0_bready",  "direction": "output", "width": 1,  "channel": "B",  "side": "master", "description": "Master port 0 write response ready" },
+
+        { "name": "m0_arid",    "direction": "output", "width": 6,  "channel": "AR", "side": "master", "description": "Master port 0 read address ID (widened)" },
+        { "name": "m0_araddr",  "direction": "output", "width": 32, "channel": "AR", "side": "master", "description": "Master port 0 read address" },
+        { "name": "m0_arvalid", "direction": "output", "width": 1,  "channel": "AR", "side": "master", "description": "Master port 0 read address valid" },
+        { "name": "m0_arready", "direction": "input",  "width": 1,  "channel": "AR", "side": "master", "description": "Master port 0 read address ready" },
+
+        { "name": "m0_rid",     "direction": "input",  "width": 6,  "channel": "R",  "side": "master", "description": "Master port 0 read data ID (widened)" },
+        { "name": "m0_rdata",   "direction": "input",  "width": 64, "channel": "R",  "side": "master", "description": "Master port 0 read data" },
+        { "name": "m0_rvalid",  "direction": "input",  "width": 1,  "channel": "R",  "side": "master", "description": "Master port 0 read data valid" },
+        { "name": "m0_rready",  "direction": "output", "width": 1,  "channel": "R",  "side": "master", "description": "Master port 0 read data ready" },
+
+        { "name": "m1_awid",    "direction": "output", "width": 6,  "channel": "AW", "side": "master", "description": "Master port 1 write address ID (widened, to DDR)" },
+        { "name": "m1_awaddr",  "direction": "output", "width": 32, "channel": "AW", "side": "master", "description": "Master port 1 write address" },
+        { "name": "m1_awvalid", "direction": "output", "width": 1,  "channel": "AW", "side": "master", "description": "Master port 1 write address valid" },
+        { "name": "m1_awready", "direction": "input",  "width": 1,  "channel": "AW", "side": "master", "description": "Master port 1 write address ready" },
+
+        { "name": "m1_wdata",   "direction": "output", "width": 64, "channel": "W",  "side": "master", "description": "Master port 1 write data" },
+        { "name": "m1_wvalid",  "direction": "output", "width": 1,  "channel": "W",  "side": "master", "description": "Master port 1 write data valid" },
+        { "name": "m1_wready",  "direction": "input",  "width": 1,  "channel": "W",  "side": "master", "description": "Master port 1 write data ready" },
+
+        { "name": "m1_bid",     "direction": "input",  "width": 6,  "channel": "B",  "side": "master", "description": "Master port 1 write response ID (widened)" },
+        { "name": "m1_bresp",   "direction": "input",  "width": 2,  "channel": "B",  "side": "master", "description": "Master port 1 write response" },
+        { "name": "m1_bvalid",  "direction": "input",  "width": 1,  "channel": "B",  "side": "master", "description": "Master port 1 write response valid" },
+        { "name": "m1_bready",  "direction": "output", "width": 1,  "channel": "B",  "side": "master", "description": "Master port 1 write response ready" },
+
+        { "name": "m1_arid",    "direction": "output", "width": 6,  "channel": "AR", "side": "master", "description": "Master port 1 read address ID (widened)" },
+        { "name": "m1_araddr",  "direction": "output", "width": 32, "channel": "AR", "side": "master", "description": "Master port 1 read address" },
+        { "name": "m1_arvalid", "direction": "output", "width": 1,  "channel": "AR", "side": "master", "description": "Master port 1 read address valid" },
+        { "name": "m1_arready", "direction": "input",  "width": 1,  "channel": "AR", "side": "master", "description": "Master port 1 read address ready" },
+
+        { "name": "m1_rid",     "direction": "input",  "width": 6,  "channel": "R",  "side": "master", "description": "Master port 1 read data ID (widened)" },
+        { "name": "m1_rdata",   "direction": "input",  "width": 64, "channel": "R",  "side": "master", "description": "Master port 1 read data" },
+        { "name": "m1_rvalid",  "direction": "input",  "width": 1,  "channel": "R",  "side": "master", "description": "Master port 1 read data valid" },
+        { "name": "m1_rready",  "direction": "output", "width": 1,  "channel": "R",  "side": "master", "description": "Master port 1 read data ready" },
+
+        { "name": "m2_awid",    "direction": "output", "width": 6,  "channel": "AW", "side": "master", "description": "Master port 2 write address ID (widened, to UART)" },
+        { "name": "m2_awaddr",  "direction": "output", "width": 32, "channel": "AW", "side": "master", "description": "Master port 2 write address" },
+        { "name": "m2_awvalid", "direction": "output", "width": 1,  "channel": "AW", "side": "master", "description": "Master port 2 write address valid" },
+        { "name": "m2_awready", "direction": "input",  "width": 1,  "channel": "AW", "side": "master", "description": "Master port 2 write address ready" },
+
+        { "name": "m2_wdata",   "direction": "output", "width": 64, "channel": "W",  "side": "master", "description": "Master port 2 write data" },
+        { "name": "m2_wvalid",  "direction": "output", "width": 1,  "channel": "W",  "side": "master", "description": "Master port 2 write data valid" },
+        { "name": "m2_wready",  "direction": "input",  "width": 1,  "channel": "W",  "side": "master", "description": "Master port 2 write data ready" },
+
+        { "name": "m2_bid",     "direction": "input",  "width": 6,  "channel": "B",  "side": "master", "description": "Master port 2 write response ID (widened)" },
+        { "name": "m2_bresp",   "direction": "input",  "width": 2,  "channel": "B",  "side": "master", "description": "Master port 2 write response" },
+        { "name": "m2_bvalid",  "direction": "input",  "width": 1,  "channel": "B",  "side": "master", "description": "Master port 2 write response valid" },
+        { "name": "m2_bready",  "direction": "output", "width": 1,  "channel": "B",  "side": "master", "description": "Master port 2 write response ready" },
+
+        { "name": "m2_arid",    "direction": "output", "width": 6,  "channel": "AR", "side": "master", "description": "Master port 2 read address ID (widened)" },
+        { "name": "m2_araddr",  "direction": "output", "width": 32, "channel": "AR", "side": "master", "description": "Master port 2 read address" },
+        { "name": "m2_arvalid", "direction": "output", "width": 1,  "channel": "AR", "side": "master", "description": "Master port 2 read address valid" },
+        { "name": "m2_arready", "direction": "input",  "width": 1,  "channel": "AR", "side": "master", "description": "Master port 2 read address ready" },
+
+        { "name": "m2_rid",     "direction": "input",  "width": 6,  "channel": "R",  "side": "master", "description": "Master port 2 read data ID (widened)" },
+        { "name": "m2_rdata",   "direction": "input",  "width": 64, "channel": "R",  "side": "master", "description": "Master port 2 read data" },
+        { "name": "m2_rvalid",  "direction": "input",  "width": 1,  "channel": "R",  "side": "master", "description": "Master port 2 read data valid" },
+        { "name": "m2_rready",  "direction": "output", "width": 1,  "channel": "R",  "side": "master", "description": "Master port 2 read data ready" },
+
+        { "name": "m3_awid",    "direction": "output", "width": 6,  "channel": "AW", "side": "master", "description": "Master port 3 write address ID (widened, to SPI)" },
+        { "name": "m3_awaddr",  "direction": "output", "width": 32, "channel": "AW", "side": "master", "description": "Master port 3 write address" },
+        { "name": "m3_awvalid", "direction": "output", "width": 1,  "channel": "AW", "side": "master", "description": "Master port 3 write address valid" },
+        { "name": "m3_awready", "direction": "input",  "width": 1,  "channel": "AW", "side": "master", "description": "Master port 3 write address ready" },
+
+        { "name": "m3_wdata",   "direction": "output", "width": 64, "channel": "W",  "side": "master", "description": "Master port 3 write data" },
+        { "name": "m3_wvalid",  "direction": "output", "width": 1,  "channel": "W",  "side": "master", "description": "Master port 3 write data valid" },
+        { "name": "m3_wready",  "direction": "input",  "width": 1,  "channel": "W",  "side": "master", "description": "Master port 3 write data ready" },
+
+        { "name": "m3_bid",     "direction": "input",  "width": 6,  "channel": "B",  "side": "master", "description": "Master port 3 write response ID (widened)" },
+        { "name": "m3_bresp",   "direction": "input",  "width": 2,  "channel": "B",  "side": "master", "description": "Master port 3 write response" },
+        { "name": "m3_bvalid",  "direction": "input",  "width": 1,  "channel": "B",  "side": "master", "description": "Master port 3 write response valid" },
+        { "name": "m3_bready",  "direction": "output", "width": 1,  "channel": "B",  "side": "master", "description": "Master port 3 write response ready" },
+
+        { "name": "m3_arid",    "direction": "output", "width": 6,  "channel": "AR", "side": "master", "description": "Master port 3 read address ID (widened)" },
+        { "name": "m3_araddr",  "direction": "output", "width": 32, "channel": "AR", "side": "master", "description": "Master port 3 read address" },
+        { "name": "m3_arvalid", "direction": "output", "width": 1,  "channel": "AR", "side": "master", "description": "Master port 3 read address valid" },
+        { "name": "m3_arready", "direction": "input",  "width": 1,  "channel": "AR", "side": "master", "description": "Master port 3 read address ready" },
+
+        { "name": "m3_rid",     "direction": "input",  "width": 6,  "channel": "R",  "side": "master", "description": "Master port 3 read data ID (widened)" },
+        { "name": "m3_rdata",   "direction": "input",  "width": 64, "channel": "R",  "side": "master", "description": "Master port 3 read data" },
+        { "name": "m3_rvalid",  "direction": "input",  "width": 1,  "channel": "R",  "side": "master", "description": "Master port 3 read data valid" },
+        { "name": "m3_rready",  "direction": "output", "width": 1,  "channel": "R",  "side": "master", "description": "Master port 3 read data ready" }
+      ]
+    },
+
+    "axi4_slave_sram": {
+      "description": "AXI4 SRAM Slave. Provides low-latency, single-cycle access to on-chip SRAM. Serves as tightly coupled memory for the CPU and a fast scratch-pad for the DMA and GPU.",
+      "render": { "color": "#4CAF50" },
+      "ports": [
+        { "name": "clk",       "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "System clock" },
+        { "name": "rst_n",     "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "Active-low reset" },
+
+        { "name": "s_awid",    "direction": "input",  "width": 6,  "channel": "AW", "description": "Write address ID (widened)" },
+        { "name": "s_awaddr",  "direction": "input",  "width": 32, "channel": "AW", "description": "Write address" },
+        { "name": "s_awvalid", "direction": "input",  "width": 1,  "channel": "AW", "description": "Write address valid" },
+        { "name": "s_awready", "direction": "output", "width": 1,  "channel": "AW", "description": "Write address ready" },
+
+        { "name": "s_wdata",   "direction": "input",  "width": 64, "channel": "W",  "description": "Write data" },
+        { "name": "s_wvalid",  "direction": "input",  "width": 1,  "channel": "W",  "description": "Write data valid" },
+        { "name": "s_wready",  "direction": "output", "width": 1,  "channel": "W",  "description": "Write data ready" },
+
+        { "name": "s_bid",     "direction": "output", "width": 6,  "channel": "B",  "description": "Write response ID (widened)" },
+        { "name": "s_bresp",   "direction": "output", "width": 2,  "channel": "B",  "description": "Write response" },
+        { "name": "s_bvalid",  "direction": "output", "width": 1,  "channel": "B",  "description": "Write response valid" },
+        { "name": "s_bready",  "direction": "input",  "width": 1,  "channel": "B",  "description": "Write response ready" },
+
+        { "name": "s_arid",    "direction": "input",  "width": 6,  "channel": "AR", "description": "Read address ID (widened)" },
+        { "name": "s_araddr",  "direction": "input",  "width": 32, "channel": "AR", "description": "Read address" },
+        { "name": "s_arvalid", "direction": "input",  "width": 1,  "channel": "AR", "description": "Read address valid" },
+        { "name": "s_arready", "direction": "output", "width": 1,  "channel": "AR", "description": "Read address ready" },
+
+        { "name": "s_rid",     "direction": "output", "width": 6,  "channel": "R",  "description": "Read data ID (widened)" },
+        { "name": "s_rdata",   "direction": "output", "width": 64, "channel": "R",  "description": "Read data" },
+        { "name": "s_rvalid",  "direction": "output", "width": 1,  "channel": "R",  "description": "Read data valid" },
+        { "name": "s_rready",  "direction": "input",  "width": 1,  "channel": "R",  "description": "Read data ready" }
+      ]
+    },
+
+    "axi4_slave_ddr": {
+      "description": "AXI4 DDR Controller Slave. Interfaces with external DDR SDRAM through a memory controller. Handles refresh scheduling, bank management, and burst reordering to maximize DRAM bandwidth.",
+      "render": { "color": "#009688" },
+      "ports": [
+        { "name": "clk",       "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "System clock" },
+        { "name": "rst_n",     "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "Active-low reset" },
+
+        { "name": "s_awid",    "direction": "input",  "width": 6,  "channel": "AW", "description": "Write address ID (widened)" },
+        { "name": "s_awaddr",  "direction": "input",  "width": 32, "channel": "AW", "description": "Write address" },
+        { "name": "s_awvalid", "direction": "input",  "width": 1,  "channel": "AW", "description": "Write address valid" },
+        { "name": "s_awready", "direction": "output", "width": 1,  "channel": "AW", "description": "Write address ready" },
+
+        { "name": "s_wdata",   "direction": "input",  "width": 64, "channel": "W",  "description": "Write data" },
+        { "name": "s_wvalid",  "direction": "input",  "width": 1,  "channel": "W",  "description": "Write data valid" },
+        { "name": "s_wready",  "direction": "output", "width": 1,  "channel": "W",  "description": "Write data ready" },
+
+        { "name": "s_bid",     "direction": "output", "width": 6,  "channel": "B",  "description": "Write response ID (widened)" },
+        { "name": "s_bresp",   "direction": "output", "width": 2,  "channel": "B",  "description": "Write response" },
+        { "name": "s_bvalid",  "direction": "output", "width": 1,  "channel": "B",  "description": "Write response valid" },
+        { "name": "s_bready",  "direction": "input",  "width": 1,  "channel": "B",  "description": "Write response ready" },
+
+        { "name": "s_arid",    "direction": "input",  "width": 6,  "channel": "AR", "description": "Read address ID (widened)" },
+        { "name": "s_araddr",  "direction": "input",  "width": 32, "channel": "AR", "description": "Read address" },
+        { "name": "s_arvalid", "direction": "input",  "width": 1,  "channel": "AR", "description": "Read address valid" },
+        { "name": "s_arready", "direction": "output", "width": 1,  "channel": "AR", "description": "Read address ready" },
+
+        { "name": "s_rid",     "direction": "output", "width": 6,  "channel": "R",  "description": "Read data ID (widened)" },
+        { "name": "s_rdata",   "direction": "output", "width": 64, "channel": "R",  "description": "Read data" },
+        { "name": "s_rvalid",  "direction": "output", "width": 1,  "channel": "R",  "description": "Read data valid" },
+        { "name": "s_rready",  "direction": "input",  "width": 1,  "channel": "R",  "description": "Read data ready" }
+      ]
+    },
+
+    "axi4_slave_uart": {
+      "description": "AXI4 UART Peripheral Slave. Memory-mapped UART transmitter/receiver. Supports programmed-I/O register access for baud-rate configuration, TX/RX data, and status/interrupt registers.",
+      "render": { "color": "#FFC107" },
+      "ports": [
+        { "name": "clk",       "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "System clock" },
+        { "name": "rst_n",     "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "Active-low reset" },
+
+        { "name": "s_awid",    "direction": "input",  "width": 6,  "channel": "AW", "description": "Write address ID (widened)" },
+        { "name": "s_awaddr",  "direction": "input",  "width": 32, "channel": "AW", "description": "Write address" },
+        { "name": "s_awvalid", "direction": "input",  "width": 1,  "channel": "AW", "description": "Write address valid" },
+        { "name": "s_awready", "direction": "output", "width": 1,  "channel": "AW", "description": "Write address ready" },
+
+        { "name": "s_wdata",   "direction": "input",  "width": 64, "channel": "W",  "description": "Write data" },
+        { "name": "s_wvalid",  "direction": "input",  "width": 1,  "channel": "W",  "description": "Write data valid" },
+        { "name": "s_wready",  "direction": "output", "width": 1,  "channel": "W",  "description": "Write data ready" },
+
+        { "name": "s_bid",     "direction": "output", "width": 6,  "channel": "B",  "description": "Write response ID (widened)" },
+        { "name": "s_bresp",   "direction": "output", "width": 2,  "channel": "B",  "description": "Write response" },
+        { "name": "s_bvalid",  "direction": "output", "width": 1,  "channel": "B",  "description": "Write response valid" },
+        { "name": "s_bready",  "direction": "input",  "width": 1,  "channel": "B",  "description": "Write response ready" },
+
+        { "name": "s_arid",    "direction": "input",  "width": 6,  "channel": "AR", "description": "Read address ID (widened)" },
+        { "name": "s_araddr",  "direction": "input",  "width": 32, "channel": "AR", "description": "Read address" },
+        { "name": "s_arvalid", "direction": "input",  "width": 1,  "channel": "AR", "description": "Read address valid" },
+        { "name": "s_arready", "direction": "output", "width": 1,  "channel": "AR", "description": "Read address ready" },
+
+        { "name": "s_rid",     "direction": "output", "width": 6,  "channel": "R",  "description": "Read data ID (widened)" },
+        { "name": "s_rdata",   "direction": "output", "width": 64, "channel": "R",  "description": "Read data" },
+        { "name": "s_rvalid",  "direction": "output", "width": 1,  "channel": "R",  "description": "Read data valid" },
+        { "name": "s_rready",  "direction": "input",  "width": 1,  "channel": "R",  "description": "Read data ready" }
+      ]
+    },
+
+    "axi4_slave_spi": {
+      "description": "AXI4 SPI Peripheral Slave. Memory-mapped SPI controller supporting master-mode serial communication. Provides register-based access for clock divider, chip-select, TX/RX FIFOs, and transfer control.",
+      "render": { "color": "#E91E63" },
+      "ports": [
+        { "name": "clk",       "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "System clock" },
+        { "name": "rst_n",     "direction": "input",  "width": 1,  "channel": "GLOBAL", "description": "Active-low reset" },
+
+        { "name": "s_awid",    "direction": "input",  "width": 6,  "channel": "AW", "description": "Write address ID (widened)" },
+        { "name": "s_awaddr",  "direction": "input",  "width": 32, "channel": "AW", "description": "Write address" },
+        { "name": "s_awvalid", "direction": "input",  "width": 1,  "channel": "AW", "description": "Write address valid" },
+        { "name": "s_awready", "direction": "output", "width": 1,  "channel": "AW", "description": "Write address ready" },
+
+        { "name": "s_wdata",   "direction": "input",  "width": 64, "channel": "W",  "description": "Write data" },
+        { "name": "s_wvalid",  "direction": "input",  "width": 1,  "channel": "W",  "description": "Write data valid" },
+        { "name": "s_wready",  "direction": "output", "width": 1,  "channel": "W",  "description": "Write data ready" },
+
+        { "name": "s_bid",     "direction": "output", "width": 6,  "channel": "B",  "description": "Write response ID (widened)" },
+        { "name": "s_bresp",   "direction": "output", "width": 2,  "channel": "B",  "description": "Write response" },
+        { "name": "s_bvalid",  "direction": "output", "width": 1,  "channel": "B",  "description": "Write response valid" },
+        { "name": "s_bready",  "direction": "input",  "width": 1,  "channel": "B",  "description": "Write response ready" },
+
+        { "name": "s_arid",    "direction": "input",  "width": 6,  "channel": "AR", "description": "Read address ID (widened)" },
+        { "name": "s_araddr",  "direction": "input",  "width": 32, "channel": "AR", "description": "Read address" },
+        { "name": "s_arvalid", "direction": "input",  "width": 1,  "channel": "AR", "description": "Read address valid" },
+        { "name": "s_arready", "direction": "output", "width": 1,  "channel": "AR", "description": "Read address ready" },
+
+        { "name": "s_rid",     "direction": "output", "width": 6,  "channel": "R",  "description": "Read data ID (widened)" },
+        { "name": "s_rdata",   "direction": "output", "width": 64, "channel": "R",  "description": "Read data" },
+        { "name": "s_rvalid",  "direction": "output", "width": 1,  "channel": "R",  "description": "Read data valid" },
+        { "name": "s_rready",  "direction": "input",  "width": 1,  "channel": "R",  "description": "Read data ready" }
+      ]
+    }
+  },
+
+  "instances": [
+    {
+      "instance_name": "u_cpu",
+      "module": "axi4_master_cpu",
+      "description": "CPU master instance – primary system initiator",
+      "position": { "x": -16, "y": 4, "z": 0 }
+    },
+    {
+      "instance_name": "u_dma",
+      "module": "axi4_master_dma",
+      "description": "DMA engine master instance – bulk data mover",
+      "position": { "x": -16, "y": 0, "z": 0 }
+    },
+    {
+      "instance_name": "u_gpu",
+      "module": "axi4_master_gpu",
+      "description": "GPU master instance – graphics/compute initiator",
+      "position": { "x": -16, "y": -4, "z": 0 }
+    },
+    {
+      "instance_name": "u_xbar",
+      "module": "axi4_interconnect",
+      "description": "AXI4 crossbar interconnect – 3-to-4 address-decoded switch fabric",
+      "position": { "x": 0, "y": 0, "z": 0 }
+    },
+    {
+      "instance_name": "u_sram",
+      "module": "axi4_slave_sram",
+      "description": "On-chip SRAM slave instance",
+      "position": { "x": 16, "y": 6, "z": 0 }
+    },
+    {
+      "instance_name": "u_ddr",
+      "module": "axi4_slave_ddr",
+      "description": "DDR controller slave instance",
+      "position": { "x": 16, "y": 2, "z": 0 }
+    },
+    {
+      "instance_name": "u_uart",
+      "module": "axi4_slave_uart",
+      "description": "UART peripheral slave instance",
+      "position": { "x": 16, "y": -2, "z": 0 }
+    },
+    {
+      "instance_name": "u_spi",
+      "module": "axi4_slave_spi",
+      "description": "SPI peripheral slave instance",
+      "position": { "x": 16, "y": -6, "z": 0 }
+    }
+  ],
+
+  "connections": [
+    {
+      "id": "clk_fanout",
+      "type": "clock",
+      "description": "System clock from testbench to all 8 instances (enters at BOTTOM of each cube)",
+      "from": { "instance": "tb_top", "port": "clk" },
+      "to": [
+        { "instance": "u_cpu",  "port": "clk" },
+        { "instance": "u_dma",  "port": "clk" },
+        { "instance": "u_gpu",  "port": "clk" },
+        { "instance": "u_xbar", "port": "clk" },
+        { "instance": "u_sram", "port": "clk" },
+        { "instance": "u_ddr",  "port": "clk" },
+        { "instance": "u_uart", "port": "clk" },
+        { "instance": "u_spi",  "port": "clk" }
+      ]
+    },
+    {
+      "id": "rst_fanout",
+      "type": "reset",
+      "description": "Active-low reset from testbench to all 8 instances (enters at TOP of each cube)",
+      "from": { "instance": "tb_top", "port": "rst_n" },
+      "to": [
+        { "instance": "u_cpu",  "port": "rst_n" },
+        { "instance": "u_dma",  "port": "rst_n" },
+        { "instance": "u_gpu",  "port": "rst_n" },
+        { "instance": "u_xbar", "port": "rst_n" },
+        { "instance": "u_sram", "port": "rst_n" },
+        { "instance": "u_ddr",  "port": "rst_n" },
+        { "instance": "u_uart", "port": "rst_n" },
+        { "instance": "u_spi",  "port": "rst_n" }
+      ]
+    },
+
+    {
+      "id": "cpu_to_xbar_s0",
+      "type": "axi4_bus",
+      "label": "AXI4 CPU→XBAR_S0",
+      "description": "AXI4 bus from CPU master to interconnect slave port 0",
+      "from_instance": "u_cpu",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "AW": [
+          { "from_port": "m_awid",    "to_port": "s0_awid",    "wire": "cpu2xb_awid"    },
+          { "from_port": "m_awaddr",  "to_port": "s0_awaddr",  "wire": "cpu2xb_awaddr"  },
+          { "from_port": "m_awvalid", "to_port": "s0_awvalid", "wire": "cpu2xb_awvalid" },
+          { "from_port": "m_awready", "to_port": "s0_awready", "wire": "cpu2xb_awready" }
+        ],
+        "W": [
+          { "from_port": "m_wdata",   "to_port": "s0_wdata",   "wire": "cpu2xb_wdata"   },
+          { "from_port": "m_wvalid",  "to_port": "s0_wvalid",  "wire": "cpu2xb_wvalid"  },
+          { "from_port": "m_wready",  "to_port": "s0_wready",  "wire": "cpu2xb_wready"  }
+        ],
+        "B": [
+          { "from_port": "m_bid",     "to_port": "s0_bid",     "wire": "cpu2xb_bid"     },
+          { "from_port": "m_bresp",   "to_port": "s0_bresp",   "wire": "cpu2xb_bresp"   },
+          { "from_port": "m_bvalid",  "to_port": "s0_bvalid",  "wire": "cpu2xb_bvalid"  },
+          { "from_port": "m_bready",  "to_port": "s0_bready",  "wire": "cpu2xb_bready"  }
+        ],
+        "AR": [
+          { "from_port": "m_arid",    "to_port": "s0_arid",    "wire": "cpu2xb_arid"    },
+          { "from_port": "m_araddr",  "to_port": "s0_araddr",  "wire": "cpu2xb_araddr"  },
+          { "from_port": "m_arvalid", "to_port": "s0_arvalid", "wire": "cpu2xb_arvalid" },
+          { "from_port": "m_arready", "to_port": "s0_arready", "wire": "cpu2xb_arready" }
+        ],
+        "R": [
+          { "from_port": "m_rid",     "to_port": "s0_rid",     "wire": "cpu2xb_rid"     },
+          { "from_port": "m_rdata",   "to_port": "s0_rdata",   "wire": "cpu2xb_rdata"   },
+          { "from_port": "m_rvalid",  "to_port": "s0_rvalid",  "wire": "cpu2xb_rvalid"  },
+          { "from_port": "m_rready",  "to_port": "s0_rready",  "wire": "cpu2xb_rready"  }
+        ]
+      }
+    },
+
+    {
+      "id": "dma_to_xbar_s1",
+      "type": "axi4_bus",
+      "label": "AXI4 DMA→XBAR_S1",
+      "description": "AXI4 bus from DMA engine master to interconnect slave port 1",
+      "from_instance": "u_dma",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "AW": [
+          { "from_port": "m_awid",    "to_port": "s1_awid",    "wire": "dma2xb_awid"    },
+          { "from_port": "m_awaddr",  "to_port": "s1_awaddr",  "wire": "dma2xb_awaddr"  },
+          { "from_port": "m_awvalid", "to_port": "s1_awvalid", "wire": "dma2xb_awvalid" },
+          { "from_port": "m_awready", "to_port": "s1_awready", "wire": "dma2xb_awready" }
+        ],
+        "W": [
+          { "from_port": "m_wdata",   "to_port": "s1_wdata",   "wire": "dma2xb_wdata"   },
+          { "from_port": "m_wvalid",  "to_port": "s1_wvalid",  "wire": "dma2xb_wvalid"  },
+          { "from_port": "m_wready",  "to_port": "s1_wready",  "wire": "dma2xb_wready"  }
+        ],
+        "B": [
+          { "from_port": "m_bid",     "to_port": "s1_bid",     "wire": "dma2xb_bid"     },
+          { "from_port": "m_bresp",   "to_port": "s1_bresp",   "wire": "dma2xb_bresp"   },
+          { "from_port": "m_bvalid",  "to_port": "s1_bvalid",  "wire": "dma2xb_bvalid"  },
+          { "from_port": "m_bready",  "to_port": "s1_bready",  "wire": "dma2xb_bready"  }
+        ],
+        "AR": [
+          { "from_port": "m_arid",    "to_port": "s1_arid",    "wire": "dma2xb_arid"    },
+          { "from_port": "m_araddr",  "to_port": "s1_araddr",  "wire": "dma2xb_araddr"  },
+          { "from_port": "m_arvalid", "to_port": "s1_arvalid", "wire": "dma2xb_arvalid" },
+          { "from_port": "m_arready", "to_port": "s1_arready", "wire": "dma2xb_arready" }
+        ],
+        "R": [
+          { "from_port": "m_rid",     "to_port": "s1_rid",     "wire": "dma2xb_rid"     },
+          { "from_port": "m_rdata",   "to_port": "s1_rdata",   "wire": "dma2xb_rdata"   },
+          { "from_port": "m_rvalid",  "to_port": "s1_rvalid",  "wire": "dma2xb_rvalid"  },
+          { "from_port": "m_rready",  "to_port": "s1_rready",  "wire": "dma2xb_rready"  }
+        ]
+      }
+    },
+
+    {
+      "id": "gpu_to_xbar_s2",
+      "type": "axi4_bus",
+      "label": "AXI4 GPU→XBAR_S2",
+      "description": "AXI4 bus from GPU master to interconnect slave port 2",
+      "from_instance": "u_gpu",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "AW": [
+          { "from_port": "m_awid",    "to_port": "s2_awid",    "wire": "gpu2xb_awid"    },
+          { "from_port": "m_awaddr",  "to_port": "s2_awaddr",  "wire": "gpu2xb_awaddr"  },
+          { "from_port": "m_awvalid", "to_port": "s2_awvalid", "wire": "gpu2xb_awvalid" },
+          { "from_port": "m_awready", "to_port": "s2_awready", "wire": "gpu2xb_awready" }
+        ],
+        "W": [
+          { "from_port": "m_wdata",   "to_port": "s2_wdata",   "wire": "gpu2xb_wdata"   },
+          { "from_port": "m_wvalid",  "to_port": "s2_wvalid",  "wire": "gpu2xb_wvalid"  },
+          { "from_port": "m_wready",  "to_port": "s2_wready",  "wire": "gpu2xb_wready"  }
+        ],
+        "B": [
+          { "from_port": "m_bid",     "to_port": "s2_bid",     "wire": "gpu2xb_bid"     },
+          { "from_port": "m_bresp",   "to_port": "s2_bresp",   "wire": "gpu2xb_bresp"   },
+          { "from_port": "m_bvalid",  "to_port": "s2_bvalid",  "wire": "gpu2xb_bvalid"  },
+          { "from_port": "m_bready",  "to_port": "s2_bready",  "wire": "gpu2xb_bready"  }
+        ],
+        "AR": [
+          { "from_port": "m_arid",    "to_port": "s2_arid",    "wire": "gpu2xb_arid"    },
+          { "from_port": "m_araddr",  "to_port": "s2_araddr",  "wire": "gpu2xb_araddr"  },
+          { "from_port": "m_arvalid", "to_port": "s2_arvalid", "wire": "gpu2xb_arvalid" },
+          { "from_port": "m_arready", "to_port": "s2_arready", "wire": "gpu2xb_arready" }
+        ],
+        "R": [
+          { "from_port": "m_rid",     "to_port": "s2_rid",     "wire": "gpu2xb_rid"     },
+          { "from_port": "m_rdata",   "to_port": "s2_rdata",   "wire": "gpu2xb_rdata"   },
+          { "from_port": "m_rvalid",  "to_port": "s2_rvalid",  "wire": "gpu2xb_rvalid"  },
+          { "from_port": "m_rready",  "to_port": "s2_rready",  "wire": "gpu2xb_rready"  }
+        ]
+      }
+    },
+
+    {
+      "id": "xbar_m0_to_sram",
+      "type": "axi4_bus",
+      "label": "AXI4 XBAR_M0→SRAM",
+      "description": "AXI4 bus from interconnect master port 0 to SRAM slave (widened 6-bit ID)",
+      "from_instance": "u_xbar",
+      "to_instance": "u_sram",
+      "channel_signals": {
+        "AW": [
+          { "from_port": "m0_awid",    "to_port": "s_awid",    "wire": "xb2sram_awid"    },
+          { "from_port": "m0_awaddr",  "to_port": "s_awaddr",  "wire": "xb2sram_awaddr"  },
+          { "from_port": "m0_awvalid", "to_port": "s_awvalid", "wire": "xb2sram_awvalid" },
+          { "from_port": "m0_awready", "to_port": "s_awready", "wire": "xb2sram_awready" }
+        ],
+        "W": [
+          { "from_port": "m0_wdata",   "to_port": "s_wdata",   "wire": "xb2sram_wdata"   },
+          { "from_port": "m0_wvalid",  "to_port": "s_wvalid",  "wire": "xb2sram_wvalid"  },
+          { "from_port": "m0_wready",  "to_port": "s_wready",  "wire": "xb2sram_wready"  }
+        ],
+        "B": [
+          { "from_port": "m0_bid",     "to_port": "s_bid",     "wire": "xb2sram_bid"     },
+          { "from_port": "m0_bresp",   "to_port": "s_bresp",   "wire": "xb2sram_bresp"   },
+          { "from_port": "m0_bvalid",  "to_port": "s_bvalid",  "wire": "xb2sram_bvalid"  },
+          { "from_port": "m0_bready",  "to_port": "s_bready",  "wire": "xb2sram_bready"  }
+        ],
+        "AR": [
+          { "from_port": "m0_arid",    "to_port": "s_arid",    "wire": "xb2sram_arid"    },
+          { "from_port": "m0_araddr",  "to_port": "s_araddr",  "wire": "xb2sram_araddr"  },
+          { "from_port": "m0_arvalid", "to_port": "s_arvalid", "wire": "xb2sram_arvalid" },
+          { "from_port": "m0_arready", "to_port": "s_arready", "wire": "xb2sram_arready" }
+        ],
+        "R": [
+          { "from_port": "m0_rid",     "to_port": "s_rid",     "wire": "xb2sram_rid"     },
+          { "from_port": "m0_rdata",   "to_port": "s_rdata",   "wire": "xb2sram_rdata"   },
+          { "from_port": "m0_rvalid",  "to_port": "s_rvalid",  "wire": "xb2sram_rvalid"  },
+          { "from_port": "m0_rready",  "to_port": "s_rready",  "wire": "xb2sram_rready"  }
+        ]
+      }
+    },
+
+    {
+      "id": "xbar_m1_to_ddr",
+      "type": "axi4_bus",
+      "label": "AXI4 XBAR_M1→DDR",
+      "description": "AXI4 bus from interconnect master port 1 to DDR controller slave (widened 6-bit ID)",
+      "from_instance": "u_xbar",
+      "to_instance": "u_ddr",
+      "channel_signals": {
+        "AW": [
+          { "from_port": "m1_awid",    "to_port": "s_awid",    "wire": "xb2ddr_awid"    },
+          { "from_port": "m1_awaddr",  "to_port": "s_awaddr",  "wire": "xb2ddr_awaddr"  },
+          { "from_port": "m1_awvalid", "to_port": "s_awvalid", "wire": "xb2ddr_awvalid" },
+          { "from_port": "m1_awready", "to_port": "s_awready", "wire": "xb2ddr_awready" }
+        ],
+        "W": [
+          { "from_port": "m1_wdata",   "to_port": "s_wdata",   "wire": "xb2ddr_wdata"   },
+          { "from_port": "m1_wvalid",  "to_port": "s_wvalid",  "wire": "xb2ddr_wvalid"  },
+          { "from_port": "m1_wready",  "to_port": "s_wready",  "wire": "xb2ddr_wready"  }
+        ],
+        "B": [
+          { "from_port": "m1_bid",     "to_port": "s_bid",     "wire": "xb2ddr_bid"     },
+          { "from_port": "m1_bresp",   "to_port": "s_bresp",   "wire": "xb2ddr_bresp"   },
+          { "from_port": "m1_bvalid",  "to_port": "s_bvalid",  "wire": "xb2ddr_bvalid"  },
+          { "from_port": "m1_bready",  "to_port": "s_bready",  "wire": "xb2ddr_bready"  }
+        ],
+        "AR": [
+          { "from_port": "m1_arid",    "to_port": "s_arid",    "wire": "xb2ddr_arid"    },
+          { "from_port": "m1_araddr",  "to_port": "s_araddr",  "wire": "xb2ddr_araddr"  },
+          { "from_port": "m1_arvalid", "to_port": "s_arvalid", "wire": "xb2ddr_arvalid" },
+          { "from_port": "m1_arready", "to_port": "s_arready", "wire": "xb2ddr_arready" }
+        ],
+        "R": [
+          { "from_port": "m1_rid",     "to_port": "s_rid",     "wire": "xb2ddr_rid"     },
+          { "from_port": "m1_rdata",   "to_port": "s_rdata",   "wire": "xb2ddr_rdata"   },
+          { "from_port": "m1_rvalid",  "to_port": "s_rvalid",  "wire": "xb2ddr_rvalid"  },
+          { "from_port": "m1_rready",  "to_port": "s_rready",  "wire": "xb2ddr_rready"  }
+        ]
+      }
+    },
+
+    {
+      "id": "xbar_m2_to_uart",
+      "type": "axi4_bus",
+      "label": "AXI4 XBAR_M2→UART",
+      "description": "AXI4 bus from interconnect master port 2 to UART peripheral slave (widened 6-bit ID)",
+      "from_instance": "u_xbar",
+      "to_instance": "u_uart",
+      "channel_signals": {
+        "AW": [
+          { "from_port": "m2_awid",    "to_port": "s_awid",    "wire": "xb2uart_awid"    },
+          { "from_port": "m2_awaddr",  "to_port": "s_awaddr",  "wire": "xb2uart_awaddr"  },
+          { "from_port": "m2_awvalid", "to_port": "s_awvalid", "wire": "xb2uart_awvalid" },
+          { "from_port": "m2_awready", "to_port": "s_awready", "wire": "xb2uart_awready" }
+        ],
+        "W": [
+          { "from_port": "m2_wdata",   "to_port": "s_wdata",   "wire": "xb2uart_wdata"   },
+          { "from_port": "m2_wvalid",  "to_port": "s_wvalid",  "wire": "xb2uart_wvalid"  },
+          { "from_port": "m2_wready",  "to_port": "s_wready",  "wire": "xb2uart_wready"  }
+        ],
+        "B": [
+          { "from_port": "m2_bid",     "to_port": "s_bid",     "wire": "xb2uart_bid"     },
+          { "from_port": "m2_bresp",   "to_port": "s_bresp",   "wire": "xb2uart_bresp"   },
+          { "from_port": "m2_bvalid",  "to_port": "s_bvalid",  "wire": "xb2uart_bvalid"  },
+          { "from_port": "m2_bready",  "to_port": "s_bready",  "wire": "xb2uart_bready"  }
+        ],
+        "AR": [
+          { "from_port": "m2_arid",    "to_port": "s_arid",    "wire": "xb2uart_arid"    },
+          { "from_port": "m2_araddr",  "to_port": "s_araddr",  "wire": "xb2uart_araddr"  },
+          { "from_port": "m2_arvalid", "to_port": "s_arvalid", "wire": "xb2uart_arvalid" },
+          { "from_port": "m2_arready", "to_port": "s_arready", "wire": "xb2uart_arready" }
+        ],
+        "R": [
+          { "from_port": "m2_rid",     "to_port": "s_rid",     "wire": "xb2uart_rid"     },
+          { "from_port": "m2_rdata",   "to_port": "s_rdata",   "wire": "xb2uart_rdata"   },
+          { "from_port": "m2_rvalid",  "to_port": "s_rvalid",  "wire": "xb2uart_rvalid"  },
+          { "from_port": "m2_rready",  "to_port": "s_rready",  "wire": "xb2uart_rready"  }
+        ]
+      }
+    },
+
+    {
+      "id": "xbar_m3_to_spi",
+      "type": "axi4_bus",
+      "label": "AXI4 XBAR_M3→SPI",
+      "description": "AXI4 bus from interconnect master port 3 to SPI peripheral slave (widened 6-bit ID)",
+      "from_instance": "u_xbar",
+      "to_instance": "u_spi",
+      "channel_signals": {
+        "AW": [
+          { "from_port": "m3_awid",    "to_port": "s_awid",    "wire": "xb2spi_awid"    },
+          { "from_port": "m3_awaddr",  "to_port": "s_awaddr",  "wire": "xb2spi_awaddr"  },
+          { "from_port": "m3_awvalid", "to_port": "s_awvalid", "wire": "xb2spi_awvalid" },
+          { "from_port": "m3_awready", "to_port": "s_awready", "wire": "xb2spi_awready" }
+        ],
+        "W": [
+          { "from_port": "m3_wdata",   "to_port": "s_wdata",   "wire": "xb2spi_wdata"   },
+          { "from_port": "m3_wvalid",  "to_port": "s_wvalid",  "wire": "xb2spi_wvalid"  },
+          { "from_port": "m3_wready",  "to_port": "s_wready",  "wire": "xb2spi_wready"  }
+        ],
+        "B": [
+          { "from_port": "m3_bid",     "to_port": "s_bid",     "wire": "xb2spi_bid"     },
+          { "from_port": "m3_bresp",   "to_port": "s_bresp",   "wire": "xb2spi_bresp"   },
+          { "from_port": "m3_bvalid",  "to_port": "s_bvalid",  "wire": "xb2spi_bvalid"  },
+          { "from_port": "m3_bready",  "to_port": "s_bready",  "wire": "xb2spi_bready"  }
+        ],
+        "AR": [
+          { "from_port": "m3_arid",    "to_port": "s_arid",    "wire": "xb2spi_arid"    },
+          { "from_port": "m3_araddr",  "to_port": "s_araddr",  "wire": "xb2spi_araddr"  },
+          { "from_port": "m3_arvalid", "to_port": "s_arvalid", "wire": "xb2spi_arvalid" },
+          { "from_port": "m3_arready", "to_port": "s_arready", "wire": "xb2spi_arready" }
+        ],
+        "R": [
+          { "from_port": "m3_rid",     "to_port": "s_rid",     "wire": "xb2spi_rid"     },
+          { "from_port": "m3_rdata",   "to_port": "s_rdata",   "wire": "xb2spi_rdata"   },
+          { "from_port": "m3_rvalid",  "to_port": "s_rvalid",  "wire": "xb2spi_rvalid"  },
+          { "from_port": "m3_rready",  "to_port": "s_rready",  "wire": "xb2spi_rready"  }
+        ]
+      }
+    }
+  ]
+}
