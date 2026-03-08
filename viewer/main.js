@@ -93,6 +93,10 @@ let currentHighlight = null;
 // Each entry: { obj: THREE.Object3D, maxDist: number }
 const lodObjects = [];
 
+// Connection data stored for highlighting all connections of a clicked instance/group
+// Each entry: { fromInst, toInst, routePts, segmentPairs, color }
+let designConnData = [];
+
 // ═══════════════════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════════════════
@@ -215,8 +219,9 @@ function dashedBox(cx, cy, cz, w, h, d, color) {
 /** Coloured block with white wireframe edges and a floating label.
  *  Supports cuboid shapes via `renderSize` { w, h, d } or uniform `scale`.
  *  `scale` multiplies the default CUBE size (1 = normal, >1 = bigger).
- *  When `compact` is true, only the instance name is shown (no module name). */
-function instanceCube(inst, hexColor, scale = 1, renderSize = null, compact = false) {
+ *  When `compact` is true, only the instance name is shown (no module name).
+ *  `displayName` overrides the label text (instance_name still used for wiring). */
+function instanceCube(inst, hexColor, scale = 1, renderSize = null, compact = false, displayName = null) {
   const group = new THREE.Group();
   const w = renderSize?.w ?? CUBE * scale;
   const h = renderSize?.h ?? CUBE * scale;
@@ -239,9 +244,10 @@ function instanceCube(inst, hexColor, scale = 1, renderSize = null, compact = fa
   ));
 
   // Floating label above the block
+  const name = displayName || inst.instance_name;
   const modLine = compact ? '' : `<div class="mod-name">(${inst.module})</div>`;
   const label = makeLabel(
-    `<div class="inst-name">${inst.instance_name}</div>` + modLine,
+    `<div class="inst-name">${name}</div>` + modLine,
     'cube-label'
   );
   label.position.set(0, halfH + 0.5, 0);
@@ -519,7 +525,7 @@ function clearHighlight() {
   }
 }
 
-/** Add a bright outline around a clicked instance. */
+/** Add a bright outline around a clicked instance AND highlight all its connections. */
 function highlightInstance(meta) {
   clearHighlight();
   const inst = meta.instance;
@@ -546,8 +552,79 @@ function highlightInstance(meta) {
   shell.position.set(inst.position.x, inst.position.y, inst.position.z);
   group.add(shell);
 
+  // Highlight all connections to/from this instance
+  addConnectionHighlights(group, (c) =>
+    c.fromInst === inst.instance_name || c.toInst === inst.instance_name
+  );
+
   scene.add(group);
   currentHighlight = group;
+}
+
+/** Add a bright outline around a clicked group AND highlight all its connections. */
+function highlightGroup(meta) {
+  clearHighlight();
+  const grp = meta.group;
+  const bounds = meta.bounds;
+  if (!bounds) return;
+
+  const group = new THREE.Group();
+  const pad = 0.4;
+
+  const gw = bounds.w + pad * 2;
+  const gh = bounds.h + pad * 2;
+  const gd = bounds.d + pad * 2;
+
+  // Bright wireframe outline
+  const geo   = new THREE.BoxGeometry(gw, gh, gd);
+  const edges = new THREE.EdgesGeometry(geo);
+  const outline = new THREE.LineSegments(
+    edges, new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 })
+  );
+  outline.position.set(bounds.cx, bounds.cy, bounds.cz);
+  group.add(outline);
+
+  // Semi-transparent glow shell
+  const shell = new THREE.Mesh(
+    new THREE.BoxGeometry(gw, gh, gd),
+    new THREE.MeshBasicMaterial({ color: 0x42A5F5, transparent: true, opacity: 0.08, side: THREE.BackSide })
+  );
+  shell.position.set(bounds.cx, bounds.cy, bounds.cz);
+  group.add(shell);
+
+  // Highlight all connections to/from any member of the group
+  const memberSet = new Set(grp.members);
+  addConnectionHighlights(group, (c) =>
+    memberSet.has(c.fromInst) || memberSet.has(c.toInst)
+  );
+
+  scene.add(group);
+  currentHighlight = group;
+}
+
+/** Helper: draw highlight tubes for connections matching the filter predicate. */
+function addConnectionHighlights(group, filterFn) {
+  for (const c of designConnData) {
+    if (!filterFn(c)) continue;
+    const pts = c.routePts;
+    if (!pts || pts.length < 2) continue;
+    const step = c.segmentPairs ? 2 : 1;
+    for (let i = 0; i < pts.length - 1; i += step) {
+      const a   = new THREE.Vector3(...pts[i]);
+      const b   = new THREE.Vector3(...pts[i + 1]);
+      const len = a.distanceTo(b);
+      if (len < 0.01) continue;
+      const mid = a.clone().add(b).multiplyScalar(0.5);
+      const dir = b.clone().sub(a).normalize();
+      const tube = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.15, 0.15, len, 8),
+        new THREE.MeshBasicMaterial({ color: c.color ?? 0xffffff, transparent: true, opacity: 0.45 })
+      );
+      tube.position.copy(mid);
+      tube.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+      group.add(tube);
+    }
+  }
 }
 
 /** Add a thick glow tube along a clicked connection path.
@@ -634,7 +711,7 @@ renderer.domElement.addEventListener('pointerup', (e) => {
         highlightConnection(meta);
       } else if (meta.type === 'group') {
         showGroupInfo(meta.group);
-        clearHighlight();
+        highlightGroup(meta);
       }
     }
   } else {
@@ -671,6 +748,7 @@ function clearScene() {
   clickableObjects.length = 0;
   objectMeta.clear();
   lodObjects.length = 0;
+  designConnData = [];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -804,6 +882,35 @@ async function buildScene(designPath) {
   // Map instance name → its cube half-size for wiring
   const instHalf = {};
 
+  // ── Compute display names (strip group prefix for cleaner labels) ──
+  const instDisplayName = {};
+  if (Array.isArray(design.groups)) {
+    // For each group, compute the longest common prefix of all members
+    const groupPrefix = {};
+    for (const grp of design.groups) {
+      if (!grp.members?.length) continue;
+      let prefix = grp.members[0];
+      for (const m of grp.members) {
+        while (prefix && !m.startsWith(prefix)) prefix = prefix.slice(0, -1);
+      }
+      groupPrefix[grp.name] = prefix;
+    }
+    // For each instance, strip the shortest common prefix from its outermost group
+    for (const inst of instances) {
+      let shortestPrefix = '';
+      for (const grp of design.groups) {
+        if (!grp.members?.includes(inst.instance_name)) continue;
+        const prefix = groupPrefix[grp.name] || '';
+        if (prefix && (!shortestPrefix || prefix.length < shortestPrefix.length)) {
+          shortestPrefix = prefix;
+        }
+      }
+      if (shortestPrefix && inst.instance_name.startsWith(shortestPrefix)) {
+        instDisplayName[inst.instance_name] = inst.instance_name.slice(shortestPrefix.length);
+      }
+    }
+  }
+
   // ── Instance cubes / cuboids ────────────────────────────────────
   // Hide module name labels when many instances (reduces clutter)
   const compact = instances.length > 12;
@@ -812,7 +919,8 @@ async function buildScene(designPath) {
     const s = scaleFor(inst);
     const mod = design.modules[inst.module];
     const renderSize = mod?.render?.size ?? null;   // { w, h, d } for cuboid
-    const cubeGroup = instanceCube(inst, moduleColor[inst.module] ?? 0x888888, s, renderSize, compact);
+    const displayName = instDisplayName[inst.instance_name] || null;
+    const cubeGroup = instanceCube(inst, moduleColor[inst.module] ?? 0x888888, s, renderSize, compact, displayName);
     scene.add(cubeGroup);
     instHalf[inst.instance_name]  = cubeGroup.userData.cubeHalf;
     instHalfH[inst.instance_name] = cubeGroup.userData.cubeHalfH ?? cubeGroup.userData.cubeHalf;
@@ -862,11 +970,12 @@ async function buildScene(designPath) {
         'group-label-obj', gxMin + 0.6, gyMax + 0.4, gcz
       );
 
-      // Make group clickable
+      // Make group clickable (store bounds for highlighting)
       clickableObjects.push(box);
       objectMeta.set(box, {
         type: 'group',
         group: grp,
+        bounds: { cx: gcx, cy: gcy, cz: gcz, w: gw, h: gh, d: gd },
       });
     }
   }
@@ -962,11 +1071,18 @@ async function buildScene(designPath) {
   // Hit zone for CLK horizontal rail
   if (clkConn) {
     addFanoutHitZone([railL, clkY, 0], [railR, clkY, 0], clkConn, clkRoutePts);
+    // Store for click-highlighting (CLK fanout reaches all clk targets)
+    for (const t of (clkConn.to || [])) {
+      designConnData.push({ fromInst: clkConn.from?.instance, toInst: t.instance, routePts: clkRoutePts, segmentPairs: true, color: CLK_COL });
+    }
   }
 
   // Hit zone for RST horizontal rail
   if (rstConn) {
     addFanoutHitZone([railL, rstY, 0], [railR, rstY, 0], rstConn, rstRoutePts);
+    for (const t of (rstConn.to || [])) {
+      designConnData.push({ fromInst: rstConn.from?.instance, toInst: t.instance, routePts: rstRoutePts, segmentPairs: true, color: RST_COL });
+    }
   }
 
   // ── Bus / TLM connections ────────────────────────────────────
@@ -1029,6 +1145,20 @@ async function buildScene(designPath) {
     return -span / 2 + (idx / (total - 1)) * span;
   }
 
+  // ── Precompute bundle groups: connections between the same block pair ──
+  const bundleKey = (from, to) => `${from}::${to}`;
+  const bundleCounts = {};
+  const bundleIndexMap = {};
+  for (const conn of design.connections) {
+    if (conn.type === 'clock' || conn.type === 'reset') continue;
+    if (!instByName.has(conn.from_instance) || !instByName.has(conn.to_instance)) continue;
+    const key = bundleKey(conn.from_instance, conn.to_instance);
+    bundleCounts[key] = (bundleCounts[key] || 0) + 1;
+  }
+  // Assign sequential index within each bundle
+  const bundleNextIdx = {};
+  for (const key of Object.keys(bundleCounts)) bundleNextIdx[key] = 0;
+
   for (const conn of design.connections) {
     if (conn.type === 'clock' || conn.type === 'reset') continue;
 
@@ -1071,11 +1201,21 @@ async function buildScene(designPath) {
 
     const col = connColor[conn.type] ?? AXI4_COL;
 
+    // ── Z-offset: spread bundled connections in Z to avoid overlap ──
+    const bKey = bundleKey(conn.from_instance, conn.to_instance);
+    const bCount = bundleCounts[bKey] || 1;
+    const bIdx   = bundleNextIdx[bKey] || 0;
+    bundleNextIdx[bKey] = bIdx + 1;
+    // Centre the bundle around Z=0; spacing = 0.5 per connection
+    const zOff = bCount <= 1 ? 0 : -((bCount - 1) * 0.5) / 2 + bIdx * 0.5;
+
     // Build route points: L-shaped routing that avoids unconnected boxes
     const obstacles = allObstacles.filter(
       o => o.name !== conn.from_instance && o.name !== conn.to_instance
     );
-    const routePts = routeConnection(fromX, fromY, toX, toY, exitHorizontal, obstacles);
+    const routePts2D = routeConnection(fromX, fromY, toX, toY, exitHorizontal, obstacles);
+    // Apply Z-offset to each waypoint
+    const routePts = routePts2D.map(([x, y]) => [x, y, zOff]);
 
     // Draw connection with arrowhead
     if (routePts.length === 2) {
@@ -1085,8 +1225,8 @@ async function buildScene(designPath) {
     }
 
     // Port dots (registered for LOD — hide when far away)
-    const fromDot = portDot([fromX, fromY, 0], col, 0.16);
-    const toDot   = portDot([toX,   toY, 0], col, 0.16);
+    const fromDot = portDot([fromX, fromY, zOff], col, 0.16);
+    const toDot   = portDot([toX,   toY,   zOff], col, 0.16);
     scene.add(fromDot);
     scene.add(toDot);
     lodObjects.push({ obj: fromDot, maxDist: 80 });
@@ -1098,7 +1238,7 @@ async function buildScene(designPath) {
     if (conn.label) {
       const busLabel = addSceneLabel(
         `<span class="bus-label-text">${conn.label}</span>`,
-        'bus-label-obj', midX, midY + 0.9, 0
+        'bus-label-obj', midX, midY + 0.9, zOff
       );
       lodObjects.push({ obj: busLabel, maxDist: 60 });
     }
@@ -1112,6 +1252,50 @@ async function buildScene(designPath) {
       if (segLen < 0.01) continue;
       registerHitZone(routePts[i], routePts[i + 1], { type: 'connection', connection: conn, routePts });
     }
+
+    // Store for click-highlighting
+    designConnData.push({ fromInst: conn.from_instance, toInst: conn.to_instance, routePts, segmentPairs: false, color: col });
+
+    // Track bundle index for this connection pair
+    if (!bundleIndexMap[bKey]) bundleIndexMap[bKey] = [];
+    bundleIndexMap[bKey].push({ routePts, col });
+  }
+
+  // ── Draw bundle pipes for block pairs with multiple connections ──
+  for (const [key, conns] of Object.entries(bundleIndexMap)) {
+    if (conns.length <= 1) continue;
+    const [fromName, toName] = key.split('::');
+    const fromInst = instByName.get(fromName);
+    const toInst   = instByName.get(toName);
+    if (!fromInst || !toInst) continue;
+
+    const n = conns.length;
+    const radius = 0.15 + 0.08 * n;
+    const a = new THREE.Vector3(fromInst.position.x, fromInst.position.y, fromInst.position.z);
+    const b = new THREE.Vector3(toInst.position.x, toInst.position.y, toInst.position.z);
+    const mid = a.clone().add(b).multiplyScalar(0.5);
+    const len = a.distanceTo(b);
+    if (len < 0.01) continue;
+    const dir = b.clone().sub(a).normalize();
+
+    const bundlePipe = new THREE.Mesh(
+      new THREE.CylinderGeometry(radius, radius, len, 12),
+      new THREE.MeshBasicMaterial({
+        color: conns[0].col,
+        transparent: true,
+        opacity: 0.12,
+      })
+    );
+    bundlePipe.position.copy(mid);
+    bundlePipe.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+    scene.add(bundlePipe);
+
+    // Bundle label showing count
+    const bundleLabel = addSceneLabel(
+      `<span class="bus-label-text" style="opacity:0.6">×${n}</span>`,
+      'bus-label-obj', mid.x, mid.y + radius + 0.5, mid.z
+    );
+    lodObjects.push({ obj: bundleLabel, maxDist: 100 });
   }
 
   // ── Testbench wireframe ─────────────────────────────────────────
