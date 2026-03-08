@@ -309,6 +309,10 @@ function expandPopup() {
   popup.classList.remove('collapsed');
   popup.classList.add('expanded');
   popupExpanded = true;
+  // Reset to centred position on each new open
+  popup.style.top       = '50%';
+  popup.style.left      = '50%';
+  popup.style.transform = 'translate(-50%, -50%)';
 }
 
 function collapsePopup() {
@@ -317,9 +321,48 @@ function collapsePopup() {
   popupExpanded = false;
 }
 
-popupHandle.addEventListener('click', () => {
+let handleDownPos = null;
+
+popupHandle.addEventListener('click', (e) => {
+  // Ignore if the pointer moved during press (was a drag, not a click)
+  if (handleDownPos && handleDownPos.moved) return;
   if (popupExpanded) collapsePopup();
   else expandPopup();
+});
+
+// ── Popup drag support ───────────────────────────────────────────
+let isDragging  = false;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+
+popupHandle.addEventListener('pointerdown', (e) => {
+  // Ignore clicks on the close button
+  if (e.target === popupToggle) return;
+  handleDownPos = { x: e.clientX, y: e.clientY, moved: false };
+  isDragging  = true;
+  const rect  = popup.getBoundingClientRect();
+  dragOffsetX = e.clientX - rect.left;
+  dragOffsetY = e.clientY - rect.top;
+  e.preventDefault();
+});
+
+window.addEventListener('pointermove', (e) => {
+  if (!isDragging) return;
+  // Mark as drag (not click) if pointer moved more than 4px
+  if (handleDownPos) {
+    const mx = e.clientX - handleDownPos.x;
+    const my = e.clientY - handleDownPos.y;
+    if (Math.sqrt(mx * mx + my * my) > 4) handleDownPos.moved = true;
+  }
+  if (!handleDownPos?.moved) return;
+  // Switch from centred transform to explicit top/left positioning
+  popup.style.transform = 'none';
+  popup.style.left = (e.clientX - dragOffsetX) + 'px';
+  popup.style.top  = (e.clientY - dragOffsetY) + 'px';
+});
+
+window.addEventListener('pointerup', () => {
+  isDragging = false;
 });
 
 /** Show instance info in the popup. */
@@ -817,15 +860,25 @@ async function buildScene(designPath) {
   // ── Build set of instances in clock/reset fanout ────────────
   const clkInstances = new Set();
   const rstInstances = new Set();
+  let clkConn = null;
+  let rstConn = null;
   for (const conn of design.connections) {
     if (conn.type === 'clock') {
       for (const t of (conn.to || [])) clkInstances.add(t.instance);
+      clkConn = conn;
     } else if (conn.type === 'reset') {
       for (const t of (conn.to || [])) rstInstances.add(t.instance);
+      rstConn = conn;
     }
   }
 
   // ── Per-instance CLK and RST stubs (only for instances in fanout) ─
+  // Shared route-point arrays: clicking any clk/rst element highlights the
+  // entire fanout tree (rail + all stubs), which is the intended behaviour
+  // for clock/reset nets.
+  const clkRoutePts = [[railL, clkY, 0], [railR, clkY, 0]];
+  const rstRoutePts = [[railL, rstY, 0], [railR, rstY, 0]];
+
   for (const inst of instances) {
     const x = inst.position.x;
     const y = inst.position.y;
@@ -834,12 +887,42 @@ async function buildScene(designPath) {
     if (clkInstances.has(inst.instance_name)) {
       scene.add(solidLine([[x, y - hy, 0], [x, clkY, 0]], CLK_COL));
       scene.add(portDot([x, y - hy, 0], CLK_COL));
+      clkRoutePts.push([x, y - hy, 0], [x, clkY, 0]);
+
+      // Hit zone for stub
+      const hitZone = busHitZone([x, y - hy, 0], [x, clkY, 0]);
+      scene.add(hitZone);
+      clickableObjects.push(hitZone);
+      objectMeta.set(hitZone, { type: 'connection', connection: clkConn, routePts: clkRoutePts });
     }
 
     if (rstInstances.has(inst.instance_name)) {
       scene.add(solidLine([[x, y + hy, 0], [x, rstY, 0]], RST_COL));
       scene.add(portDot([x, y + hy, 0], RST_COL));
+      rstRoutePts.push([x, y + hy, 0], [x, rstY, 0]);
+
+      // Hit zone for stub
+      const hitZone = busHitZone([x, y + hy, 0], [x, rstY, 0]);
+      scene.add(hitZone);
+      clickableObjects.push(hitZone);
+      objectMeta.set(hitZone, { type: 'connection', connection: rstConn, routePts: rstRoutePts });
     }
+  }
+
+  // Hit zone for CLK horizontal rail
+  if (clkConn) {
+    const railHit = busHitZone([railL, clkY, 0], [railR, clkY, 0]);
+    scene.add(railHit);
+    clickableObjects.push(railHit);
+    objectMeta.set(railHit, { type: 'connection', connection: clkConn, routePts: clkRoutePts });
+  }
+
+  // Hit zone for RST horizontal rail
+  if (rstConn) {
+    const railHit = busHitZone([railL, rstY, 0], [railR, rstY, 0]);
+    scene.add(railHit);
+    clickableObjects.push(railHit);
+    objectMeta.set(railHit, { type: 'connection', connection: rstConn, routePts: rstRoutePts });
   }
 
   // ── Bus / TLM connections ────────────────────────────────────
