@@ -1,10 +1,10 @@
 {
   "block_name": "axi4_pipeline",
-  "description": "AXI4 pipeline: master → repeater → slave",
+  "description": "AXI4 pipeline: master \u2192 repeater \u2192 slave",
   "includes": [
-    "blocks/axi4_master.json",
-    "blocks/axi4_repeater.json",
-    "blocks/axi4_slave.json"
+    "axi4_master.json",
+    "axi4_repeater.json",
+    "axi4_slave.json"
   ],
   "instances": [
     {
@@ -39,7 +39,7 @@
     {
       "id": "master_to_repeater",
       "type": "axi4_bus",
-      "label": "AXI4  M→R",
+      "label": "AXI4  M\u2192R",
       "description": "Full AXI4 bus: u_master (master) drives u_repeater (slave-side interface)",
       "from_instance": "u_master",
       "to_instance": "u_repeater",
@@ -244,7 +244,7 @@
     {
       "id": "repeater_to_slave",
       "type": "axi4_bus",
-      "label": "AXI4  R→S",
+      "label": "AXI4  R\u2192S",
       "description": "Full AXI4 bus: u_repeater (master-side interface) drives u_slave",
       "from_instance": "u_repeater",
       "to_instance": "u_slave",

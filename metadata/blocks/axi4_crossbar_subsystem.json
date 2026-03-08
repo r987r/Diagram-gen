@@ -1,21 +1,21 @@
 {
   "block_name": "axi4_crossbar_subsystem",
-  "description": "AXI4 crossbar subsystem: 3 masters → interconnect → 4 slaves",
+  "description": "AXI4 crossbar subsystem: 3 masters \u2192 interconnect \u2192 4 slaves",
   "includes": [
-    "blocks/axi4_master_cpu.json",
-    "blocks/axi4_master_dma.json",
-    "blocks/axi4_master_gpu.json",
-    "blocks/axi4_interconnect.json",
-    "blocks/axi4_slave_sram.json",
-    "blocks/axi4_slave_ddr.json",
-    "blocks/axi4_slave_uart.json",
-    "blocks/axi4_slave_spi.json"
+    "axi4_master_cpu.json",
+    "axi4_master_dma.json",
+    "axi4_master_gpu.json",
+    "axi4_interconnect.json",
+    "axi4_slave_sram.json",
+    "axi4_slave_ddr.json",
+    "axi4_slave_uart.json",
+    "axi4_slave_spi.json"
   ],
   "instances": [
     {
       "instance_name": "u_cpu",
       "module": "axi4_master_cpu",
-      "description": "CPU master instance – primary system initiator",
+      "description": "CPU master instance \u2013 primary system initiator",
       "position": {
         "x": -16,
         "y": 4,
@@ -25,7 +25,7 @@
     {
       "instance_name": "u_dma",
       "module": "axi4_master_dma",
-      "description": "DMA engine master instance – bulk data mover",
+      "description": "DMA engine master instance \u2013 bulk data mover",
       "position": {
         "x": -16,
         "y": 0,
@@ -35,7 +35,7 @@
     {
       "instance_name": "u_gpu",
       "module": "axi4_master_gpu",
-      "description": "GPU master instance – graphics/compute initiator",
+      "description": "GPU master instance \u2013 graphics/compute initiator",
       "position": {
         "x": -16,
         "y": -4,
@@ -45,7 +45,7 @@
     {
       "instance_name": "u_xbar",
       "module": "axi4_interconnect",
-      "description": "AXI4 crossbar interconnect – 3-to-4 address-decoded switch fabric",
+      "description": "AXI4 crossbar interconnect \u2013 3-to-4 address-decoded switch fabric",
       "position": {
         "x": 0,
         "y": 0,
@@ -97,7 +97,7 @@
     {
       "id": "cpu_to_xbar_s0",
       "type": "axi4_bus",
-      "label": "AXI4 CPU→XBAR_S0",
+      "label": "AXI4 CPU\u2192XBAR_S0",
       "description": "AXI4 bus from CPU master to interconnect slave port 0",
       "from_instance": "u_cpu",
       "to_instance": "u_xbar",
@@ -212,7 +212,7 @@
     {
       "id": "dma_to_xbar_s1",
       "type": "axi4_bus",
-      "label": "AXI4 DMA→XBAR_S1",
+      "label": "AXI4 DMA\u2192XBAR_S1",
       "description": "AXI4 bus from DMA engine master to interconnect slave port 1",
       "from_instance": "u_dma",
       "to_instance": "u_xbar",
@@ -327,7 +327,7 @@
     {
       "id": "gpu_to_xbar_s2",
       "type": "axi4_bus",
-      "label": "AXI4 GPU→XBAR_S2",
+      "label": "AXI4 GPU\u2192XBAR_S2",
       "description": "AXI4 bus from GPU master to interconnect slave port 2",
       "from_instance": "u_gpu",
       "to_instance": "u_xbar",
@@ -442,7 +442,7 @@
     {
       "id": "xbar_m0_to_sram",
       "type": "axi4_bus",
-      "label": "AXI4 XBAR_M0→SRAM",
+      "label": "AXI4 XBAR_M0\u2192SRAM",
       "description": "AXI4 bus from interconnect master port 0 to SRAM slave (widened 6-bit ID)",
       "from_instance": "u_xbar",
       "to_instance": "u_sram",
@@ -557,7 +557,7 @@
     {
       "id": "xbar_m1_to_ddr",
       "type": "axi4_bus",
-      "label": "AXI4 XBAR_M1→DDR",
+      "label": "AXI4 XBAR_M1\u2192DDR",
       "description": "AXI4 bus from interconnect master port 1 to DDR controller slave (widened 6-bit ID)",
       "from_instance": "u_xbar",
       "to_instance": "u_ddr",
@@ -672,7 +672,7 @@
     {
       "id": "xbar_m2_to_uart",
       "type": "axi4_bus",
-      "label": "AXI4 XBAR_M2→UART",
+      "label": "AXI4 XBAR_M2\u2192UART",
       "description": "AXI4 bus from interconnect master port 2 to UART peripheral slave (widened 6-bit ID)",
       "from_instance": "u_xbar",
       "to_instance": "u_uart",
@@ -787,7 +787,7 @@
     {
       "id": "xbar_m3_to_spi",
       "type": "axi4_bus",
-      "label": "AXI4 XBAR_M3→SPI",
+      "label": "AXI4 XBAR_M3\u2192SPI",
       "description": "AXI4 bus from interconnect master port 3 to SPI peripheral slave (widened 6-bit ID)",
       "from_instance": "u_xbar",
       "to_instance": "u_spi",
