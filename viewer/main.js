@@ -21,6 +21,7 @@ const RST_COL   = 0xFF5252;   // red
 const AXI4_COL  = 0xFFC107;   // amber
 const TB_COL    = 0x546E7A;   // blue-grey
 const BG_COL    = 0x0d0d1a;   // deep navy
+const CAM_AUTO_FIT = 20;      // scene size threshold for auto camera refit
 
 // ── Scene ────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -507,7 +508,7 @@ async function buildScene(designPath) {
   const sceneWidth  = xMax - xMin + CUBE * 2 + 6;
   const sceneHeight = (rstY - clkY) + 4;
   const maxDim = Math.max(sceneWidth, sceneHeight);
-  if (maxDim > 20) {
+  if (maxDim > CAM_AUTO_FIT) {
     camera.position.set(tbCX, tbCY + maxDim * 0.5, maxDim * 1.5);
     controls.target.set(tbCX, tbCY, 0);
     controls.update();
