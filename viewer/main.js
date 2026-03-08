@@ -148,11 +148,11 @@ function dashedBox(cx, cy, cz, w, h, d, color) {
  *  `scale` multiplies the default CUBE size (1 = normal, >1 = bigger). */
 function instanceCube(inst, hexColor, scale = 1) {
   const group = new THREE.Group();
-  const side = CUBE * scale;
-  const half = side / 2;
+  const size = CUBE * scale;
+  const half = size / 2;
 
   // Solid face
-  const geo = new THREE.BoxGeometry(side, side, side);
+  const geo = new THREE.BoxGeometry(size, size, size);
   const mat = new THREE.MeshLambertMaterial({
     color: hexColor, transparent: true, opacity: 0.82,
   });
@@ -406,7 +406,7 @@ async function buildScene(designPath) {
     if (mod?.render?.scale) return mod.render.scale;
     const f = fanOut[inst.instance_name] || 0;
     if (f <= 1 || maxFan <= 1) return 1;
-    return 1 + (f - 1) / (maxFan - 1);   // linear 1→2
+    return 1 + (f - 1) / (maxFan - 1);   // linear interpolation: f=1→1.0, f=maxFan→2.0
   }
 
   // Map instance name → its cube half-size for wiring
@@ -429,6 +429,9 @@ async function buildScene(designPath) {
   }
 
   // ── Geometry helpers (use per-instance half for extents) ───────
+  // Requires at least one instance; designs without instances have nothing to render.
+  if (instances.length === 0) return;
+
   let xMin = Infinity, xMax = -Infinity, yMin = Infinity, yMax = -Infinity;
   for (const inst of instances) {
     const h = instHalf[inst.instance_name];
