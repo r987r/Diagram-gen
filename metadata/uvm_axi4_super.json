@@ -1,7 +1,7 @@
 {
   "design_name": "uvm_axi4_super",
   "version": "3.0",
-  "description": "UVM verification environment wrapping the AXI4 wide interconnect. Each AXI4 UVC has five per-channel agents (AW, W, B for write; AR, R for read), each encapsulating a sequencer, driver and monitor. Agents connect to the DUT crossbar via virtual interfaces. Read and write scoreboards receive monitor transactions via TLM analysis ports. Read and write sequences drive agents via TLM seq_item ports. All TLM connections are internal to the environment \u2014 no external TLM ports.",
+  "description": "UVM verification environment wrapping the AXI4 wide interconnect. Each AXI4 UVC has five per-channel agents (AW, W, B for write; AR, R for read), each encapsulating a sequencer, driver and monitor. Agents are grouped into UVC encapsulation boxes. The interconnect is the central routing element.",
   "includes": [
     "blocks/uvm_agent.json",
     "blocks/uvm_sequence.json"
@@ -10,14 +10,12 @@
     "DATA_WIDTH": 64,
     "ADDR_WIDTH": 32,
     "ID_WIDTH": 4,
-    "ID_WIDTH_OUT": 6,
-    "STRB_WIDTH": 8,
     "NUM_MASTERS": 3,
     "NUM_SLAVES": 4
   },
   "testbench": {
     "module_name": "tb_top",
-    "description": "Top-level testbench. Drives clk/rst and connects virtual interfaces between the DUT interconnect and per-channel UVC agents.",
+    "description": "Top-level UVM testbench for AXI4 interconnect verification.",
     "global_signals": [
       {
         "name": "clk",
@@ -33,7 +31,7 @@
         "name": "rst_n",
         "width": 1,
         "type": "reg",
-        "description": "Active-low synchronous reset.",
+        "description": "Active-low reset.",
         "render": {
           "face": "top",
           "color": "#FF5252"
@@ -42,104 +40,35 @@
     ]
   },
   "modules": {
-    "uvm_env": {
-      "description": "Top-level UVM environment. Contains all per-channel agents, read/write scoreboards and read/write sequences. All TLM connections are internal.",
-      "render": {
-        "color": "#3F51B5"
-      },
-      "ports": [
-        {
-          "name": "clk",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL"
-        },
-        {
-          "name": "rst_n",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL"
-        }
-      ]
-    },
     "axi4_interconnect": {
-      "description": "AXI4 crossbar / interconnect (DUT). Routes transactions from master ports to slave ports based on address decoding. This is the real RTL design under verification.",
+      "description": "AXI4 Crossbar Interconnect \u2014 routes master transactions to slave ports",
       "render": {
-        "color": "#FF9800"
+        "color": "#FF9800",
+        "size": {
+          "w": 16,
+          "h": 6,
+          "d": 6
+        }
       },
       "ports": [
         {
           "name": "clk",
           "direction": "input",
           "width": 1,
-          "channel": "GLOBAL"
+          "channel": "GLOBAL",
+          "description": "System clock"
         },
         {
           "name": "rst_n",
           "direction": "input",
           "width": 1,
-          "channel": "GLOBAL"
-        },
-        {
-          "name": "s0_awid",
-          "direction": "input",
-          "width": 4,
-          "channel": "AW",
-          "side": "slave"
-        },
-        {
-          "name": "s0_awaddr",
-          "direction": "input",
-          "width": 32,
-          "channel": "AW",
-          "side": "slave"
-        },
-        {
-          "name": "s0_awvalid",
-          "direction": "input",
-          "width": 1,
-          "channel": "AW",
-          "side": "slave"
-        },
-        {
-          "name": "s0_awready",
-          "direction": "output",
-          "width": 1,
-          "channel": "AW",
-          "side": "slave"
-        },
-        {
-          "name": "m0_awid",
-          "direction": "output",
-          "width": 6,
-          "channel": "AW",
-          "side": "master"
-        },
-        {
-          "name": "m0_awaddr",
-          "direction": "output",
-          "width": 32,
-          "channel": "AW",
-          "side": "master"
-        },
-        {
-          "name": "m0_awvalid",
-          "direction": "output",
-          "width": 1,
-          "channel": "AW",
-          "side": "master"
-        },
-        {
-          "name": "m0_awready",
-          "direction": "input",
-          "width": 1,
-          "channel": "AW",
-          "side": "master"
+          "channel": "GLOBAL",
+          "description": "Active-low reset"
         }
       ]
     },
     "uvm_read_scoreboard": {
-      "description": "Read scoreboard. Receives transactions from AR and R channel monitors via TLM analysis ports and checks end-to-end read data integrity.",
+      "description": "Read scoreboard \u2014 checks AR/R channel transactions across all ports",
       "render": {
         "color": "#F44336"
       },
@@ -148,25 +77,27 @@
           "name": "clk",
           "direction": "input",
           "width": 1,
-          "channel": "GLOBAL"
+          "channel": "GLOBAL",
+          "description": "System clock"
         },
         {
           "name": "rst_n",
           "direction": "input",
           "width": 1,
-          "channel": "GLOBAL"
+          "channel": "GLOBAL",
+          "description": "Active-low reset"
         },
         {
           "name": "analysis_export",
           "direction": "input",
           "width": 1,
           "channel": "TLM",
-          "description": "Analysis export for AR/R monitor transactions"
+          "description": "TLM analysis export for read transactions"
         }
       ]
     },
     "uvm_write_scoreboard": {
-      "description": "Write scoreboard. Receives transactions from AW, W and B channel monitors via TLM analysis ports and checks end-to-end write data integrity.",
+      "description": "Write scoreboard \u2014 checks AW/W/B channel transactions across all ports",
       "render": {
         "color": "#E53935"
       },
@@ -175,41 +106,33 @@
           "name": "clk",
           "direction": "input",
           "width": 1,
-          "channel": "GLOBAL"
+          "channel": "GLOBAL",
+          "description": "System clock"
         },
         {
           "name": "rst_n",
           "direction": "input",
           "width": 1,
-          "channel": "GLOBAL"
+          "channel": "GLOBAL",
+          "description": "Active-low reset"
         },
         {
           "name": "analysis_export",
           "direction": "input",
           "width": 1,
           "channel": "TLM",
-          "description": "Analysis export for AW/W/B monitor transactions"
+          "description": "TLM analysis export for write transactions"
         }
       ]
     }
   },
   "instances": [
     {
-      "instance_name": "env_i",
-      "module": "uvm_env",
-      "description": "Top-level UVM environment \u2014 contains all per-channel agents, scoreboards and sequences",
-      "position": {
-        "x": 8,
-        "y": 14,
-        "z": 0
-      }
-    },
-    {
       "instance_name": "u_xbar",
       "module": "axi4_interconnect",
-      "description": "AXI4 crossbar / interconnect (DUT under verification)",
+      "description": "AXI4 crossbar interconnect \u2014 routes master transactions to slave ports",
       "position": {
-        "x": 8,
+        "x": 0,
         "y": 0,
         "z": 0
       }
@@ -217,390 +140,390 @@
     {
       "instance_name": "read_seq",
       "module": "uvm_sequence",
-      "description": "Read sequence \u2014 generates AR/R stimulus items, connects to AR and R sequencers via TLM",
+      "description": "Read sequence \u2014 generates AR/R channel stimulus",
       "position": {
-        "x": 2,
-        "y": 10,
+        "x": -55,
+        "y": 5,
         "z": 0
       }
     },
     {
       "instance_name": "write_seq",
       "module": "uvm_sequence",
-      "description": "Write sequence \u2014 generates AW/W/B stimulus items, connects to AW, W and B sequencers via TLM",
+      "description": "Write sequence \u2014 generates AW/W/B channel stimulus",
       "position": {
-        "x": 14,
-        "y": 10,
+        "x": -55,
+        "y": -5,
         "z": 0
       }
     },
     {
       "instance_name": "read_sb",
       "module": "uvm_read_scoreboard",
-      "description": "Read scoreboard \u2014 checks end-to-end data integrity using AR and R monitor transactions",
+      "description": "Read scoreboard \u2014 checks AR\u2192R transactions",
       "position": {
-        "x": 2,
-        "y": -10,
+        "x": 55,
+        "y": 5,
         "z": 0
       }
     },
     {
       "instance_name": "write_sb",
       "module": "uvm_write_scoreboard",
-      "description": "Write scoreboard \u2014 checks end-to-end data integrity using AW, W and B monitor transactions",
+      "description": "Write scoreboard \u2014 checks AW+W\u2192B transactions",
       "position": {
-        "x": 14,
-        "y": -10,
+        "x": 55,
+        "y": -5,
         "z": 0
       }
     },
     {
       "instance_name": "cpu_aw_agent",
       "module": "uvm_agent",
-      "description": "CPU master AW channel agent \u2014 encapsulates sequencer, driver and monitor for AW channel",
+      "description": "CPU AW channel agent",
       "position": {
-        "x": -24,
-        "y": 4,
+        "x": -44.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "cpu_w_agent",
       "module": "uvm_agent",
-      "description": "CPU master W channel agent \u2014 encapsulates sequencer, driver and monitor for W channel",
+      "description": "CPU W channel agent",
       "position": {
-        "x": -23,
-        "y": 4,
+        "x": -38.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "cpu_b_agent",
       "module": "uvm_agent",
-      "description": "CPU master B channel agent \u2014 encapsulates sequencer, driver and monitor for B channel",
+      "description": "CPU B channel agent",
       "position": {
-        "x": -22,
-        "y": 4,
+        "x": -32.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "cpu_ar_agent",
       "module": "uvm_agent",
-      "description": "CPU master AR channel agent \u2014 encapsulates sequencer, driver and monitor for AR channel",
+      "description": "CPU AR channel agent",
       "position": {
-        "x": -21,
-        "y": 4,
+        "x": -26.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "cpu_r_agent",
       "module": "uvm_agent",
-      "description": "CPU master R channel agent \u2014 encapsulates sequencer, driver and monitor for R channel",
+      "description": "CPU R channel agent",
       "position": {
-        "x": -20,
-        "y": 4,
+        "x": -20.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "dma_aw_agent",
       "module": "uvm_agent",
-      "description": "DMA master AW channel agent \u2014 encapsulates sequencer, driver and monitor for AW channel",
+      "description": "DMA AW channel agent",
       "position": {
-        "x": -14,
-        "y": 4,
+        "x": -12.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "dma_w_agent",
       "module": "uvm_agent",
-      "description": "DMA master W channel agent \u2014 encapsulates sequencer, driver and monitor for W channel",
+      "description": "DMA W channel agent",
       "position": {
-        "x": -13,
-        "y": 4,
+        "x": -6.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "dma_b_agent",
       "module": "uvm_agent",
-      "description": "DMA master B channel agent \u2014 encapsulates sequencer, driver and monitor for B channel",
+      "description": "DMA B channel agent",
       "position": {
-        "x": -12,
-        "y": 4,
+        "x": 0.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "dma_ar_agent",
       "module": "uvm_agent",
-      "description": "DMA master AR channel agent \u2014 encapsulates sequencer, driver and monitor for AR channel",
+      "description": "DMA AR channel agent",
       "position": {
-        "x": -11,
-        "y": 4,
+        "x": 6.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "dma_r_agent",
       "module": "uvm_agent",
-      "description": "DMA master R channel agent \u2014 encapsulates sequencer, driver and monitor for R channel",
+      "description": "DMA R channel agent",
       "position": {
-        "x": -10,
-        "y": 4,
+        "x": 12.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "gpu_aw_agent",
       "module": "uvm_agent",
-      "description": "GPU master AW channel agent \u2014 encapsulates sequencer, driver and monitor for AW channel",
+      "description": "GPU AW channel agent",
       "position": {
-        "x": -4,
-        "y": 4,
+        "x": 20.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "gpu_w_agent",
       "module": "uvm_agent",
-      "description": "GPU master W channel agent \u2014 encapsulates sequencer, driver and monitor for W channel",
+      "description": "GPU W channel agent",
       "position": {
-        "x": -3,
-        "y": 4,
+        "x": 26.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "gpu_b_agent",
       "module": "uvm_agent",
-      "description": "GPU master B channel agent \u2014 encapsulates sequencer, driver and monitor for B channel",
+      "description": "GPU B channel agent",
       "position": {
-        "x": -2,
-        "y": 4,
+        "x": 32.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "gpu_ar_agent",
       "module": "uvm_agent",
-      "description": "GPU master AR channel agent \u2014 encapsulates sequencer, driver and monitor for AR channel",
+      "description": "GPU AR channel agent",
       "position": {
-        "x": -1,
-        "y": 4,
+        "x": 38.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "gpu_r_agent",
       "module": "uvm_agent",
-      "description": "GPU master R channel agent \u2014 encapsulates sequencer, driver and monitor for R channel",
+      "description": "GPU R channel agent",
       "position": {
-        "x": 0,
-        "y": 4,
+        "x": 44.0,
+        "y": 18,
         "z": 0
       }
     },
     {
       "instance_name": "sram_aw_agent",
       "module": "uvm_agent",
-      "description": "SRAM slave AW channel agent \u2014 encapsulates sequencer, driver and monitor for AW channel",
+      "description": "SRAM AW channel agent",
       "position": {
-        "x": 16,
-        "y": -4,
+        "x": -60.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "sram_w_agent",
       "module": "uvm_agent",
-      "description": "SRAM slave W channel agent \u2014 encapsulates sequencer, driver and monitor for W channel",
+      "description": "SRAM W channel agent",
       "position": {
-        "x": 17,
-        "y": -4,
+        "x": -54.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "sram_b_agent",
       "module": "uvm_agent",
-      "description": "SRAM slave B channel agent \u2014 encapsulates sequencer, driver and monitor for B channel",
+      "description": "SRAM B channel agent",
       "position": {
-        "x": 18,
-        "y": -4,
+        "x": -48.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "sram_ar_agent",
       "module": "uvm_agent",
-      "description": "SRAM slave AR channel agent \u2014 encapsulates sequencer, driver and monitor for AR channel",
+      "description": "SRAM AR channel agent",
       "position": {
-        "x": 19,
-        "y": -4,
+        "x": -42.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "sram_r_agent",
       "module": "uvm_agent",
-      "description": "SRAM slave R channel agent \u2014 encapsulates sequencer, driver and monitor for R channel",
+      "description": "SRAM R channel agent",
       "position": {
-        "x": 20,
-        "y": -4,
+        "x": -36.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "ddr_aw_agent",
       "module": "uvm_agent",
-      "description": "DDR slave AW channel agent \u2014 encapsulates sequencer, driver and monitor for AW channel",
+      "description": "DDR AW channel agent",
       "position": {
-        "x": 24,
-        "y": -4,
+        "x": -28.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "ddr_w_agent",
       "module": "uvm_agent",
-      "description": "DDR slave W channel agent \u2014 encapsulates sequencer, driver and monitor for W channel",
+      "description": "DDR W channel agent",
       "position": {
-        "x": 25,
-        "y": -4,
+        "x": -22.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "ddr_b_agent",
       "module": "uvm_agent",
-      "description": "DDR slave B channel agent \u2014 encapsulates sequencer, driver and monitor for B channel",
+      "description": "DDR B channel agent",
       "position": {
-        "x": 26,
-        "y": -4,
+        "x": -16.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "ddr_ar_agent",
       "module": "uvm_agent",
-      "description": "DDR slave AR channel agent \u2014 encapsulates sequencer, driver and monitor for AR channel",
+      "description": "DDR AR channel agent",
       "position": {
-        "x": 27,
-        "y": -4,
+        "x": -10.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "ddr_r_agent",
       "module": "uvm_agent",
-      "description": "DDR slave R channel agent \u2014 encapsulates sequencer, driver and monitor for R channel",
+      "description": "DDR R channel agent",
       "position": {
-        "x": 28,
-        "y": -4,
+        "x": -4.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "uart_aw_agent",
       "module": "uvm_agent",
-      "description": "UART slave AW channel agent \u2014 encapsulates sequencer, driver and monitor for AW channel",
+      "description": "UART AW channel agent",
       "position": {
-        "x": 32,
-        "y": -4,
+        "x": 4.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "uart_w_agent",
       "module": "uvm_agent",
-      "description": "UART slave W channel agent \u2014 encapsulates sequencer, driver and monitor for W channel",
+      "description": "UART W channel agent",
       "position": {
-        "x": 33,
-        "y": -4,
+        "x": 10.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "uart_b_agent",
       "module": "uvm_agent",
-      "description": "UART slave B channel agent \u2014 encapsulates sequencer, driver and monitor for B channel",
+      "description": "UART B channel agent",
       "position": {
-        "x": 34,
-        "y": -4,
+        "x": 16.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "uart_ar_agent",
       "module": "uvm_agent",
-      "description": "UART slave AR channel agent \u2014 encapsulates sequencer, driver and monitor for AR channel",
+      "description": "UART AR channel agent",
       "position": {
-        "x": 35,
-        "y": -4,
+        "x": 22.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "uart_r_agent",
       "module": "uvm_agent",
-      "description": "UART slave R channel agent \u2014 encapsulates sequencer, driver and monitor for R channel",
+      "description": "UART R channel agent",
       "position": {
-        "x": 36,
-        "y": -4,
+        "x": 28.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "spi_aw_agent",
       "module": "uvm_agent",
-      "description": "SPI slave AW channel agent \u2014 encapsulates sequencer, driver and monitor for AW channel",
+      "description": "SPI AW channel agent",
       "position": {
-        "x": 40,
-        "y": -4,
+        "x": 36.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "spi_w_agent",
       "module": "uvm_agent",
-      "description": "SPI slave W channel agent \u2014 encapsulates sequencer, driver and monitor for W channel",
+      "description": "SPI W channel agent",
       "position": {
-        "x": 41,
-        "y": -4,
+        "x": 42.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "spi_b_agent",
       "module": "uvm_agent",
-      "description": "SPI slave B channel agent \u2014 encapsulates sequencer, driver and monitor for B channel",
+      "description": "SPI B channel agent",
       "position": {
-        "x": 42,
-        "y": -4,
+        "x": 48.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "spi_ar_agent",
       "module": "uvm_agent",
-      "description": "SPI slave AR channel agent \u2014 encapsulates sequencer, driver and monitor for AR channel",
+      "description": "SPI AR channel agent",
       "position": {
-        "x": 43,
-        "y": -4,
+        "x": 54.0,
+        "y": -18,
         "z": 0
       }
     },
     {
       "instance_name": "spi_r_agent",
       "module": "uvm_agent",
-      "description": "SPI slave R channel agent \u2014 encapsulates sequencer, driver and monitor for R channel",
+      "description": "SPI R channel agent",
       "position": {
-        "x": 44,
-        "y": -4,
+        "x": 60.0,
+        "y": -18,
         "z": 0
       }
     }
@@ -615,10 +538,6 @@
         "port": "clk"
       },
       "to": [
-        {
-          "instance": "env_i",
-          "port": "clk"
-        },
         {
           "instance": "u_xbar",
           "port": "clk"
@@ -791,10 +710,6 @@
       },
       "to": [
         {
-          "instance": "env_i",
-          "port": "rst_n"
-        },
-        {
           "instance": "u_xbar",
           "port": "rst_n"
         },
@@ -957,2133 +872,18 @@
       ]
     },
     {
-      "id": "env_to_read_seq",
-      "type": "axi4_bus",
-      "label": "env \u2192 read_seq",
-      "description": "Environment creates and contains read_seq",
-      "from_instance": "env_i",
-      "to_instance": "read_seq",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "read_seq"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_write_seq",
-      "type": "axi4_bus",
-      "label": "env \u2192 write_seq",
-      "description": "Environment creates and contains write_seq",
-      "from_instance": "env_i",
-      "to_instance": "write_seq",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "write_seq"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_read_sb",
-      "type": "axi4_bus",
-      "label": "env \u2192 read_sb",
-      "description": "Environment creates and contains read_sb",
-      "from_instance": "env_i",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "read_sb"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_write_sb",
-      "type": "axi4_bus",
-      "label": "env \u2192 write_sb",
-      "description": "Environment creates and contains write_sb",
-      "from_instance": "env_i",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "write_sb"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_cpu_aw_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 cpu_aw_agent",
-      "description": "Environment creates and contains cpu_aw_agent",
-      "from_instance": "env_i",
-      "to_instance": "cpu_aw_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "cpu_aw_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_cpu_w_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 cpu_w_agent",
-      "description": "Environment creates and contains cpu_w_agent",
-      "from_instance": "env_i",
-      "to_instance": "cpu_w_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "cpu_w_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_cpu_b_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 cpu_b_agent",
-      "description": "Environment creates and contains cpu_b_agent",
-      "from_instance": "env_i",
-      "to_instance": "cpu_b_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "cpu_b_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_cpu_ar_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 cpu_ar_agent",
-      "description": "Environment creates and contains cpu_ar_agent",
-      "from_instance": "env_i",
-      "to_instance": "cpu_ar_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "cpu_ar_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_cpu_r_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 cpu_r_agent",
-      "description": "Environment creates and contains cpu_r_agent",
-      "from_instance": "env_i",
-      "to_instance": "cpu_r_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "cpu_r_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_dma_aw_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 dma_aw_agent",
-      "description": "Environment creates and contains dma_aw_agent",
-      "from_instance": "env_i",
-      "to_instance": "dma_aw_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "dma_aw_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_dma_w_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 dma_w_agent",
-      "description": "Environment creates and contains dma_w_agent",
-      "from_instance": "env_i",
-      "to_instance": "dma_w_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "dma_w_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_dma_b_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 dma_b_agent",
-      "description": "Environment creates and contains dma_b_agent",
-      "from_instance": "env_i",
-      "to_instance": "dma_b_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "dma_b_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_dma_ar_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 dma_ar_agent",
-      "description": "Environment creates and contains dma_ar_agent",
-      "from_instance": "env_i",
-      "to_instance": "dma_ar_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "dma_ar_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_dma_r_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 dma_r_agent",
-      "description": "Environment creates and contains dma_r_agent",
-      "from_instance": "env_i",
-      "to_instance": "dma_r_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "dma_r_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_gpu_aw_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 gpu_aw_agent",
-      "description": "Environment creates and contains gpu_aw_agent",
-      "from_instance": "env_i",
-      "to_instance": "gpu_aw_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "gpu_aw_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_gpu_w_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 gpu_w_agent",
-      "description": "Environment creates and contains gpu_w_agent",
-      "from_instance": "env_i",
-      "to_instance": "gpu_w_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "gpu_w_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_gpu_b_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 gpu_b_agent",
-      "description": "Environment creates and contains gpu_b_agent",
-      "from_instance": "env_i",
-      "to_instance": "gpu_b_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "gpu_b_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_gpu_ar_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 gpu_ar_agent",
-      "description": "Environment creates and contains gpu_ar_agent",
-      "from_instance": "env_i",
-      "to_instance": "gpu_ar_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "gpu_ar_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_gpu_r_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 gpu_r_agent",
-      "description": "Environment creates and contains gpu_r_agent",
-      "from_instance": "env_i",
-      "to_instance": "gpu_r_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "gpu_r_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_sram_aw_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 sram_aw_agent",
-      "description": "Environment creates and contains sram_aw_agent",
-      "from_instance": "env_i",
-      "to_instance": "sram_aw_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "sram_aw_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_sram_w_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 sram_w_agent",
-      "description": "Environment creates and contains sram_w_agent",
-      "from_instance": "env_i",
-      "to_instance": "sram_w_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "sram_w_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_sram_b_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 sram_b_agent",
-      "description": "Environment creates and contains sram_b_agent",
-      "from_instance": "env_i",
-      "to_instance": "sram_b_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "sram_b_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_sram_ar_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 sram_ar_agent",
-      "description": "Environment creates and contains sram_ar_agent",
-      "from_instance": "env_i",
-      "to_instance": "sram_ar_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "sram_ar_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_sram_r_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 sram_r_agent",
-      "description": "Environment creates and contains sram_r_agent",
-      "from_instance": "env_i",
-      "to_instance": "sram_r_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "sram_r_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_ddr_aw_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 ddr_aw_agent",
-      "description": "Environment creates and contains ddr_aw_agent",
-      "from_instance": "env_i",
-      "to_instance": "ddr_aw_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "ddr_aw_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_ddr_w_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 ddr_w_agent",
-      "description": "Environment creates and contains ddr_w_agent",
-      "from_instance": "env_i",
-      "to_instance": "ddr_w_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "ddr_w_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_ddr_b_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 ddr_b_agent",
-      "description": "Environment creates and contains ddr_b_agent",
-      "from_instance": "env_i",
-      "to_instance": "ddr_b_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "ddr_b_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_ddr_ar_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 ddr_ar_agent",
-      "description": "Environment creates and contains ddr_ar_agent",
-      "from_instance": "env_i",
-      "to_instance": "ddr_ar_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "ddr_ar_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_ddr_r_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 ddr_r_agent",
-      "description": "Environment creates and contains ddr_r_agent",
-      "from_instance": "env_i",
-      "to_instance": "ddr_r_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "ddr_r_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_uart_aw_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 uart_aw_agent",
-      "description": "Environment creates and contains uart_aw_agent",
-      "from_instance": "env_i",
-      "to_instance": "uart_aw_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "uart_aw_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_uart_w_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 uart_w_agent",
-      "description": "Environment creates and contains uart_w_agent",
-      "from_instance": "env_i",
-      "to_instance": "uart_w_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "uart_w_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_uart_b_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 uart_b_agent",
-      "description": "Environment creates and contains uart_b_agent",
-      "from_instance": "env_i",
-      "to_instance": "uart_b_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "uart_b_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_uart_ar_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 uart_ar_agent",
-      "description": "Environment creates and contains uart_ar_agent",
-      "from_instance": "env_i",
-      "to_instance": "uart_ar_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "uart_ar_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_uart_r_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 uart_r_agent",
-      "description": "Environment creates and contains uart_r_agent",
-      "from_instance": "env_i",
-      "to_instance": "uart_r_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "uart_r_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_spi_aw_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 spi_aw_agent",
-      "description": "Environment creates and contains spi_aw_agent",
-      "from_instance": "env_i",
-      "to_instance": "spi_aw_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "spi_aw_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_spi_w_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 spi_w_agent",
-      "description": "Environment creates and contains spi_w_agent",
-      "from_instance": "env_i",
-      "to_instance": "spi_w_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "spi_w_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_spi_b_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 spi_b_agent",
-      "description": "Environment creates and contains spi_b_agent",
-      "from_instance": "env_i",
-      "to_instance": "spi_b_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "spi_b_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_spi_ar_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 spi_ar_agent",
-      "description": "Environment creates and contains spi_ar_agent",
-      "from_instance": "env_i",
-      "to_instance": "spi_ar_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "spi_ar_agent"
-          }
-        ]
-      }
-    },
-    {
-      "id": "env_to_spi_r_agent",
-      "type": "axi4_bus",
-      "label": "env \u2192 spi_r_agent",
-      "description": "Environment creates and contains spi_r_agent",
-      "from_instance": "env_i",
-      "to_instance": "spi_r_agent",
-      "channel_signals": {
-        "HIERARCHY": [
-          {
-            "from_port": "build_phase",
-            "wire": "create",
-            "to_port": "spi_r_agent"
-          }
-        ]
-      }
-    },
-    {
       "id": "cpu_aw_agent_vif",
       "type": "axi4_bus",
-      "label": "CPU AW \u2192 XBAR",
-      "description": "CPU AW agent drives/monitors AW channel via virtual interface to DUT",
+      "label": "AW \u2192 xbar",
+      "description": "CPU AW agent drives interconnect via virtual interface",
       "from_instance": "cpu_aw_agent",
       "to_instance": "u_xbar",
       "channel_signals": {
-        "AW": [
+        "VIF": [
           {
             "from_port": "vif",
-            "wire": "cpu2xbar_awid",
-            "to_port": "s0_awid"
-          },
-          {
-            "from_port": "vif",
-            "wire": "cpu2xbar_awaddr",
-            "to_port": "s0_awaddr"
-          },
-          {
-            "from_port": "vif",
-            "wire": "cpu2xbar_awvalid",
-            "to_port": "s0_awvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "cpu_w_agent_vif",
-      "type": "axi4_bus",
-      "label": "CPU W \u2192 XBAR",
-      "description": "CPU W agent drives/monitors W channel via virtual interface to DUT",
-      "from_instance": "cpu_w_agent",
-      "to_instance": "u_xbar",
-      "channel_signals": {
-        "W": [
-          {
-            "from_port": "vif",
-            "wire": "cpu2xbar_wdata",
-            "to_port": "s0_wdata"
-          },
-          {
-            "from_port": "vif",
-            "wire": "cpu2xbar_wvalid",
-            "to_port": "s0_wvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "cpu_b_agent_vif",
-      "type": "axi4_bus",
-      "label": "CPU B \u2192 XBAR",
-      "description": "CPU B agent drives/monitors B channel via virtual interface to DUT",
-      "from_instance": "cpu_b_agent",
-      "to_instance": "u_xbar",
-      "channel_signals": {
-        "B": [
-          {
-            "from_port": "vif",
-            "wire": "cpu2xbar_bresp",
-            "to_port": "s0_bresp"
-          },
-          {
-            "from_port": "vif",
-            "wire": "cpu2xbar_bvalid",
-            "to_port": "s0_bvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "cpu_ar_agent_vif",
-      "type": "axi4_bus",
-      "label": "CPU AR \u2192 XBAR",
-      "description": "CPU AR agent drives/monitors AR channel via virtual interface to DUT",
-      "from_instance": "cpu_ar_agent",
-      "to_instance": "u_xbar",
-      "channel_signals": {
-        "AR": [
-          {
-            "from_port": "vif",
-            "wire": "cpu2xbar_arid",
-            "to_port": "s0_arid"
-          },
-          {
-            "from_port": "vif",
-            "wire": "cpu2xbar_araddr",
-            "to_port": "s0_araddr"
-          },
-          {
-            "from_port": "vif",
-            "wire": "cpu2xbar_arvalid",
-            "to_port": "s0_arvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "cpu_r_agent_vif",
-      "type": "axi4_bus",
-      "label": "CPU R \u2192 XBAR",
-      "description": "CPU R agent drives/monitors R channel via virtual interface to DUT",
-      "from_instance": "cpu_r_agent",
-      "to_instance": "u_xbar",
-      "channel_signals": {
-        "R": [
-          {
-            "from_port": "vif",
-            "wire": "cpu2xbar_rdata",
-            "to_port": "s0_rdata"
-          },
-          {
-            "from_port": "vif",
-            "wire": "cpu2xbar_rvalid",
-            "to_port": "s0_rvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "dma_aw_agent_vif",
-      "type": "axi4_bus",
-      "label": "DMA AW \u2192 XBAR",
-      "description": "DMA AW agent drives/monitors AW channel via virtual interface to DUT",
-      "from_instance": "dma_aw_agent",
-      "to_instance": "u_xbar",
-      "channel_signals": {
-        "AW": [
-          {
-            "from_port": "vif",
-            "wire": "dma2xbar_awid",
-            "to_port": "s1_awid"
-          },
-          {
-            "from_port": "vif",
-            "wire": "dma2xbar_awaddr",
-            "to_port": "s1_awaddr"
-          },
-          {
-            "from_port": "vif",
-            "wire": "dma2xbar_awvalid",
-            "to_port": "s1_awvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "dma_w_agent_vif",
-      "type": "axi4_bus",
-      "label": "DMA W \u2192 XBAR",
-      "description": "DMA W agent drives/monitors W channel via virtual interface to DUT",
-      "from_instance": "dma_w_agent",
-      "to_instance": "u_xbar",
-      "channel_signals": {
-        "W": [
-          {
-            "from_port": "vif",
-            "wire": "dma2xbar_wdata",
-            "to_port": "s1_wdata"
-          },
-          {
-            "from_port": "vif",
-            "wire": "dma2xbar_wvalid",
-            "to_port": "s1_wvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "dma_b_agent_vif",
-      "type": "axi4_bus",
-      "label": "DMA B \u2192 XBAR",
-      "description": "DMA B agent drives/monitors B channel via virtual interface to DUT",
-      "from_instance": "dma_b_agent",
-      "to_instance": "u_xbar",
-      "channel_signals": {
-        "B": [
-          {
-            "from_port": "vif",
-            "wire": "dma2xbar_bresp",
-            "to_port": "s1_bresp"
-          },
-          {
-            "from_port": "vif",
-            "wire": "dma2xbar_bvalid",
-            "to_port": "s1_bvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "dma_ar_agent_vif",
-      "type": "axi4_bus",
-      "label": "DMA AR \u2192 XBAR",
-      "description": "DMA AR agent drives/monitors AR channel via virtual interface to DUT",
-      "from_instance": "dma_ar_agent",
-      "to_instance": "u_xbar",
-      "channel_signals": {
-        "AR": [
-          {
-            "from_port": "vif",
-            "wire": "dma2xbar_arid",
-            "to_port": "s1_arid"
-          },
-          {
-            "from_port": "vif",
-            "wire": "dma2xbar_araddr",
-            "to_port": "s1_araddr"
-          },
-          {
-            "from_port": "vif",
-            "wire": "dma2xbar_arvalid",
-            "to_port": "s1_arvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "dma_r_agent_vif",
-      "type": "axi4_bus",
-      "label": "DMA R \u2192 XBAR",
-      "description": "DMA R agent drives/monitors R channel via virtual interface to DUT",
-      "from_instance": "dma_r_agent",
-      "to_instance": "u_xbar",
-      "channel_signals": {
-        "R": [
-          {
-            "from_port": "vif",
-            "wire": "dma2xbar_rdata",
-            "to_port": "s1_rdata"
-          },
-          {
-            "from_port": "vif",
-            "wire": "dma2xbar_rvalid",
-            "to_port": "s1_rvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "gpu_aw_agent_vif",
-      "type": "axi4_bus",
-      "label": "GPU AW \u2192 XBAR",
-      "description": "GPU AW agent drives/monitors AW channel via virtual interface to DUT",
-      "from_instance": "gpu_aw_agent",
-      "to_instance": "u_xbar",
-      "channel_signals": {
-        "AW": [
-          {
-            "from_port": "vif",
-            "wire": "gpu2xbar_awid",
-            "to_port": "s2_awid"
-          },
-          {
-            "from_port": "vif",
-            "wire": "gpu2xbar_awaddr",
-            "to_port": "s2_awaddr"
-          },
-          {
-            "from_port": "vif",
-            "wire": "gpu2xbar_awvalid",
-            "to_port": "s2_awvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "gpu_w_agent_vif",
-      "type": "axi4_bus",
-      "label": "GPU W \u2192 XBAR",
-      "description": "GPU W agent drives/monitors W channel via virtual interface to DUT",
-      "from_instance": "gpu_w_agent",
-      "to_instance": "u_xbar",
-      "channel_signals": {
-        "W": [
-          {
-            "from_port": "vif",
-            "wire": "gpu2xbar_wdata",
-            "to_port": "s2_wdata"
-          },
-          {
-            "from_port": "vif",
-            "wire": "gpu2xbar_wvalid",
-            "to_port": "s2_wvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "gpu_b_agent_vif",
-      "type": "axi4_bus",
-      "label": "GPU B \u2192 XBAR",
-      "description": "GPU B agent drives/monitors B channel via virtual interface to DUT",
-      "from_instance": "gpu_b_agent",
-      "to_instance": "u_xbar",
-      "channel_signals": {
-        "B": [
-          {
-            "from_port": "vif",
-            "wire": "gpu2xbar_bresp",
-            "to_port": "s2_bresp"
-          },
-          {
-            "from_port": "vif",
-            "wire": "gpu2xbar_bvalid",
-            "to_port": "s2_bvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "gpu_ar_agent_vif",
-      "type": "axi4_bus",
-      "label": "GPU AR \u2192 XBAR",
-      "description": "GPU AR agent drives/monitors AR channel via virtual interface to DUT",
-      "from_instance": "gpu_ar_agent",
-      "to_instance": "u_xbar",
-      "channel_signals": {
-        "AR": [
-          {
-            "from_port": "vif",
-            "wire": "gpu2xbar_arid",
-            "to_port": "s2_arid"
-          },
-          {
-            "from_port": "vif",
-            "wire": "gpu2xbar_araddr",
-            "to_port": "s2_araddr"
-          },
-          {
-            "from_port": "vif",
-            "wire": "gpu2xbar_arvalid",
-            "to_port": "s2_arvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "gpu_r_agent_vif",
-      "type": "axi4_bus",
-      "label": "GPU R \u2192 XBAR",
-      "description": "GPU R agent drives/monitors R channel via virtual interface to DUT",
-      "from_instance": "gpu_r_agent",
-      "to_instance": "u_xbar",
-      "channel_signals": {
-        "R": [
-          {
-            "from_port": "vif",
-            "wire": "gpu2xbar_rdata",
-            "to_port": "s2_rdata"
-          },
-          {
-            "from_port": "vif",
-            "wire": "gpu2xbar_rvalid",
-            "to_port": "s2_rvalid"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_sram_aw_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 SRAM AW",
-      "description": "DUT AW channel connects via virtual interface to SRAM AW agent",
-      "from_instance": "u_xbar",
-      "to_instance": "sram_aw_agent",
-      "channel_signals": {
-        "AW": [
-          {
-            "from_port": "m0_awid",
-            "wire": "xbar2sram_awid",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m0_awaddr",
-            "wire": "xbar2sram_awaddr",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m0_awvalid",
-            "wire": "xbar2sram_awvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_sram_w_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 SRAM W",
-      "description": "DUT W channel connects via virtual interface to SRAM W agent",
-      "from_instance": "u_xbar",
-      "to_instance": "sram_w_agent",
-      "channel_signals": {
-        "W": [
-          {
-            "from_port": "m0_wdata",
-            "wire": "xbar2sram_wdata",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m0_wvalid",
-            "wire": "xbar2sram_wvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_sram_b_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 SRAM B",
-      "description": "DUT B channel connects via virtual interface to SRAM B agent",
-      "from_instance": "u_xbar",
-      "to_instance": "sram_b_agent",
-      "channel_signals": {
-        "B": [
-          {
-            "from_port": "m0_bresp",
-            "wire": "xbar2sram_bresp",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m0_bvalid",
-            "wire": "xbar2sram_bvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_sram_ar_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 SRAM AR",
-      "description": "DUT AR channel connects via virtual interface to SRAM AR agent",
-      "from_instance": "u_xbar",
-      "to_instance": "sram_ar_agent",
-      "channel_signals": {
-        "AR": [
-          {
-            "from_port": "m0_arid",
-            "wire": "xbar2sram_arid",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m0_araddr",
-            "wire": "xbar2sram_araddr",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m0_arvalid",
-            "wire": "xbar2sram_arvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_sram_r_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 SRAM R",
-      "description": "DUT R channel connects via virtual interface to SRAM R agent",
-      "from_instance": "u_xbar",
-      "to_instance": "sram_r_agent",
-      "channel_signals": {
-        "R": [
-          {
-            "from_port": "m0_rdata",
-            "wire": "xbar2sram_rdata",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m0_rvalid",
-            "wire": "xbar2sram_rvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_ddr_aw_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 DDR AW",
-      "description": "DUT AW channel connects via virtual interface to DDR AW agent",
-      "from_instance": "u_xbar",
-      "to_instance": "ddr_aw_agent",
-      "channel_signals": {
-        "AW": [
-          {
-            "from_port": "m1_awid",
-            "wire": "xbar2ddr_awid",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m1_awaddr",
-            "wire": "xbar2ddr_awaddr",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m1_awvalid",
-            "wire": "xbar2ddr_awvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_ddr_w_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 DDR W",
-      "description": "DUT W channel connects via virtual interface to DDR W agent",
-      "from_instance": "u_xbar",
-      "to_instance": "ddr_w_agent",
-      "channel_signals": {
-        "W": [
-          {
-            "from_port": "m1_wdata",
-            "wire": "xbar2ddr_wdata",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m1_wvalid",
-            "wire": "xbar2ddr_wvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_ddr_b_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 DDR B",
-      "description": "DUT B channel connects via virtual interface to DDR B agent",
-      "from_instance": "u_xbar",
-      "to_instance": "ddr_b_agent",
-      "channel_signals": {
-        "B": [
-          {
-            "from_port": "m1_bresp",
-            "wire": "xbar2ddr_bresp",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m1_bvalid",
-            "wire": "xbar2ddr_bvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_ddr_ar_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 DDR AR",
-      "description": "DUT AR channel connects via virtual interface to DDR AR agent",
-      "from_instance": "u_xbar",
-      "to_instance": "ddr_ar_agent",
-      "channel_signals": {
-        "AR": [
-          {
-            "from_port": "m1_arid",
-            "wire": "xbar2ddr_arid",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m1_araddr",
-            "wire": "xbar2ddr_araddr",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m1_arvalid",
-            "wire": "xbar2ddr_arvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_ddr_r_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 DDR R",
-      "description": "DUT R channel connects via virtual interface to DDR R agent",
-      "from_instance": "u_xbar",
-      "to_instance": "ddr_r_agent",
-      "channel_signals": {
-        "R": [
-          {
-            "from_port": "m1_rdata",
-            "wire": "xbar2ddr_rdata",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m1_rvalid",
-            "wire": "xbar2ddr_rvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_uart_aw_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 UART AW",
-      "description": "DUT AW channel connects via virtual interface to UART AW agent",
-      "from_instance": "u_xbar",
-      "to_instance": "uart_aw_agent",
-      "channel_signals": {
-        "AW": [
-          {
-            "from_port": "m2_awid",
-            "wire": "xbar2uart_awid",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m2_awaddr",
-            "wire": "xbar2uart_awaddr",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m2_awvalid",
-            "wire": "xbar2uart_awvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_uart_w_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 UART W",
-      "description": "DUT W channel connects via virtual interface to UART W agent",
-      "from_instance": "u_xbar",
-      "to_instance": "uart_w_agent",
-      "channel_signals": {
-        "W": [
-          {
-            "from_port": "m2_wdata",
-            "wire": "xbar2uart_wdata",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m2_wvalid",
-            "wire": "xbar2uart_wvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_uart_b_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 UART B",
-      "description": "DUT B channel connects via virtual interface to UART B agent",
-      "from_instance": "u_xbar",
-      "to_instance": "uart_b_agent",
-      "channel_signals": {
-        "B": [
-          {
-            "from_port": "m2_bresp",
-            "wire": "xbar2uart_bresp",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m2_bvalid",
-            "wire": "xbar2uart_bvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_uart_ar_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 UART AR",
-      "description": "DUT AR channel connects via virtual interface to UART AR agent",
-      "from_instance": "u_xbar",
-      "to_instance": "uart_ar_agent",
-      "channel_signals": {
-        "AR": [
-          {
-            "from_port": "m2_arid",
-            "wire": "xbar2uart_arid",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m2_araddr",
-            "wire": "xbar2uart_araddr",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m2_arvalid",
-            "wire": "xbar2uart_arvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_uart_r_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 UART R",
-      "description": "DUT R channel connects via virtual interface to UART R agent",
-      "from_instance": "u_xbar",
-      "to_instance": "uart_r_agent",
-      "channel_signals": {
-        "R": [
-          {
-            "from_port": "m2_rdata",
-            "wire": "xbar2uart_rdata",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m2_rvalid",
-            "wire": "xbar2uart_rvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_spi_aw_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 SPI AW",
-      "description": "DUT AW channel connects via virtual interface to SPI AW agent",
-      "from_instance": "u_xbar",
-      "to_instance": "spi_aw_agent",
-      "channel_signals": {
-        "AW": [
-          {
-            "from_port": "m3_awid",
-            "wire": "xbar2spi_awid",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m3_awaddr",
-            "wire": "xbar2spi_awaddr",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m3_awvalid",
-            "wire": "xbar2spi_awvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_spi_w_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 SPI W",
-      "description": "DUT W channel connects via virtual interface to SPI W agent",
-      "from_instance": "u_xbar",
-      "to_instance": "spi_w_agent",
-      "channel_signals": {
-        "W": [
-          {
-            "from_port": "m3_wdata",
-            "wire": "xbar2spi_wdata",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m3_wvalid",
-            "wire": "xbar2spi_wvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_spi_b_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 SPI B",
-      "description": "DUT B channel connects via virtual interface to SPI B agent",
-      "from_instance": "u_xbar",
-      "to_instance": "spi_b_agent",
-      "channel_signals": {
-        "B": [
-          {
-            "from_port": "m3_bresp",
-            "wire": "xbar2spi_bresp",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m3_bvalid",
-            "wire": "xbar2spi_bvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_spi_ar_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 SPI AR",
-      "description": "DUT AR channel connects via virtual interface to SPI AR agent",
-      "from_instance": "u_xbar",
-      "to_instance": "spi_ar_agent",
-      "channel_signals": {
-        "AR": [
-          {
-            "from_port": "m3_arid",
-            "wire": "xbar2spi_arid",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m3_araddr",
-            "wire": "xbar2spi_araddr",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m3_arvalid",
-            "wire": "xbar2spi_arvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "xbar_to_spi_r_agent",
-      "type": "axi4_bus",
-      "label": "XBAR \u2192 SPI R",
-      "description": "DUT R channel connects via virtual interface to SPI R agent",
-      "from_instance": "u_xbar",
-      "to_instance": "spi_r_agent",
-      "channel_signals": {
-        "R": [
-          {
-            "from_port": "m3_rdata",
-            "wire": "xbar2spi_rdata",
-            "to_port": "vif"
-          },
-          {
-            "from_port": "m3_rvalid",
-            "wire": "xbar2spi_rvalid",
-            "to_port": "vif"
-          }
-        ]
-      }
-    },
-    {
-      "id": "cpu_ar_agent_to_read_sb",
-      "type": "axi4_bus",
-      "label": "CPU AR mon \u2192 read SB",
-      "description": "CPU AR agent monitor analysis port connects to read scoreboard via TLM",
-      "from_instance": "cpu_ar_agent",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "cpu_ar_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "cpu_r_agent_to_read_sb",
-      "type": "axi4_bus",
-      "label": "CPU R mon \u2192 read SB",
-      "description": "CPU R agent monitor analysis port connects to read scoreboard via TLM",
-      "from_instance": "cpu_r_agent",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "cpu_r_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "cpu_aw_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "CPU AW mon \u2192 write SB",
-      "description": "CPU AW agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "cpu_aw_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "cpu_aw_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "cpu_w_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "CPU W mon \u2192 write SB",
-      "description": "CPU W agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "cpu_w_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "cpu_w_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "cpu_b_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "CPU B mon \u2192 write SB",
-      "description": "CPU B agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "cpu_b_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "cpu_b_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "dma_ar_agent_to_read_sb",
-      "type": "axi4_bus",
-      "label": "DMA AR mon \u2192 read SB",
-      "description": "DMA AR agent monitor analysis port connects to read scoreboard via TLM",
-      "from_instance": "dma_ar_agent",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "dma_ar_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "dma_r_agent_to_read_sb",
-      "type": "axi4_bus",
-      "label": "DMA R mon \u2192 read SB",
-      "description": "DMA R agent monitor analysis port connects to read scoreboard via TLM",
-      "from_instance": "dma_r_agent",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "dma_r_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "dma_aw_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "DMA AW mon \u2192 write SB",
-      "description": "DMA AW agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "dma_aw_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "dma_aw_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "dma_w_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "DMA W mon \u2192 write SB",
-      "description": "DMA W agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "dma_w_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "dma_w_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "dma_b_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "DMA B mon \u2192 write SB",
-      "description": "DMA B agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "dma_b_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "dma_b_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "gpu_ar_agent_to_read_sb",
-      "type": "axi4_bus",
-      "label": "GPU AR mon \u2192 read SB",
-      "description": "GPU AR agent monitor analysis port connects to read scoreboard via TLM",
-      "from_instance": "gpu_ar_agent",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "gpu_ar_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "gpu_r_agent_to_read_sb",
-      "type": "axi4_bus",
-      "label": "GPU R mon \u2192 read SB",
-      "description": "GPU R agent monitor analysis port connects to read scoreboard via TLM",
-      "from_instance": "gpu_r_agent",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "gpu_r_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "gpu_aw_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "GPU AW mon \u2192 write SB",
-      "description": "GPU AW agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "gpu_aw_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "gpu_aw_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "gpu_w_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "GPU W mon \u2192 write SB",
-      "description": "GPU W agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "gpu_w_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "gpu_w_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "gpu_b_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "GPU B mon \u2192 write SB",
-      "description": "GPU B agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "gpu_b_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "gpu_b_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "sram_ar_agent_to_read_sb",
-      "type": "axi4_bus",
-      "label": "SRAM AR mon \u2192 read SB",
-      "description": "SRAM AR agent monitor analysis port connects to read scoreboard via TLM",
-      "from_instance": "sram_ar_agent",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "sram_ar_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "sram_r_agent_to_read_sb",
-      "type": "axi4_bus",
-      "label": "SRAM R mon \u2192 read SB",
-      "description": "SRAM R agent monitor analysis port connects to read scoreboard via TLM",
-      "from_instance": "sram_r_agent",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "sram_r_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "sram_aw_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "SRAM AW mon \u2192 write SB",
-      "description": "SRAM AW agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "sram_aw_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "sram_aw_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "sram_w_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "SRAM W mon \u2192 write SB",
-      "description": "SRAM W agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "sram_w_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "sram_w_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "sram_b_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "SRAM B mon \u2192 write SB",
-      "description": "SRAM B agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "sram_b_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "sram_b_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "ddr_ar_agent_to_read_sb",
-      "type": "axi4_bus",
-      "label": "DDR AR mon \u2192 read SB",
-      "description": "DDR AR agent monitor analysis port connects to read scoreboard via TLM",
-      "from_instance": "ddr_ar_agent",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "ddr_ar_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "ddr_r_agent_to_read_sb",
-      "type": "axi4_bus",
-      "label": "DDR R mon \u2192 read SB",
-      "description": "DDR R agent monitor analysis port connects to read scoreboard via TLM",
-      "from_instance": "ddr_r_agent",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "ddr_r_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "ddr_aw_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "DDR AW mon \u2192 write SB",
-      "description": "DDR AW agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "ddr_aw_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "ddr_aw_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "ddr_w_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "DDR W mon \u2192 write SB",
-      "description": "DDR W agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "ddr_w_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "ddr_w_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "ddr_b_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "DDR B mon \u2192 write SB",
-      "description": "DDR B agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "ddr_b_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "ddr_b_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "uart_ar_agent_to_read_sb",
-      "type": "axi4_bus",
-      "label": "UART AR mon \u2192 read SB",
-      "description": "UART AR agent monitor analysis port connects to read scoreboard via TLM",
-      "from_instance": "uart_ar_agent",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "uart_ar_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "uart_r_agent_to_read_sb",
-      "type": "axi4_bus",
-      "label": "UART R mon \u2192 read SB",
-      "description": "UART R agent monitor analysis port connects to read scoreboard via TLM",
-      "from_instance": "uart_r_agent",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "uart_r_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "uart_aw_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "UART AW mon \u2192 write SB",
-      "description": "UART AW agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "uart_aw_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "uart_aw_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "uart_w_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "UART W mon \u2192 write SB",
-      "description": "UART W agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "uart_w_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "uart_w_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "uart_b_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "UART B mon \u2192 write SB",
-      "description": "UART B agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "uart_b_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "uart_b_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "spi_ar_agent_to_read_sb",
-      "type": "axi4_bus",
-      "label": "SPI AR mon \u2192 read SB",
-      "description": "SPI AR agent monitor analysis port connects to read scoreboard via TLM",
-      "from_instance": "spi_ar_agent",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "spi_ar_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "spi_r_agent_to_read_sb",
-      "type": "axi4_bus",
-      "label": "SPI R mon \u2192 read SB",
-      "description": "SPI R agent monitor analysis port connects to read scoreboard via TLM",
-      "from_instance": "spi_r_agent",
-      "to_instance": "read_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "spi_r_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "spi_aw_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "SPI AW mon \u2192 write SB",
-      "description": "SPI AW agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "spi_aw_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "spi_aw_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "spi_w_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "SPI W mon \u2192 write SB",
-      "description": "SPI W agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "spi_w_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "spi_w_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "spi_b_agent_to_write_sb",
-      "type": "axi4_bus",
-      "label": "SPI B mon \u2192 write SB",
-      "description": "SPI B agent monitor analysis port connects to write scoreboard via TLM",
-      "from_instance": "spi_b_agent",
-      "to_instance": "write_sb",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "analysis_port",
-            "wire": "spi_b_ap",
-            "to_port": "analysis_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "read_seq_to_cpu_ar_agent",
-      "type": "axi4_bus",
-      "label": "read seq \u2192 CPU AR",
-      "description": "Read sequence sends items via TLM to CPU AR agent sequencer",
-      "from_instance": "read_seq",
-      "to_instance": "cpu_ar_agent",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "seq_item_port",
-            "wire": "read_seq_cpu_ar",
-            "to_port": "seq_item_export"
-          }
-        ]
-      }
-    },
-    {
-      "id": "read_seq_to_cpu_r_agent",
-      "type": "axi4_bus",
-      "label": "read seq \u2192 CPU R",
-      "description": "Read sequence sends items via TLM to CPU R agent sequencer",
-      "from_instance": "read_seq",
-      "to_instance": "cpu_r_agent",
-      "channel_signals": {
-        "TLM": [
-          {
-            "from_port": "seq_item_port",
-            "wire": "read_seq_cpu_r",
-            "to_port": "seq_item_export"
+            "wire": "vif_handle",
+            "to_port": "cpu_aw"
           }
         ]
       }
@@ -3091,16 +891,50 @@
     {
       "id": "write_seq_to_cpu_aw_agent",
       "type": "axi4_bus",
-      "label": "write seq \u2192 CPU AW",
-      "description": "Write sequence sends items via TLM to CPU AW agent sequencer",
+      "label": "seq \u2192 AW",
+      "description": "Write sequence drives CPU AW agent via TLM",
       "from_instance": "write_seq",
       "to_instance": "cpu_aw_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "write_seq_cpu_aw",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cpu_aw_agent_to_write_sb",
+      "type": "axi4_bus",
+      "label": "AW \u2192 SB",
+      "description": "CPU AW monitor \u2192 write scoreboard via TLM",
+      "from_instance": "cpu_aw_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cpu_w_agent_vif",
+      "type": "axi4_bus",
+      "label": "W \u2192 xbar",
+      "description": "CPU W agent drives interconnect via virtual interface",
+      "from_instance": "cpu_w_agent",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "cpu_w"
           }
         ]
       }
@@ -3108,16 +942,50 @@
     {
       "id": "write_seq_to_cpu_w_agent",
       "type": "axi4_bus",
-      "label": "write seq \u2192 CPU W",
-      "description": "Write sequence sends items via TLM to CPU W agent sequencer",
+      "label": "seq \u2192 W",
+      "description": "Write sequence drives CPU W agent via TLM",
       "from_instance": "write_seq",
       "to_instance": "cpu_w_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "write_seq_cpu_w",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cpu_w_agent_to_write_sb",
+      "type": "axi4_bus",
+      "label": "W \u2192 SB",
+      "description": "CPU W monitor \u2192 write scoreboard via TLM",
+      "from_instance": "cpu_w_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cpu_b_agent_vif",
+      "type": "axi4_bus",
+      "label": "B \u2192 xbar",
+      "description": "CPU B agent drives interconnect via virtual interface",
+      "from_instance": "cpu_b_agent",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "cpu_b"
           }
         ]
       }
@@ -3125,50 +993,152 @@
     {
       "id": "write_seq_to_cpu_b_agent",
       "type": "axi4_bus",
-      "label": "write seq \u2192 CPU B",
-      "description": "Write sequence sends items via TLM to CPU B agent sequencer",
+      "label": "seq \u2192 B",
+      "description": "Write sequence drives CPU B agent via TLM",
       "from_instance": "write_seq",
       "to_instance": "cpu_b_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "write_seq_cpu_b",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
           }
         ]
       }
     },
     {
-      "id": "read_seq_to_dma_ar_agent",
+      "id": "cpu_b_agent_to_write_sb",
       "type": "axi4_bus",
-      "label": "read seq \u2192 DMA AR",
-      "description": "Read sequence sends items via TLM to DMA AR agent sequencer",
+      "label": "B \u2192 SB",
+      "description": "CPU B monitor \u2192 write scoreboard via TLM",
+      "from_instance": "cpu_b_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cpu_ar_agent_vif",
+      "type": "axi4_bus",
+      "label": "AR \u2192 xbar",
+      "description": "CPU AR agent drives interconnect via virtual interface",
+      "from_instance": "cpu_ar_agent",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "cpu_ar"
+          }
+        ]
+      }
+    },
+    {
+      "id": "read_seq_to_cpu_ar_agent",
+      "type": "axi4_bus",
+      "label": "seq \u2192 AR",
+      "description": "Read sequence drives CPU AR agent via TLM",
       "from_instance": "read_seq",
-      "to_instance": "dma_ar_agent",
+      "to_instance": "cpu_ar_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "read_seq_dma_ar",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
           }
         ]
       }
     },
     {
-      "id": "read_seq_to_dma_r_agent",
+      "id": "cpu_ar_agent_to_read_sb",
       "type": "axi4_bus",
-      "label": "read seq \u2192 DMA R",
-      "description": "Read sequence sends items via TLM to DMA R agent sequencer",
+      "label": "AR \u2192 SB",
+      "description": "CPU AR monitor \u2192 read scoreboard via TLM",
+      "from_instance": "cpu_ar_agent",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cpu_r_agent_vif",
+      "type": "axi4_bus",
+      "label": "R \u2192 xbar",
+      "description": "CPU R agent drives interconnect via virtual interface",
+      "from_instance": "cpu_r_agent",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "cpu_r"
+          }
+        ]
+      }
+    },
+    {
+      "id": "read_seq_to_cpu_r_agent",
+      "type": "axi4_bus",
+      "label": "seq \u2192 R",
+      "description": "Read sequence drives CPU R agent via TLM",
       "from_instance": "read_seq",
-      "to_instance": "dma_r_agent",
+      "to_instance": "cpu_r_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "read_seq_dma_r",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cpu_r_agent_to_read_sb",
+      "type": "axi4_bus",
+      "label": "R \u2192 SB",
+      "description": "CPU R monitor \u2192 read scoreboard via TLM",
+      "from_instance": "cpu_r_agent",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dma_aw_agent_vif",
+      "type": "axi4_bus",
+      "label": "AW \u2192 xbar",
+      "description": "DMA AW agent drives interconnect via virtual interface",
+      "from_instance": "dma_aw_agent",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "dma_aw"
           }
         ]
       }
@@ -3176,16 +1146,50 @@
     {
       "id": "write_seq_to_dma_aw_agent",
       "type": "axi4_bus",
-      "label": "write seq \u2192 DMA AW",
-      "description": "Write sequence sends items via TLM to DMA AW agent sequencer",
+      "label": "seq \u2192 AW",
+      "description": "Write sequence drives DMA AW agent via TLM",
       "from_instance": "write_seq",
       "to_instance": "dma_aw_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "write_seq_dma_aw",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dma_aw_agent_to_write_sb",
+      "type": "axi4_bus",
+      "label": "AW \u2192 SB",
+      "description": "DMA AW monitor \u2192 write scoreboard via TLM",
+      "from_instance": "dma_aw_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dma_w_agent_vif",
+      "type": "axi4_bus",
+      "label": "W \u2192 xbar",
+      "description": "DMA W agent drives interconnect via virtual interface",
+      "from_instance": "dma_w_agent",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "dma_w"
           }
         ]
       }
@@ -3193,16 +1197,50 @@
     {
       "id": "write_seq_to_dma_w_agent",
       "type": "axi4_bus",
-      "label": "write seq \u2192 DMA W",
-      "description": "Write sequence sends items via TLM to DMA W agent sequencer",
+      "label": "seq \u2192 W",
+      "description": "Write sequence drives DMA W agent via TLM",
       "from_instance": "write_seq",
       "to_instance": "dma_w_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "write_seq_dma_w",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dma_w_agent_to_write_sb",
+      "type": "axi4_bus",
+      "label": "W \u2192 SB",
+      "description": "DMA W monitor \u2192 write scoreboard via TLM",
+      "from_instance": "dma_w_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dma_b_agent_vif",
+      "type": "axi4_bus",
+      "label": "B \u2192 xbar",
+      "description": "DMA B agent drives interconnect via virtual interface",
+      "from_instance": "dma_b_agent",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "dma_b"
           }
         ]
       }
@@ -3210,50 +1248,152 @@
     {
       "id": "write_seq_to_dma_b_agent",
       "type": "axi4_bus",
-      "label": "write seq \u2192 DMA B",
-      "description": "Write sequence sends items via TLM to DMA B agent sequencer",
+      "label": "seq \u2192 B",
+      "description": "Write sequence drives DMA B agent via TLM",
       "from_instance": "write_seq",
       "to_instance": "dma_b_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "write_seq_dma_b",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
           }
         ]
       }
     },
     {
-      "id": "read_seq_to_gpu_ar_agent",
+      "id": "dma_b_agent_to_write_sb",
       "type": "axi4_bus",
-      "label": "read seq \u2192 GPU AR",
-      "description": "Read sequence sends items via TLM to GPU AR agent sequencer",
+      "label": "B \u2192 SB",
+      "description": "DMA B monitor \u2192 write scoreboard via TLM",
+      "from_instance": "dma_b_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dma_ar_agent_vif",
+      "type": "axi4_bus",
+      "label": "AR \u2192 xbar",
+      "description": "DMA AR agent drives interconnect via virtual interface",
+      "from_instance": "dma_ar_agent",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "dma_ar"
+          }
+        ]
+      }
+    },
+    {
+      "id": "read_seq_to_dma_ar_agent",
+      "type": "axi4_bus",
+      "label": "seq \u2192 AR",
+      "description": "Read sequence drives DMA AR agent via TLM",
       "from_instance": "read_seq",
-      "to_instance": "gpu_ar_agent",
+      "to_instance": "dma_ar_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "read_seq_gpu_ar",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
           }
         ]
       }
     },
     {
-      "id": "read_seq_to_gpu_r_agent",
+      "id": "dma_ar_agent_to_read_sb",
       "type": "axi4_bus",
-      "label": "read seq \u2192 GPU R",
-      "description": "Read sequence sends items via TLM to GPU R agent sequencer",
+      "label": "AR \u2192 SB",
+      "description": "DMA AR monitor \u2192 read scoreboard via TLM",
+      "from_instance": "dma_ar_agent",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dma_r_agent_vif",
+      "type": "axi4_bus",
+      "label": "R \u2192 xbar",
+      "description": "DMA R agent drives interconnect via virtual interface",
+      "from_instance": "dma_r_agent",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "dma_r"
+          }
+        ]
+      }
+    },
+    {
+      "id": "read_seq_to_dma_r_agent",
+      "type": "axi4_bus",
+      "label": "seq \u2192 R",
+      "description": "Read sequence drives DMA R agent via TLM",
       "from_instance": "read_seq",
-      "to_instance": "gpu_r_agent",
+      "to_instance": "dma_r_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "read_seq_gpu_r",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dma_r_agent_to_read_sb",
+      "type": "axi4_bus",
+      "label": "R \u2192 SB",
+      "description": "DMA R monitor \u2192 read scoreboard via TLM",
+      "from_instance": "dma_r_agent",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "gpu_aw_agent_vif",
+      "type": "axi4_bus",
+      "label": "AW \u2192 xbar",
+      "description": "GPU AW agent drives interconnect via virtual interface",
+      "from_instance": "gpu_aw_agent",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "gpu_aw"
           }
         ]
       }
@@ -3261,16 +1401,50 @@
     {
       "id": "write_seq_to_gpu_aw_agent",
       "type": "axi4_bus",
-      "label": "write seq \u2192 GPU AW",
-      "description": "Write sequence sends items via TLM to GPU AW agent sequencer",
+      "label": "seq \u2192 AW",
+      "description": "Write sequence drives GPU AW agent via TLM",
       "from_instance": "write_seq",
       "to_instance": "gpu_aw_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "write_seq_gpu_aw",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "gpu_aw_agent_to_write_sb",
+      "type": "axi4_bus",
+      "label": "AW \u2192 SB",
+      "description": "GPU AW monitor \u2192 write scoreboard via TLM",
+      "from_instance": "gpu_aw_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "gpu_w_agent_vif",
+      "type": "axi4_bus",
+      "label": "W \u2192 xbar",
+      "description": "GPU W agent drives interconnect via virtual interface",
+      "from_instance": "gpu_w_agent",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "gpu_w"
           }
         ]
       }
@@ -3278,16 +1452,50 @@
     {
       "id": "write_seq_to_gpu_w_agent",
       "type": "axi4_bus",
-      "label": "write seq \u2192 GPU W",
-      "description": "Write sequence sends items via TLM to GPU W agent sequencer",
+      "label": "seq \u2192 W",
+      "description": "Write sequence drives GPU W agent via TLM",
       "from_instance": "write_seq",
       "to_instance": "gpu_w_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "write_seq_gpu_w",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "gpu_w_agent_to_write_sb",
+      "type": "axi4_bus",
+      "label": "W \u2192 SB",
+      "description": "GPU W monitor \u2192 write scoreboard via TLM",
+      "from_instance": "gpu_w_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "gpu_b_agent_vif",
+      "type": "axi4_bus",
+      "label": "B \u2192 xbar",
+      "description": "GPU B agent drives interconnect via virtual interface",
+      "from_instance": "gpu_b_agent",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "gpu_b"
           }
         ]
       }
@@ -3295,359 +1503,918 @@
     {
       "id": "write_seq_to_gpu_b_agent",
       "type": "axi4_bus",
-      "label": "write seq \u2192 GPU B",
-      "description": "Write sequence sends items via TLM to GPU B agent sequencer",
+      "label": "seq \u2192 B",
+      "description": "Write sequence drives GPU B agent via TLM",
       "from_instance": "write_seq",
       "to_instance": "gpu_b_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "write_seq_gpu_b",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
           }
         ]
       }
     },
     {
-      "id": "read_seq_to_sram_ar_agent",
+      "id": "gpu_b_agent_to_write_sb",
       "type": "axi4_bus",
-      "label": "read seq \u2192 SRAM AR",
-      "description": "Read sequence sends items via TLM to SRAM AR agent sequencer",
+      "label": "B \u2192 SB",
+      "description": "GPU B monitor \u2192 write scoreboard via TLM",
+      "from_instance": "gpu_b_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "gpu_ar_agent_vif",
+      "type": "axi4_bus",
+      "label": "AR \u2192 xbar",
+      "description": "GPU AR agent drives interconnect via virtual interface",
+      "from_instance": "gpu_ar_agent",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "gpu_ar"
+          }
+        ]
+      }
+    },
+    {
+      "id": "read_seq_to_gpu_ar_agent",
+      "type": "axi4_bus",
+      "label": "seq \u2192 AR",
+      "description": "Read sequence drives GPU AR agent via TLM",
       "from_instance": "read_seq",
-      "to_instance": "sram_ar_agent",
+      "to_instance": "gpu_ar_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "read_seq_sram_ar",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
           }
         ]
       }
     },
     {
-      "id": "read_seq_to_sram_r_agent",
+      "id": "gpu_ar_agent_to_read_sb",
       "type": "axi4_bus",
-      "label": "read seq \u2192 SRAM R",
-      "description": "Read sequence sends items via TLM to SRAM R agent sequencer",
+      "label": "AR \u2192 SB",
+      "description": "GPU AR monitor \u2192 read scoreboard via TLM",
+      "from_instance": "gpu_ar_agent",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "gpu_r_agent_vif",
+      "type": "axi4_bus",
+      "label": "R \u2192 xbar",
+      "description": "GPU R agent drives interconnect via virtual interface",
+      "from_instance": "gpu_r_agent",
+      "to_instance": "u_xbar",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "gpu_r"
+          }
+        ]
+      }
+    },
+    {
+      "id": "read_seq_to_gpu_r_agent",
+      "type": "axi4_bus",
+      "label": "seq \u2192 R",
+      "description": "Read sequence drives GPU R agent via TLM",
       "from_instance": "read_seq",
-      "to_instance": "sram_r_agent",
+      "to_instance": "gpu_r_agent",
       "channel_signals": {
         "TLM": [
           {
             "from_port": "seq_item_port",
-            "wire": "read_seq_sram_r",
+            "wire": "seq_item_port",
             "to_port": "seq_item_export"
           }
         ]
       }
     },
     {
-      "id": "write_seq_to_sram_aw_agent",
+      "id": "gpu_r_agent_to_read_sb",
       "type": "axi4_bus",
-      "label": "write seq \u2192 SRAM AW",
-      "description": "Write sequence sends items via TLM to SRAM AW agent sequencer",
-      "from_instance": "write_seq",
+      "label": "R \u2192 SB",
+      "description": "GPU R monitor \u2192 read scoreboard via TLM",
+      "from_instance": "gpu_r_agent",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_to_sram_aw_agent",
+      "type": "axi4_bus",
+      "label": "xbar \u2192 AW",
+      "description": "Interconnect routes to SRAM AW agent via virtual interface",
+      "from_instance": "u_xbar",
       "to_instance": "sram_aw_agent",
       "channel_signals": {
-        "TLM": [
+        "VIF": [
           {
-            "from_port": "seq_item_port",
-            "wire": "write_seq_sram_aw",
-            "to_port": "seq_item_export"
+            "from_port": "sram_aw",
+            "wire": "vif_handle",
+            "to_port": "vif"
           }
         ]
       }
     },
     {
-      "id": "write_seq_to_sram_w_agent",
+      "id": "sram_aw_agent_to_write_sb",
       "type": "axi4_bus",
-      "label": "write seq \u2192 SRAM W",
-      "description": "Write sequence sends items via TLM to SRAM W agent sequencer",
-      "from_instance": "write_seq",
+      "label": "AW \u2192 SB",
+      "description": "SRAM AW monitor \u2192 write scoreboard via TLM",
+      "from_instance": "sram_aw_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_to_sram_w_agent",
+      "type": "axi4_bus",
+      "label": "xbar \u2192 W",
+      "description": "Interconnect routes to SRAM W agent via virtual interface",
+      "from_instance": "u_xbar",
       "to_instance": "sram_w_agent",
       "channel_signals": {
-        "TLM": [
+        "VIF": [
           {
-            "from_port": "seq_item_port",
-            "wire": "write_seq_sram_w",
-            "to_port": "seq_item_export"
+            "from_port": "sram_w",
+            "wire": "vif_handle",
+            "to_port": "vif"
           }
         ]
       }
     },
     {
-      "id": "write_seq_to_sram_b_agent",
+      "id": "sram_w_agent_to_write_sb",
       "type": "axi4_bus",
-      "label": "write seq \u2192 SRAM B",
-      "description": "Write sequence sends items via TLM to SRAM B agent sequencer",
-      "from_instance": "write_seq",
+      "label": "W \u2192 SB",
+      "description": "SRAM W monitor \u2192 write scoreboard via TLM",
+      "from_instance": "sram_w_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_to_sram_b_agent",
+      "type": "axi4_bus",
+      "label": "xbar \u2192 B",
+      "description": "Interconnect routes to SRAM B agent via virtual interface",
+      "from_instance": "u_xbar",
       "to_instance": "sram_b_agent",
       "channel_signals": {
-        "TLM": [
+        "VIF": [
           {
-            "from_port": "seq_item_port",
-            "wire": "write_seq_sram_b",
-            "to_port": "seq_item_export"
+            "from_port": "sram_b",
+            "wire": "vif_handle",
+            "to_port": "vif"
           }
         ]
       }
     },
     {
-      "id": "read_seq_to_ddr_ar_agent",
+      "id": "sram_b_agent_to_write_sb",
       "type": "axi4_bus",
-      "label": "read seq \u2192 DDR AR",
-      "description": "Read sequence sends items via TLM to DDR AR agent sequencer",
-      "from_instance": "read_seq",
-      "to_instance": "ddr_ar_agent",
+      "label": "B \u2192 SB",
+      "description": "SRAM B monitor \u2192 write scoreboard via TLM",
+      "from_instance": "sram_b_agent",
+      "to_instance": "write_sb",
       "channel_signals": {
         "TLM": [
           {
-            "from_port": "seq_item_port",
-            "wire": "read_seq_ddr_ar",
-            "to_port": "seq_item_export"
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
           }
         ]
       }
     },
     {
-      "id": "read_seq_to_ddr_r_agent",
+      "id": "xbar_to_sram_ar_agent",
       "type": "axi4_bus",
-      "label": "read seq \u2192 DDR R",
-      "description": "Read sequence sends items via TLM to DDR R agent sequencer",
-      "from_instance": "read_seq",
-      "to_instance": "ddr_r_agent",
+      "label": "xbar \u2192 AR",
+      "description": "Interconnect routes to SRAM AR agent via virtual interface",
+      "from_instance": "u_xbar",
+      "to_instance": "sram_ar_agent",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "sram_ar",
+            "wire": "vif_handle",
+            "to_port": "vif"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sram_ar_agent_to_read_sb",
+      "type": "axi4_bus",
+      "label": "AR \u2192 SB",
+      "description": "SRAM AR monitor \u2192 read scoreboard via TLM",
+      "from_instance": "sram_ar_agent",
+      "to_instance": "read_sb",
       "channel_signals": {
         "TLM": [
           {
-            "from_port": "seq_item_port",
-            "wire": "read_seq_ddr_r",
-            "to_port": "seq_item_export"
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
           }
         ]
       }
     },
     {
-      "id": "write_seq_to_ddr_aw_agent",
+      "id": "xbar_to_sram_r_agent",
       "type": "axi4_bus",
-      "label": "write seq \u2192 DDR AW",
-      "description": "Write sequence sends items via TLM to DDR AW agent sequencer",
-      "from_instance": "write_seq",
+      "label": "xbar \u2192 R",
+      "description": "Interconnect routes to SRAM R agent via virtual interface",
+      "from_instance": "u_xbar",
+      "to_instance": "sram_r_agent",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "sram_r",
+            "wire": "vif_handle",
+            "to_port": "vif"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sram_r_agent_to_read_sb",
+      "type": "axi4_bus",
+      "label": "R \u2192 SB",
+      "description": "SRAM R monitor \u2192 read scoreboard via TLM",
+      "from_instance": "sram_r_agent",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_to_ddr_aw_agent",
+      "type": "axi4_bus",
+      "label": "xbar \u2192 AW",
+      "description": "Interconnect routes to DDR AW agent via virtual interface",
+      "from_instance": "u_xbar",
       "to_instance": "ddr_aw_agent",
       "channel_signals": {
-        "TLM": [
+        "VIF": [
           {
-            "from_port": "seq_item_port",
-            "wire": "write_seq_ddr_aw",
-            "to_port": "seq_item_export"
+            "from_port": "ddr_aw",
+            "wire": "vif_handle",
+            "to_port": "vif"
           }
         ]
       }
     },
     {
-      "id": "write_seq_to_ddr_w_agent",
+      "id": "ddr_aw_agent_to_write_sb",
       "type": "axi4_bus",
-      "label": "write seq \u2192 DDR W",
-      "description": "Write sequence sends items via TLM to DDR W agent sequencer",
-      "from_instance": "write_seq",
+      "label": "AW \u2192 SB",
+      "description": "DDR AW monitor \u2192 write scoreboard via TLM",
+      "from_instance": "ddr_aw_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_to_ddr_w_agent",
+      "type": "axi4_bus",
+      "label": "xbar \u2192 W",
+      "description": "Interconnect routes to DDR W agent via virtual interface",
+      "from_instance": "u_xbar",
       "to_instance": "ddr_w_agent",
       "channel_signals": {
-        "TLM": [
+        "VIF": [
           {
-            "from_port": "seq_item_port",
-            "wire": "write_seq_ddr_w",
-            "to_port": "seq_item_export"
+            "from_port": "ddr_w",
+            "wire": "vif_handle",
+            "to_port": "vif"
           }
         ]
       }
     },
     {
-      "id": "write_seq_to_ddr_b_agent",
+      "id": "ddr_w_agent_to_write_sb",
       "type": "axi4_bus",
-      "label": "write seq \u2192 DDR B",
-      "description": "Write sequence sends items via TLM to DDR B agent sequencer",
-      "from_instance": "write_seq",
+      "label": "W \u2192 SB",
+      "description": "DDR W monitor \u2192 write scoreboard via TLM",
+      "from_instance": "ddr_w_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_to_ddr_b_agent",
+      "type": "axi4_bus",
+      "label": "xbar \u2192 B",
+      "description": "Interconnect routes to DDR B agent via virtual interface",
+      "from_instance": "u_xbar",
       "to_instance": "ddr_b_agent",
       "channel_signals": {
-        "TLM": [
+        "VIF": [
           {
-            "from_port": "seq_item_port",
-            "wire": "write_seq_ddr_b",
-            "to_port": "seq_item_export"
+            "from_port": "ddr_b",
+            "wire": "vif_handle",
+            "to_port": "vif"
           }
         ]
       }
     },
     {
-      "id": "read_seq_to_uart_ar_agent",
+      "id": "ddr_b_agent_to_write_sb",
       "type": "axi4_bus",
-      "label": "read seq \u2192 UART AR",
-      "description": "Read sequence sends items via TLM to UART AR agent sequencer",
-      "from_instance": "read_seq",
-      "to_instance": "uart_ar_agent",
+      "label": "B \u2192 SB",
+      "description": "DDR B monitor \u2192 write scoreboard via TLM",
+      "from_instance": "ddr_b_agent",
+      "to_instance": "write_sb",
       "channel_signals": {
         "TLM": [
           {
-            "from_port": "seq_item_port",
-            "wire": "read_seq_uart_ar",
-            "to_port": "seq_item_export"
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
           }
         ]
       }
     },
     {
-      "id": "read_seq_to_uart_r_agent",
+      "id": "xbar_to_ddr_ar_agent",
       "type": "axi4_bus",
-      "label": "read seq \u2192 UART R",
-      "description": "Read sequence sends items via TLM to UART R agent sequencer",
-      "from_instance": "read_seq",
-      "to_instance": "uart_r_agent",
+      "label": "xbar \u2192 AR",
+      "description": "Interconnect routes to DDR AR agent via virtual interface",
+      "from_instance": "u_xbar",
+      "to_instance": "ddr_ar_agent",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "ddr_ar",
+            "wire": "vif_handle",
+            "to_port": "vif"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ddr_ar_agent_to_read_sb",
+      "type": "axi4_bus",
+      "label": "AR \u2192 SB",
+      "description": "DDR AR monitor \u2192 read scoreboard via TLM",
+      "from_instance": "ddr_ar_agent",
+      "to_instance": "read_sb",
       "channel_signals": {
         "TLM": [
           {
-            "from_port": "seq_item_port",
-            "wire": "read_seq_uart_r",
-            "to_port": "seq_item_export"
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
           }
         ]
       }
     },
     {
-      "id": "write_seq_to_uart_aw_agent",
+      "id": "xbar_to_ddr_r_agent",
       "type": "axi4_bus",
-      "label": "write seq \u2192 UART AW",
-      "description": "Write sequence sends items via TLM to UART AW agent sequencer",
-      "from_instance": "write_seq",
+      "label": "xbar \u2192 R",
+      "description": "Interconnect routes to DDR R agent via virtual interface",
+      "from_instance": "u_xbar",
+      "to_instance": "ddr_r_agent",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "ddr_r",
+            "wire": "vif_handle",
+            "to_port": "vif"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ddr_r_agent_to_read_sb",
+      "type": "axi4_bus",
+      "label": "R \u2192 SB",
+      "description": "DDR R monitor \u2192 read scoreboard via TLM",
+      "from_instance": "ddr_r_agent",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_to_uart_aw_agent",
+      "type": "axi4_bus",
+      "label": "xbar \u2192 AW",
+      "description": "Interconnect routes to UART AW agent via virtual interface",
+      "from_instance": "u_xbar",
       "to_instance": "uart_aw_agent",
       "channel_signals": {
-        "TLM": [
+        "VIF": [
           {
-            "from_port": "seq_item_port",
-            "wire": "write_seq_uart_aw",
-            "to_port": "seq_item_export"
+            "from_port": "uart_aw",
+            "wire": "vif_handle",
+            "to_port": "vif"
           }
         ]
       }
     },
     {
-      "id": "write_seq_to_uart_w_agent",
+      "id": "uart_aw_agent_to_write_sb",
       "type": "axi4_bus",
-      "label": "write seq \u2192 UART W",
-      "description": "Write sequence sends items via TLM to UART W agent sequencer",
-      "from_instance": "write_seq",
+      "label": "AW \u2192 SB",
+      "description": "UART AW monitor \u2192 write scoreboard via TLM",
+      "from_instance": "uart_aw_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_to_uart_w_agent",
+      "type": "axi4_bus",
+      "label": "xbar \u2192 W",
+      "description": "Interconnect routes to UART W agent via virtual interface",
+      "from_instance": "u_xbar",
       "to_instance": "uart_w_agent",
       "channel_signals": {
-        "TLM": [
+        "VIF": [
           {
-            "from_port": "seq_item_port",
-            "wire": "write_seq_uart_w",
-            "to_port": "seq_item_export"
+            "from_port": "uart_w",
+            "wire": "vif_handle",
+            "to_port": "vif"
           }
         ]
       }
     },
     {
-      "id": "write_seq_to_uart_b_agent",
+      "id": "uart_w_agent_to_write_sb",
       "type": "axi4_bus",
-      "label": "write seq \u2192 UART B",
-      "description": "Write sequence sends items via TLM to UART B agent sequencer",
-      "from_instance": "write_seq",
+      "label": "W \u2192 SB",
+      "description": "UART W monitor \u2192 write scoreboard via TLM",
+      "from_instance": "uart_w_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_to_uart_b_agent",
+      "type": "axi4_bus",
+      "label": "xbar \u2192 B",
+      "description": "Interconnect routes to UART B agent via virtual interface",
+      "from_instance": "u_xbar",
       "to_instance": "uart_b_agent",
       "channel_signals": {
-        "TLM": [
+        "VIF": [
           {
-            "from_port": "seq_item_port",
-            "wire": "write_seq_uart_b",
-            "to_port": "seq_item_export"
+            "from_port": "uart_b",
+            "wire": "vif_handle",
+            "to_port": "vif"
           }
         ]
       }
     },
     {
-      "id": "read_seq_to_spi_ar_agent",
+      "id": "uart_b_agent_to_write_sb",
       "type": "axi4_bus",
-      "label": "read seq \u2192 SPI AR",
-      "description": "Read sequence sends items via TLM to SPI AR agent sequencer",
-      "from_instance": "read_seq",
-      "to_instance": "spi_ar_agent",
+      "label": "B \u2192 SB",
+      "description": "UART B monitor \u2192 write scoreboard via TLM",
+      "from_instance": "uart_b_agent",
+      "to_instance": "write_sb",
       "channel_signals": {
         "TLM": [
           {
-            "from_port": "seq_item_port",
-            "wire": "read_seq_spi_ar",
-            "to_port": "seq_item_export"
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
           }
         ]
       }
     },
     {
-      "id": "read_seq_to_spi_r_agent",
+      "id": "xbar_to_uart_ar_agent",
       "type": "axi4_bus",
-      "label": "read seq \u2192 SPI R",
-      "description": "Read sequence sends items via TLM to SPI R agent sequencer",
-      "from_instance": "read_seq",
-      "to_instance": "spi_r_agent",
+      "label": "xbar \u2192 AR",
+      "description": "Interconnect routes to UART AR agent via virtual interface",
+      "from_instance": "u_xbar",
+      "to_instance": "uart_ar_agent",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "uart_ar",
+            "wire": "vif_handle",
+            "to_port": "vif"
+          }
+        ]
+      }
+    },
+    {
+      "id": "uart_ar_agent_to_read_sb",
+      "type": "axi4_bus",
+      "label": "AR \u2192 SB",
+      "description": "UART AR monitor \u2192 read scoreboard via TLM",
+      "from_instance": "uart_ar_agent",
+      "to_instance": "read_sb",
       "channel_signals": {
         "TLM": [
           {
-            "from_port": "seq_item_port",
-            "wire": "read_seq_spi_r",
-            "to_port": "seq_item_export"
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
           }
         ]
       }
     },
     {
-      "id": "write_seq_to_spi_aw_agent",
+      "id": "xbar_to_uart_r_agent",
       "type": "axi4_bus",
-      "label": "write seq \u2192 SPI AW",
-      "description": "Write sequence sends items via TLM to SPI AW agent sequencer",
-      "from_instance": "write_seq",
+      "label": "xbar \u2192 R",
+      "description": "Interconnect routes to UART R agent via virtual interface",
+      "from_instance": "u_xbar",
+      "to_instance": "uart_r_agent",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "uart_r",
+            "wire": "vif_handle",
+            "to_port": "vif"
+          }
+        ]
+      }
+    },
+    {
+      "id": "uart_r_agent_to_read_sb",
+      "type": "axi4_bus",
+      "label": "R \u2192 SB",
+      "description": "UART R monitor \u2192 read scoreboard via TLM",
+      "from_instance": "uart_r_agent",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_to_spi_aw_agent",
+      "type": "axi4_bus",
+      "label": "xbar \u2192 AW",
+      "description": "Interconnect routes to SPI AW agent via virtual interface",
+      "from_instance": "u_xbar",
       "to_instance": "spi_aw_agent",
       "channel_signals": {
-        "TLM": [
+        "VIF": [
           {
-            "from_port": "seq_item_port",
-            "wire": "write_seq_spi_aw",
-            "to_port": "seq_item_export"
+            "from_port": "spi_aw",
+            "wire": "vif_handle",
+            "to_port": "vif"
           }
         ]
       }
     },
     {
-      "id": "write_seq_to_spi_w_agent",
+      "id": "spi_aw_agent_to_write_sb",
       "type": "axi4_bus",
-      "label": "write seq \u2192 SPI W",
-      "description": "Write sequence sends items via TLM to SPI W agent sequencer",
-      "from_instance": "write_seq",
+      "label": "AW \u2192 SB",
+      "description": "SPI AW monitor \u2192 write scoreboard via TLM",
+      "from_instance": "spi_aw_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_to_spi_w_agent",
+      "type": "axi4_bus",
+      "label": "xbar \u2192 W",
+      "description": "Interconnect routes to SPI W agent via virtual interface",
+      "from_instance": "u_xbar",
       "to_instance": "spi_w_agent",
       "channel_signals": {
-        "TLM": [
+        "VIF": [
           {
-            "from_port": "seq_item_port",
-            "wire": "write_seq_spi_w",
-            "to_port": "seq_item_export"
+            "from_port": "spi_w",
+            "wire": "vif_handle",
+            "to_port": "vif"
           }
         ]
       }
     },
     {
-      "id": "write_seq_to_spi_b_agent",
+      "id": "spi_w_agent_to_write_sb",
       "type": "axi4_bus",
-      "label": "write seq \u2192 SPI B",
-      "description": "Write sequence sends items via TLM to SPI B agent sequencer",
-      "from_instance": "write_seq",
-      "to_instance": "spi_b_agent",
+      "label": "W \u2192 SB",
+      "description": "SPI W monitor \u2192 write scoreboard via TLM",
+      "from_instance": "spi_w_agent",
+      "to_instance": "write_sb",
       "channel_signals": {
         "TLM": [
           {
-            "from_port": "seq_item_port",
-            "wire": "write_seq_spi_b",
-            "to_port": "seq_item_export"
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
           }
         ]
       }
+    },
+    {
+      "id": "xbar_to_spi_b_agent",
+      "type": "axi4_bus",
+      "label": "xbar \u2192 B",
+      "description": "Interconnect routes to SPI B agent via virtual interface",
+      "from_instance": "u_xbar",
+      "to_instance": "spi_b_agent",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "spi_b",
+            "wire": "vif_handle",
+            "to_port": "vif"
+          }
+        ]
+      }
+    },
+    {
+      "id": "spi_b_agent_to_write_sb",
+      "type": "axi4_bus",
+      "label": "B \u2192 SB",
+      "description": "SPI B monitor \u2192 write scoreboard via TLM",
+      "from_instance": "spi_b_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_to_spi_ar_agent",
+      "type": "axi4_bus",
+      "label": "xbar \u2192 AR",
+      "description": "Interconnect routes to SPI AR agent via virtual interface",
+      "from_instance": "u_xbar",
+      "to_instance": "spi_ar_agent",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "spi_ar",
+            "wire": "vif_handle",
+            "to_port": "vif"
+          }
+        ]
+      }
+    },
+    {
+      "id": "spi_ar_agent_to_read_sb",
+      "type": "axi4_bus",
+      "label": "AR \u2192 SB",
+      "description": "SPI AR monitor \u2192 read scoreboard via TLM",
+      "from_instance": "spi_ar_agent",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xbar_to_spi_r_agent",
+      "type": "axi4_bus",
+      "label": "xbar \u2192 R",
+      "description": "Interconnect routes to SPI R agent via virtual interface",
+      "from_instance": "u_xbar",
+      "to_instance": "spi_r_agent",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "spi_r",
+            "wire": "vif_handle",
+            "to_port": "vif"
+          }
+        ]
+      }
+    },
+    {
+      "id": "spi_r_agent_to_read_sb",
+      "type": "axi4_bus",
+      "label": "R \u2192 SB",
+      "description": "SPI R monitor \u2192 read scoreboard via TLM",
+      "from_instance": "spi_r_agent",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "cpu_uvc",
+      "label": "CPU UVC",
+      "description": "AXI4 UVC for CPU master port \u2014 5 per-channel agents (AW, W, B, AR, R)",
+      "color": "#1565C0",
+      "members": [
+        "cpu_aw_agent",
+        "cpu_w_agent",
+        "cpu_b_agent",
+        "cpu_ar_agent",
+        "cpu_r_agent"
+      ],
+      "padding": 1.5
+    },
+    {
+      "name": "dma_uvc",
+      "label": "DMA UVC",
+      "description": "AXI4 UVC for DMA master port \u2014 5 per-channel agents (AW, W, B, AR, R)",
+      "color": "#1565C0",
+      "members": [
+        "dma_aw_agent",
+        "dma_w_agent",
+        "dma_b_agent",
+        "dma_ar_agent",
+        "dma_r_agent"
+      ],
+      "padding": 1.5
+    },
+    {
+      "name": "gpu_uvc",
+      "label": "GPU UVC",
+      "description": "AXI4 UVC for GPU master port \u2014 5 per-channel agents (AW, W, B, AR, R)",
+      "color": "#1565C0",
+      "members": [
+        "gpu_aw_agent",
+        "gpu_w_agent",
+        "gpu_b_agent",
+        "gpu_ar_agent",
+        "gpu_r_agent"
+      ],
+      "padding": 1.5
+    },
+    {
+      "name": "sram_uvc",
+      "label": "SRAM UVC",
+      "description": "AXI4 UVC for SRAM slave port \u2014 5 per-channel agents (AW, W, B, AR, R)",
+      "color": "#00897B",
+      "members": [
+        "sram_aw_agent",
+        "sram_w_agent",
+        "sram_b_agent",
+        "sram_ar_agent",
+        "sram_r_agent"
+      ],
+      "padding": 1.5
+    },
+    {
+      "name": "ddr_uvc",
+      "label": "DDR UVC",
+      "description": "AXI4 UVC for DDR slave port \u2014 5 per-channel agents (AW, W, B, AR, R)",
+      "color": "#00897B",
+      "members": [
+        "ddr_aw_agent",
+        "ddr_w_agent",
+        "ddr_b_agent",
+        "ddr_ar_agent",
+        "ddr_r_agent"
+      ],
+      "padding": 1.5
+    },
+    {
+      "name": "uart_uvc",
+      "label": "UART UVC",
+      "description": "AXI4 UVC for UART slave port \u2014 5 per-channel agents (AW, W, B, AR, R)",
+      "color": "#00897B",
+      "members": [
+        "uart_aw_agent",
+        "uart_w_agent",
+        "uart_b_agent",
+        "uart_ar_agent",
+        "uart_r_agent"
+      ],
+      "padding": 1.5
+    },
+    {
+      "name": "spi_uvc",
+      "label": "SPI UVC",
+      "description": "AXI4 UVC for SPI slave port \u2014 5 per-channel agents (AW, W, B, AR, R)",
+      "color": "#00897B",
+      "members": [
+        "spi_aw_agent",
+        "spi_w_agent",
+        "spi_b_agent",
+        "spi_ar_agent",
+        "spi_r_agent"
+      ],
+      "padding": 1.5
     }
   ],
   "connection_types": {
