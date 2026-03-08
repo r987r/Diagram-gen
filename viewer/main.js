@@ -123,6 +123,26 @@ function arrow(from, to, color) {
   return new THREE.ArrowHelper(dir, origin, len, color, 0.55, 0.38);
 }
 
+/** Draw an orthogonal polyline path with an arrowhead at the end.
+ *  `pts` is an array of [x,y,z] waypoints (minimum 2). */
+function arrowPath(pts, color) {
+  const group = new THREE.Group();
+  // Draw line segments
+  group.add(solidLine(pts, color));
+  // Arrowhead cone at the final point
+  const last = new THREE.Vector3(...pts[pts.length - 1]);
+  const prev = new THREE.Vector3(...pts[pts.length - 2]);
+  const dir  = last.clone().sub(prev).normalize();
+  const cone = new THREE.Mesh(
+    new THREE.ConeGeometry(0.19, 0.55, 8),
+    new THREE.MeshBasicMaterial({ color })
+  );
+  cone.position.copy(last);
+  cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+  group.add(cone);
+  return group;
+}
+
 /** Small sphere dot at a port. */
 function portDot(pos, color, r = 0.18) {
   const m = new THREE.Mesh(
@@ -487,7 +507,13 @@ async function resolveDesign(jsonPath, visited = new Set()) {
   });
 }
 
+// ── Loading overlay control ──────────────────────────────────────
+const loadingOverlay = document.getElementById('loading-overlay');
+function showLoading() { loadingOverlay.classList.remove('hidden'); }
+function hideLoading() { loadingOverlay.classList.add('hidden'); }
+
 async function buildScene(designPath) {
+  showLoading();
   clearScene();
 
   const design = await resolveDesign(designPath);
@@ -636,19 +662,32 @@ async function buildScene(designPath) {
   rstLabel.position.set(railL - 0.3, rstY, 0);
   scene.add(rstLabel);
 
-  // ── Per-instance CLK and RST stubs ────────────────────────────
+  // ── Build set of instances in clock/reset fanout ────────────
+  const clkInstances = new Set();
+  const rstInstances = new Set();
+  for (const conn of design.connections) {
+    if (conn.type === 'clock') {
+      for (const t of (conn.to || [])) clkInstances.add(t.instance);
+    } else if (conn.type === 'reset') {
+      for (const t of (conn.to || [])) rstInstances.add(t.instance);
+    }
+  }
+
+  // ── Per-instance CLK and RST stubs (only for instances in fanout) ─
   for (const inst of instances) {
     const x = inst.position.x;
     const y = inst.position.y;
     const hy = instHalfH[inst.instance_name] || instHalf[inst.instance_name];
 
-    // CLK: bottom face of block → CLK rail
-    scene.add(solidLine([[x, y - hy, 0], [x, clkY, 0]], CLK_COL));
-    scene.add(portDot([x, y - hy, 0], CLK_COL));
+    if (clkInstances.has(inst.instance_name)) {
+      scene.add(solidLine([[x, y - hy, 0], [x, clkY, 0]], CLK_COL));
+      scene.add(portDot([x, y - hy, 0], CLK_COL));
+    }
 
-    // RST: top face of block → RST rail
-    scene.add(solidLine([[x, y + hy, 0], [x, rstY, 0]], RST_COL));
-    scene.add(portDot([x, y + hy, 0], RST_COL));
+    if (rstInstances.has(inst.instance_name)) {
+      scene.add(solidLine([[x, y + hy, 0], [x, rstY, 0]], RST_COL));
+      scene.add(portDot([x, y + hy, 0], RST_COL));
+    }
   }
 
   // ── Bus / TLM connections ────────────────────────────────────
@@ -679,17 +718,18 @@ async function buildScene(designPath) {
     const dx = toInst.position.x - fromInst.position.x;
     const dy = toInst.position.y - fromInst.position.y;
     let fromX, fromY, toX, toY;
+    let exitHorizontal;
 
     if (Math.abs(dx) >= Math.abs(dy)) {
       // Horizontal connection (exit from left/right face)
-      const fromHy = instHalfH[conn.from_instance] || HALF;
-      const toHy   = instHalfH[conn.to_instance]   || HALF;
+      exitHorizontal = true;
       fromX = fromInst.position.x + (dx >= 0 ? fromH : -fromH);
       fromY = fromInst.position.y;
       toX   = toInst.position.x   + (dx >= 0 ? -toH  :  toH);
       toY   = toInst.position.y;
     } else {
       // Vertical connection (exit from top/bottom face)
+      exitHorizontal = false;
       const fromHy = instHalfH[conn.from_instance] || HALF;
       const toHy   = instHalfH[conn.to_instance]   || HALF;
       fromX = fromInst.position.x;
@@ -698,19 +738,37 @@ async function buildScene(designPath) {
       toY   = toInst.position.y   + (dy >= 0 ? -toHy  :  toHy);
     }
 
-    const midX  = (fromX + toX) / 2;
-    const midY  = (fromY + toY) / 2;
-
     const col = connColor[conn.type] ?? AXI4_COL;
 
-    // Arrow
-    scene.add(arrow([fromX, fromY, 0], [toX, toY, 0], col));
+    // Build route points: use L-shaped orthogonal routing when not aligned
+    let routePts;
+    const aligned = (Math.abs(fromX - toX) < 0.01) || (Math.abs(fromY - toY) < 0.01);
+    if (aligned) {
+      routePts = [[fromX, fromY, 0], [toX, toY, 0]];
+    } else if (exitHorizontal) {
+      // Horizontal first, then vertical bend
+      const cornerX = (fromX + toX) / 2;
+      routePts = [[fromX, fromY, 0], [cornerX, fromY, 0], [cornerX, toY, 0], [toX, toY, 0]];
+    } else {
+      // Vertical first, then horizontal bend
+      const cornerY = (fromY + toY) / 2;
+      routePts = [[fromX, fromY, 0], [fromX, cornerY, 0], [toX, cornerY, 0], [toX, toY, 0]];
+    }
+
+    // Draw connection with arrowhead
+    if (routePts.length === 2) {
+      scene.add(arrow(routePts[0], routePts[1], col));
+    } else {
+      scene.add(arrowPath(routePts, col));
+    }
 
     // Port dots
     scene.add(portDot([fromX, fromY, 0], col, 0.16));
     scene.add(portDot([toX,   toY, 0], col, 0.16));
 
     // Bus label (only for small designs)
+    const midX  = (fromX + toX) / 2;
+    const midY  = (fromY + toY) / 2;
     if (showBusLabels && conn.label) {
       const busLabel = makeLabel(
         `<span class="bus-label-text">${conn.label}</span>`, 'bus-label-obj'
@@ -832,6 +890,7 @@ async function buildScene(designPath) {
   popupBody.innerHTML = '';
   popupHint.textContent = 'Click a box or connection for details';
   collapsePopup();
+  hideLoading();
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -843,6 +902,7 @@ designSelect.addEventListener('change', () => {
     console.error('buildScene failed:', err);
     document.getElementById('panel-design-name').textContent = '⚠ Load error';
     document.getElementById('panel-desc').textContent        = err.message;
+    hideLoading();
   });
 });
 
@@ -873,4 +933,5 @@ buildScene(designSelect.value).catch(err => {
   console.error('buildScene failed:', err);
   document.getElementById('panel-design-name').textContent = '⚠ Load error';
   document.getElementById('panel-desc').textContent        = err.message;
+  hideLoading();
 });
