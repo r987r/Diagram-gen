@@ -3244,7 +3244,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "AW mon \u2192 vif"
     },
     {
       "id": "cpu_aw_vif_to_xbar",
@@ -3309,7 +3309,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "W mon \u2192 vif"
     },
     {
       "id": "cpu_w_vif_to_xbar",
@@ -3374,7 +3374,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "B mon \u2192 vif"
     },
     {
       "id": "cpu_b_vif_to_xbar",
@@ -3439,7 +3439,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "AR mon \u2192 vif"
     },
     {
       "id": "cpu_ar_vif_to_xbar",
@@ -3504,7 +3504,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "R mon \u2192 vif"
     },
     {
       "id": "cpu_r_vif_to_xbar",
@@ -3729,7 +3729,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "AW mon \u2192 vif"
     },
     {
       "id": "dma_aw_vif_to_xbar",
@@ -3794,7 +3794,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "W mon \u2192 vif"
     },
     {
       "id": "dma_w_vif_to_xbar",
@@ -3859,7 +3859,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "B mon \u2192 vif"
     },
     {
       "id": "dma_b_vif_to_xbar",
@@ -3924,7 +3924,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "AR mon \u2192 vif"
     },
     {
       "id": "dma_ar_vif_to_xbar",
@@ -3989,7 +3989,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "R mon \u2192 vif"
     },
     {
       "id": "dma_r_vif_to_xbar",
@@ -4214,7 +4214,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "AW mon \u2192 vif"
     },
     {
       "id": "gpu_aw_vif_to_xbar",
@@ -4279,7 +4279,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "W mon \u2192 vif"
     },
     {
       "id": "gpu_w_vif_to_xbar",
@@ -4344,7 +4344,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "B mon \u2192 vif"
     },
     {
       "id": "gpu_b_vif_to_xbar",
@@ -4409,7 +4409,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "AR mon \u2192 vif"
     },
     {
       "id": "gpu_ar_vif_to_xbar",
@@ -4474,7 +4474,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "R mon \u2192 vif"
     },
     {
       "id": "gpu_r_vif_to_xbar",
@@ -4699,7 +4699,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "AW mon \u2192 vif"
     },
     {
       "id": "xbar_to_sram_aw_vif",
@@ -4764,7 +4764,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "W mon \u2192 vif"
     },
     {
       "id": "xbar_to_sram_w_vif",
@@ -4829,7 +4829,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "B mon \u2192 vif"
     },
     {
       "id": "xbar_to_sram_b_vif",
@@ -4894,7 +4894,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "AR mon \u2192 vif"
     },
     {
       "id": "xbar_to_sram_ar_vif",
@@ -4959,7 +4959,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "R mon \u2192 vif"
     },
     {
       "id": "xbar_to_sram_r_vif",
@@ -5184,7 +5184,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "AW mon \u2192 vif"
     },
     {
       "id": "xbar_to_ddr_aw_vif",
@@ -5249,7 +5249,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "W mon \u2192 vif"
     },
     {
       "id": "xbar_to_ddr_w_vif",
@@ -5314,7 +5314,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "B mon \u2192 vif"
     },
     {
       "id": "xbar_to_ddr_b_vif",
@@ -5379,7 +5379,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "AR mon \u2192 vif"
     },
     {
       "id": "xbar_to_ddr_ar_vif",
@@ -5444,7 +5444,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "R mon \u2192 vif"
     },
     {
       "id": "xbar_to_ddr_r_vif",
@@ -5669,7 +5669,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "AW mon \u2192 vif"
     },
     {
       "id": "xbar_to_uart_aw_vif",
@@ -5734,7 +5734,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "W mon \u2192 vif"
     },
     {
       "id": "xbar_to_uart_w_vif",
@@ -5799,7 +5799,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "B mon \u2192 vif"
     },
     {
       "id": "xbar_to_uart_b_vif",
@@ -5864,7 +5864,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "AR mon \u2192 vif"
     },
     {
       "id": "xbar_to_uart_ar_vif",
@@ -5929,7 +5929,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "R mon \u2192 vif"
     },
     {
       "id": "xbar_to_uart_r_vif",
@@ -6154,7 +6154,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "AW mon \u2192 vif"
     },
     {
       "id": "xbar_to_spi_aw_vif",
@@ -6219,7 +6219,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "W mon \u2192 vif"
     },
     {
       "id": "xbar_to_spi_w_vif",
@@ -6284,7 +6284,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "B mon \u2192 vif"
     },
     {
       "id": "xbar_to_spi_b_vif",
@@ -6349,7 +6349,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "AR mon \u2192 vif"
     },
     {
       "id": "xbar_to_spi_ar_vif",
@@ -6414,7 +6414,7 @@
           }
         ]
       },
-      "label": ""
+      "label": "R mon \u2192 vif"
     },
     {
       "id": "xbar_to_spi_r_vif",
