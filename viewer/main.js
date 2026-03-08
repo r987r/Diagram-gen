@@ -26,11 +26,11 @@ const CAM_AUTO_FIT = 20;      // scene size threshold for auto camera refit
 // ── Scene ────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(BG_COL);
-scene.fog = new THREE.FogExp2(BG_COL, 0.018);
+scene.fog = new THREE.FogExp2(BG_COL, 0.008);
 
 // ── Camera ───────────────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(
-  55, window.innerWidth / window.innerHeight, 0.1, 300
+  55, window.innerWidth / window.innerHeight, 0.1, 600
 );
 camera.position.set(0, 13, 30);
 
@@ -57,7 +57,7 @@ controls.dampingFactor    = 0.06;
 controls.autoRotate       = true;
 controls.autoRotateSpeed  = 0.4;
 controls.minDistance      = 8;
-controls.maxDistance      = 80;
+controls.maxDistance      = 200;
 controls.target.set(0, 0, 0);
 
 // ── Lights ───────────────────────────────────────────────────────────
@@ -70,7 +70,7 @@ fill.position.set(-12, -6, -10);
 scene.add(fill);
 
 // ── Ground grid ──────────────────────────────────────────────────────
-const grid = new THREE.GridHelper(50, 50, 0x1a1a3a, 0x1a1a3a);
+const grid = new THREE.GridHelper(200, 100, 0x1a1a3a, 0x1a1a3a);
 grid.position.y = -5.5;
 scene.add(grid);
 
@@ -146,8 +146,9 @@ function dashedBox(cx, cy, cz, w, h, d, color) {
 
 /** Coloured block with white wireframe edges and a floating label.
  *  Supports cuboid shapes via `renderSize` { w, h, d } or uniform `scale`.
- *  `scale` multiplies the default CUBE size (1 = normal, >1 = bigger). */
-function instanceCube(inst, hexColor, scale = 1, renderSize = null) {
+ *  `scale` multiplies the default CUBE size (1 = normal, >1 = bigger).
+ *  When `compact` is true, only the instance name is shown (no module name). */
+function instanceCube(inst, hexColor, scale = 1, renderSize = null, compact = false) {
   const group = new THREE.Group();
   const w = renderSize?.w ?? CUBE * scale;
   const h = renderSize?.h ?? CUBE * scale;
@@ -170,9 +171,9 @@ function instanceCube(inst, hexColor, scale = 1, renderSize = null) {
   ));
 
   // Floating label above the block
+  const modLine = compact ? '' : `<div class="mod-name">(${inst.module})</div>`;
   const label = makeLabel(
-    `<div class="inst-name">${inst.instance_name}</div>` +
-    `<div class="mod-name">(${inst.module})</div>`,
+    `<div class="inst-name">${inst.instance_name}</div>` + modLine,
     'cube-label'
   );
   label.position.set(0, halfH + 0.5, 0);
@@ -523,12 +524,14 @@ async function buildScene(designPath) {
   const instHalf = {};
 
   // ── Instance cubes / cuboids ────────────────────────────────────
+  // Hide module name labels when many instances (reduces clutter)
+  const compact = instances.length > 12;
   const instHalfH = {};   // y-extent per instance
   for (const inst of instances) {
     const s = scaleFor(inst);
     const mod = design.modules[inst.module];
     const renderSize = mod?.render?.size ?? null;   // { w, h, d } for cuboid
-    const cubeGroup = instanceCube(inst, moduleColor[inst.module] ?? 0x888888, s, renderSize);
+    const cubeGroup = instanceCube(inst, moduleColor[inst.module] ?? 0x888888, s, renderSize, compact);
     scene.add(cubeGroup);
     instHalf[inst.instance_name]  = cubeGroup.userData.cubeHalf;
     instHalfH[inst.instance_name] = cubeGroup.userData.cubeHalfH ?? cubeGroup.userData.cubeHalf;
@@ -658,6 +661,10 @@ async function buildScene(designPath) {
     }
   }
 
+  // Hide bus labels when there are many connections to reduce clutter
+  const busConns = design.connections.filter(c => c.type !== 'clock' && c.type !== 'reset');
+  const showBusLabels = busConns.length <= 20;
+
   for (const conn of design.connections) {
     if (conn.type === 'clock' || conn.type === 'reset') continue;
 
@@ -668,34 +675,54 @@ async function buildScene(designPath) {
     const fromH = instHalf[conn.from_instance] || HALF;
     const toH   = instHalf[conn.to_instance]   || HALF;
 
-    const fromX = fromInst.position.x + fromH;
-    const toX   = toInst.position.x   - toH;
-    const fromY = fromInst.position.y;
-    const toY   = toInst.position.y;
+    // Compute arrow endpoints: choose exit face based on relative position
+    const dx = toInst.position.x - fromInst.position.x;
+    const dy = toInst.position.y - fromInst.position.y;
+    let fromX, fromY, toX, toY;
+
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      // Horizontal connection (exit from left/right face)
+      const fromHy = instHalfH[conn.from_instance] || HALF;
+      const toHy   = instHalfH[conn.to_instance]   || HALF;
+      fromX = fromInst.position.x + (dx >= 0 ? fromH : -fromH);
+      fromY = fromInst.position.y;
+      toX   = toInst.position.x   + (dx >= 0 ? -toH  :  toH);
+      toY   = toInst.position.y;
+    } else {
+      // Vertical connection (exit from top/bottom face)
+      const fromHy = instHalfH[conn.from_instance] || HALF;
+      const toHy   = instHalfH[conn.to_instance]   || HALF;
+      fromX = fromInst.position.x;
+      fromY = fromInst.position.y + (dy >= 0 ? fromHy : -fromHy);
+      toX   = toInst.position.x;
+      toY   = toInst.position.y   + (dy >= 0 ? -toHy  :  toHy);
+    }
+
     const midX  = (fromX + toX) / 2;
     const midY  = (fromY + toY) / 2;
-    const busY  = midY + 0.25;
 
     const col = connColor[conn.type] ?? AXI4_COL;
 
     // Arrow
-    scene.add(arrow([fromX, fromY + 0.25, 0], [toX, toY + 0.25, 0], col));
+    scene.add(arrow([fromX, fromY, 0], [toX, toY, 0], col));
 
     // Port dots
-    scene.add(portDot([fromX, fromY + 0.25, 0], col, 0.16));
-    scene.add(portDot([toX,   toY + 0.25, 0], col, 0.16));
+    scene.add(portDot([fromX, fromY, 0], col, 0.16));
+    scene.add(portDot([toX,   toY, 0], col, 0.16));
 
-    // Bus label
-    const busLabel = makeLabel(
-      `<span class="bus-label-text">${conn.label}</span>`, 'bus-label-obj'
-    );
-    busLabel.position.set(midX, busY + 0.9, 0);
-    scene.add(busLabel);
+    // Bus label (only for small designs)
+    if (showBusLabels && conn.label) {
+      const busLabel = makeLabel(
+        `<span class="bus-label-text">${conn.label}</span>`, 'bus-label-obj'
+      );
+      busLabel.position.set(midX, midY + 0.9, 0);
+      scene.add(busLabel);
+    }
 
     // Invisible hit zone for click detection
     const hitZone = busHitZone(
-      [fromX, fromY + 0.25, 0],
-      [toX, toY + 0.25, 0]
+      [fromX, fromY, 0],
+      [toX, toY, 0]
     );
     scene.add(hitZone);
     clickableObjects.push(hitZone);
