@@ -440,7 +440,15 @@
   "connection_types": {
     "axi4_bus": {
       "color": "#FFC107",
-      "description": "AXI4 bus / TLM / hierarchy connection"
+      "description": "AXI4 Bus"
+    },
+    "vif": {
+      "color": "#795548",
+      "description": "Virtual Interface"
+    },
+    "tlm": {
+      "color": "#E91E63",
+      "description": "TLM Analysis Port"
     }
   }
 }

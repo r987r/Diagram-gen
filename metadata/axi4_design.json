@@ -37,6 +37,9 @@
       }
     ]
   },
+  "connection_types": {
+    "axi4_bus": { "color": "#FFC107", "description": "AXI4 Bus" }
+  },
   "modules": {},
   "instances": [],
   "connections": [
