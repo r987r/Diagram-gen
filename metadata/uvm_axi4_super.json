@@ -3230,20 +3230,21 @@
       }
     },
     {
-      "id": "cpu_aw_vif_to_mon",
+      "id": "cpu_aw_mon_to_vif",
       "type": "axi4_bus",
       "description": "CPU AW monitor observes signals through VIF",
-      "from_instance": "cpu_aw_vif",
-      "to_instance": "cpu_aw_mon",
+      "from_instance": "cpu_aw_mon",
+      "to_instance": "cpu_aw_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "AW mon \u2192 vif"
     },
     {
       "id": "cpu_aw_vif_to_xbar",
@@ -3294,20 +3295,21 @@
       }
     },
     {
-      "id": "cpu_w_vif_to_mon",
+      "id": "cpu_w_mon_to_vif",
       "type": "axi4_bus",
       "description": "CPU W monitor observes signals through VIF",
-      "from_instance": "cpu_w_vif",
-      "to_instance": "cpu_w_mon",
+      "from_instance": "cpu_w_mon",
+      "to_instance": "cpu_w_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "W mon \u2192 vif"
     },
     {
       "id": "cpu_w_vif_to_xbar",
@@ -3358,20 +3360,21 @@
       }
     },
     {
-      "id": "cpu_b_vif_to_mon",
+      "id": "cpu_b_mon_to_vif",
       "type": "axi4_bus",
       "description": "CPU B monitor observes signals through VIF",
-      "from_instance": "cpu_b_vif",
-      "to_instance": "cpu_b_mon",
+      "from_instance": "cpu_b_mon",
+      "to_instance": "cpu_b_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "B mon \u2192 vif"
     },
     {
       "id": "cpu_b_vif_to_xbar",
@@ -3422,20 +3425,21 @@
       }
     },
     {
-      "id": "cpu_ar_vif_to_mon",
+      "id": "cpu_ar_mon_to_vif",
       "type": "axi4_bus",
       "description": "CPU AR monitor observes signals through VIF",
-      "from_instance": "cpu_ar_vif",
-      "to_instance": "cpu_ar_mon",
+      "from_instance": "cpu_ar_mon",
+      "to_instance": "cpu_ar_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "AR mon \u2192 vif"
     },
     {
       "id": "cpu_ar_vif_to_xbar",
@@ -3486,20 +3490,21 @@
       }
     },
     {
-      "id": "cpu_r_vif_to_mon",
+      "id": "cpu_r_mon_to_vif",
       "type": "axi4_bus",
       "description": "CPU R monitor observes signals through VIF",
-      "from_instance": "cpu_r_vif",
-      "to_instance": "cpu_r_mon",
+      "from_instance": "cpu_r_mon",
+      "to_instance": "cpu_r_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "R mon \u2192 vif"
     },
     {
       "id": "cpu_r_vif_to_xbar",
@@ -3710,20 +3715,21 @@
       }
     },
     {
-      "id": "dma_aw_vif_to_mon",
+      "id": "dma_aw_mon_to_vif",
       "type": "axi4_bus",
       "description": "DMA AW monitor observes signals through VIF",
-      "from_instance": "dma_aw_vif",
-      "to_instance": "dma_aw_mon",
+      "from_instance": "dma_aw_mon",
+      "to_instance": "dma_aw_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "AW mon \u2192 vif"
     },
     {
       "id": "dma_aw_vif_to_xbar",
@@ -3774,20 +3780,21 @@
       }
     },
     {
-      "id": "dma_w_vif_to_mon",
+      "id": "dma_w_mon_to_vif",
       "type": "axi4_bus",
       "description": "DMA W monitor observes signals through VIF",
-      "from_instance": "dma_w_vif",
-      "to_instance": "dma_w_mon",
+      "from_instance": "dma_w_mon",
+      "to_instance": "dma_w_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "W mon \u2192 vif"
     },
     {
       "id": "dma_w_vif_to_xbar",
@@ -3838,20 +3845,21 @@
       }
     },
     {
-      "id": "dma_b_vif_to_mon",
+      "id": "dma_b_mon_to_vif",
       "type": "axi4_bus",
       "description": "DMA B monitor observes signals through VIF",
-      "from_instance": "dma_b_vif",
-      "to_instance": "dma_b_mon",
+      "from_instance": "dma_b_mon",
+      "to_instance": "dma_b_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "B mon \u2192 vif"
     },
     {
       "id": "dma_b_vif_to_xbar",
@@ -3902,20 +3910,21 @@
       }
     },
     {
-      "id": "dma_ar_vif_to_mon",
+      "id": "dma_ar_mon_to_vif",
       "type": "axi4_bus",
       "description": "DMA AR monitor observes signals through VIF",
-      "from_instance": "dma_ar_vif",
-      "to_instance": "dma_ar_mon",
+      "from_instance": "dma_ar_mon",
+      "to_instance": "dma_ar_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "AR mon \u2192 vif"
     },
     {
       "id": "dma_ar_vif_to_xbar",
@@ -3966,20 +3975,21 @@
       }
     },
     {
-      "id": "dma_r_vif_to_mon",
+      "id": "dma_r_mon_to_vif",
       "type": "axi4_bus",
       "description": "DMA R monitor observes signals through VIF",
-      "from_instance": "dma_r_vif",
-      "to_instance": "dma_r_mon",
+      "from_instance": "dma_r_mon",
+      "to_instance": "dma_r_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "R mon \u2192 vif"
     },
     {
       "id": "dma_r_vif_to_xbar",
@@ -4190,20 +4200,21 @@
       }
     },
     {
-      "id": "gpu_aw_vif_to_mon",
+      "id": "gpu_aw_mon_to_vif",
       "type": "axi4_bus",
       "description": "GPU AW monitor observes signals through VIF",
-      "from_instance": "gpu_aw_vif",
-      "to_instance": "gpu_aw_mon",
+      "from_instance": "gpu_aw_mon",
+      "to_instance": "gpu_aw_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "AW mon \u2192 vif"
     },
     {
       "id": "gpu_aw_vif_to_xbar",
@@ -4254,20 +4265,21 @@
       }
     },
     {
-      "id": "gpu_w_vif_to_mon",
+      "id": "gpu_w_mon_to_vif",
       "type": "axi4_bus",
       "description": "GPU W monitor observes signals through VIF",
-      "from_instance": "gpu_w_vif",
-      "to_instance": "gpu_w_mon",
+      "from_instance": "gpu_w_mon",
+      "to_instance": "gpu_w_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "W mon \u2192 vif"
     },
     {
       "id": "gpu_w_vif_to_xbar",
@@ -4318,20 +4330,21 @@
       }
     },
     {
-      "id": "gpu_b_vif_to_mon",
+      "id": "gpu_b_mon_to_vif",
       "type": "axi4_bus",
       "description": "GPU B monitor observes signals through VIF",
-      "from_instance": "gpu_b_vif",
-      "to_instance": "gpu_b_mon",
+      "from_instance": "gpu_b_mon",
+      "to_instance": "gpu_b_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "B mon \u2192 vif"
     },
     {
       "id": "gpu_b_vif_to_xbar",
@@ -4382,20 +4395,21 @@
       }
     },
     {
-      "id": "gpu_ar_vif_to_mon",
+      "id": "gpu_ar_mon_to_vif",
       "type": "axi4_bus",
       "description": "GPU AR monitor observes signals through VIF",
-      "from_instance": "gpu_ar_vif",
-      "to_instance": "gpu_ar_mon",
+      "from_instance": "gpu_ar_mon",
+      "to_instance": "gpu_ar_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "AR mon \u2192 vif"
     },
     {
       "id": "gpu_ar_vif_to_xbar",
@@ -4446,20 +4460,21 @@
       }
     },
     {
-      "id": "gpu_r_vif_to_mon",
+      "id": "gpu_r_mon_to_vif",
       "type": "axi4_bus",
       "description": "GPU R monitor observes signals through VIF",
-      "from_instance": "gpu_r_vif",
-      "to_instance": "gpu_r_mon",
+      "from_instance": "gpu_r_mon",
+      "to_instance": "gpu_r_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "R mon \u2192 vif"
     },
     {
       "id": "gpu_r_vif_to_xbar",
@@ -4670,20 +4685,21 @@
       }
     },
     {
-      "id": "sram_aw_vif_to_mon",
+      "id": "sram_aw_mon_to_vif",
       "type": "axi4_bus",
       "description": "SRAM AW monitor observes signals through VIF",
-      "from_instance": "sram_aw_vif",
-      "to_instance": "sram_aw_mon",
+      "from_instance": "sram_aw_mon",
+      "to_instance": "sram_aw_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "AW mon \u2192 vif"
     },
     {
       "id": "xbar_to_sram_aw_vif",
@@ -4734,20 +4750,21 @@
       }
     },
     {
-      "id": "sram_w_vif_to_mon",
+      "id": "sram_w_mon_to_vif",
       "type": "axi4_bus",
       "description": "SRAM W monitor observes signals through VIF",
-      "from_instance": "sram_w_vif",
-      "to_instance": "sram_w_mon",
+      "from_instance": "sram_w_mon",
+      "to_instance": "sram_w_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "W mon \u2192 vif"
     },
     {
       "id": "xbar_to_sram_w_vif",
@@ -4798,20 +4815,21 @@
       }
     },
     {
-      "id": "sram_b_vif_to_mon",
+      "id": "sram_b_mon_to_vif",
       "type": "axi4_bus",
       "description": "SRAM B monitor observes signals through VIF",
-      "from_instance": "sram_b_vif",
-      "to_instance": "sram_b_mon",
+      "from_instance": "sram_b_mon",
+      "to_instance": "sram_b_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "B mon \u2192 vif"
     },
     {
       "id": "xbar_to_sram_b_vif",
@@ -4862,20 +4880,21 @@
       }
     },
     {
-      "id": "sram_ar_vif_to_mon",
+      "id": "sram_ar_mon_to_vif",
       "type": "axi4_bus",
       "description": "SRAM AR monitor observes signals through VIF",
-      "from_instance": "sram_ar_vif",
-      "to_instance": "sram_ar_mon",
+      "from_instance": "sram_ar_mon",
+      "to_instance": "sram_ar_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "AR mon \u2192 vif"
     },
     {
       "id": "xbar_to_sram_ar_vif",
@@ -4926,20 +4945,21 @@
       }
     },
     {
-      "id": "sram_r_vif_to_mon",
+      "id": "sram_r_mon_to_vif",
       "type": "axi4_bus",
       "description": "SRAM R monitor observes signals through VIF",
-      "from_instance": "sram_r_vif",
-      "to_instance": "sram_r_mon",
+      "from_instance": "sram_r_mon",
+      "to_instance": "sram_r_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "R mon \u2192 vif"
     },
     {
       "id": "xbar_to_sram_r_vif",
@@ -5150,20 +5170,21 @@
       }
     },
     {
-      "id": "ddr_aw_vif_to_mon",
+      "id": "ddr_aw_mon_to_vif",
       "type": "axi4_bus",
       "description": "DDR AW monitor observes signals through VIF",
-      "from_instance": "ddr_aw_vif",
-      "to_instance": "ddr_aw_mon",
+      "from_instance": "ddr_aw_mon",
+      "to_instance": "ddr_aw_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "AW mon \u2192 vif"
     },
     {
       "id": "xbar_to_ddr_aw_vif",
@@ -5214,20 +5235,21 @@
       }
     },
     {
-      "id": "ddr_w_vif_to_mon",
+      "id": "ddr_w_mon_to_vif",
       "type": "axi4_bus",
       "description": "DDR W monitor observes signals through VIF",
-      "from_instance": "ddr_w_vif",
-      "to_instance": "ddr_w_mon",
+      "from_instance": "ddr_w_mon",
+      "to_instance": "ddr_w_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "W mon \u2192 vif"
     },
     {
       "id": "xbar_to_ddr_w_vif",
@@ -5278,20 +5300,21 @@
       }
     },
     {
-      "id": "ddr_b_vif_to_mon",
+      "id": "ddr_b_mon_to_vif",
       "type": "axi4_bus",
       "description": "DDR B monitor observes signals through VIF",
-      "from_instance": "ddr_b_vif",
-      "to_instance": "ddr_b_mon",
+      "from_instance": "ddr_b_mon",
+      "to_instance": "ddr_b_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "B mon \u2192 vif"
     },
     {
       "id": "xbar_to_ddr_b_vif",
@@ -5342,20 +5365,21 @@
       }
     },
     {
-      "id": "ddr_ar_vif_to_mon",
+      "id": "ddr_ar_mon_to_vif",
       "type": "axi4_bus",
       "description": "DDR AR monitor observes signals through VIF",
-      "from_instance": "ddr_ar_vif",
-      "to_instance": "ddr_ar_mon",
+      "from_instance": "ddr_ar_mon",
+      "to_instance": "ddr_ar_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "AR mon \u2192 vif"
     },
     {
       "id": "xbar_to_ddr_ar_vif",
@@ -5406,20 +5430,21 @@
       }
     },
     {
-      "id": "ddr_r_vif_to_mon",
+      "id": "ddr_r_mon_to_vif",
       "type": "axi4_bus",
       "description": "DDR R monitor observes signals through VIF",
-      "from_instance": "ddr_r_vif",
-      "to_instance": "ddr_r_mon",
+      "from_instance": "ddr_r_mon",
+      "to_instance": "ddr_r_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "R mon \u2192 vif"
     },
     {
       "id": "xbar_to_ddr_r_vif",
@@ -5630,20 +5655,21 @@
       }
     },
     {
-      "id": "uart_aw_vif_to_mon",
+      "id": "uart_aw_mon_to_vif",
       "type": "axi4_bus",
       "description": "UART AW monitor observes signals through VIF",
-      "from_instance": "uart_aw_vif",
-      "to_instance": "uart_aw_mon",
+      "from_instance": "uart_aw_mon",
+      "to_instance": "uart_aw_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "AW mon \u2192 vif"
     },
     {
       "id": "xbar_to_uart_aw_vif",
@@ -5694,20 +5720,21 @@
       }
     },
     {
-      "id": "uart_w_vif_to_mon",
+      "id": "uart_w_mon_to_vif",
       "type": "axi4_bus",
       "description": "UART W monitor observes signals through VIF",
-      "from_instance": "uart_w_vif",
-      "to_instance": "uart_w_mon",
+      "from_instance": "uart_w_mon",
+      "to_instance": "uart_w_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "W mon \u2192 vif"
     },
     {
       "id": "xbar_to_uart_w_vif",
@@ -5758,20 +5785,21 @@
       }
     },
     {
-      "id": "uart_b_vif_to_mon",
+      "id": "uart_b_mon_to_vif",
       "type": "axi4_bus",
       "description": "UART B monitor observes signals through VIF",
-      "from_instance": "uart_b_vif",
-      "to_instance": "uart_b_mon",
+      "from_instance": "uart_b_mon",
+      "to_instance": "uart_b_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "B mon \u2192 vif"
     },
     {
       "id": "xbar_to_uart_b_vif",
@@ -5822,20 +5850,21 @@
       }
     },
     {
-      "id": "uart_ar_vif_to_mon",
+      "id": "uart_ar_mon_to_vif",
       "type": "axi4_bus",
       "description": "UART AR monitor observes signals through VIF",
-      "from_instance": "uart_ar_vif",
-      "to_instance": "uart_ar_mon",
+      "from_instance": "uart_ar_mon",
+      "to_instance": "uart_ar_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "AR mon \u2192 vif"
     },
     {
       "id": "xbar_to_uart_ar_vif",
@@ -5886,20 +5915,21 @@
       }
     },
     {
-      "id": "uart_r_vif_to_mon",
+      "id": "uart_r_mon_to_vif",
       "type": "axi4_bus",
       "description": "UART R monitor observes signals through VIF",
-      "from_instance": "uart_r_vif",
-      "to_instance": "uart_r_mon",
+      "from_instance": "uart_r_mon",
+      "to_instance": "uart_r_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "R mon \u2192 vif"
     },
     {
       "id": "xbar_to_uart_r_vif",
@@ -6110,20 +6140,21 @@
       }
     },
     {
-      "id": "spi_aw_vif_to_mon",
+      "id": "spi_aw_mon_to_vif",
       "type": "axi4_bus",
       "description": "SPI AW monitor observes signals through VIF",
-      "from_instance": "spi_aw_vif",
-      "to_instance": "spi_aw_mon",
+      "from_instance": "spi_aw_mon",
+      "to_instance": "spi_aw_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "AW mon \u2192 vif"
     },
     {
       "id": "xbar_to_spi_aw_vif",
@@ -6174,20 +6205,21 @@
       }
     },
     {
-      "id": "spi_w_vif_to_mon",
+      "id": "spi_w_mon_to_vif",
       "type": "axi4_bus",
       "description": "SPI W monitor observes signals through VIF",
-      "from_instance": "spi_w_vif",
-      "to_instance": "spi_w_mon",
+      "from_instance": "spi_w_mon",
+      "to_instance": "spi_w_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "W mon \u2192 vif"
     },
     {
       "id": "xbar_to_spi_w_vif",
@@ -6238,20 +6270,21 @@
       }
     },
     {
-      "id": "spi_b_vif_to_mon",
+      "id": "spi_b_mon_to_vif",
       "type": "axi4_bus",
       "description": "SPI B monitor observes signals through VIF",
-      "from_instance": "spi_b_vif",
-      "to_instance": "spi_b_mon",
+      "from_instance": "spi_b_mon",
+      "to_instance": "spi_b_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "B mon \u2192 vif"
     },
     {
       "id": "xbar_to_spi_b_vif",
@@ -6302,20 +6335,21 @@
       }
     },
     {
-      "id": "spi_ar_vif_to_mon",
+      "id": "spi_ar_mon_to_vif",
       "type": "axi4_bus",
       "description": "SPI AR monitor observes signals through VIF",
-      "from_instance": "spi_ar_vif",
-      "to_instance": "spi_ar_mon",
+      "from_instance": "spi_ar_mon",
+      "to_instance": "spi_ar_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "AR mon \u2192 vif"
     },
     {
       "id": "xbar_to_spi_ar_vif",
@@ -6366,20 +6400,21 @@
       }
     },
     {
-      "id": "spi_r_vif_to_mon",
+      "id": "spi_r_mon_to_vif",
       "type": "axi4_bus",
       "description": "SPI R monitor observes signals through VIF",
-      "from_instance": "spi_r_vif",
-      "to_instance": "spi_r_mon",
+      "from_instance": "spi_r_mon",
+      "to_instance": "spi_r_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
-      }
+      },
+      "label": "R mon \u2192 vif"
     },
     {
       "id": "xbar_to_spi_r_vif",

@@ -2,7 +2,8 @@
   "block_name": "uvm_sequencer",
   "description": "UVM sequencer. Arbitrates sequences and delivers sequence items to the driver via a TLM seq_item_port.",
   "render": {
-    "color": "#00BCD4"
+    "color": "#00BCD4",
+    "size": { "w": 2, "h": 2, "d": 2 }
   },
   "ports": [
     {

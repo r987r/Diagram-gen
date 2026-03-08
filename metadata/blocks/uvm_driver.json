@@ -2,7 +2,8 @@
   "block_name": "uvm_driver",
   "description": "UVM AXI4 driver. Receives sequence items from the sequencer and drives them onto the AXI4 virtual interface signals.",
   "render": {
-    "color": "#4CAF50"
+    "color": "#4CAF50",
+    "size": { "w": 2, "h": 2, "d": 2 }
   },
   "ports": [
     {

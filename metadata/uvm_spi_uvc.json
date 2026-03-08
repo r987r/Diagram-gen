@@ -774,86 +774,86 @@
       }
     },
     {
-      "id": "aw_vif_to_mon",
+      "id": "aw_mon_to_vif",
       "type": "axi4_bus",
-      "label": "AW vif \u2192 mon",
+      "label": "AW mon \u2192 vif",
       "description": "AW monitor observes signals through virtual interface",
-      "from_instance": "aw_vif",
-      "to_instance": "aw_mon",
+      "from_instance": "aw_mon",
+      "to_instance": "aw_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
       }
     },
     {
-      "id": "w_vif_to_mon",
+      "id": "w_mon_to_vif",
       "type": "axi4_bus",
-      "label": "W vif \u2192 mon",
+      "label": "W mon \u2192 vif",
       "description": "W monitor observes signals through virtual interface",
-      "from_instance": "w_vif",
-      "to_instance": "w_mon",
+      "from_instance": "w_mon",
+      "to_instance": "w_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
       }
     },
     {
-      "id": "b_vif_to_mon",
+      "id": "b_mon_to_vif",
       "type": "axi4_bus",
-      "label": "B vif \u2192 mon",
+      "label": "B mon \u2192 vif",
       "description": "B monitor observes signals through virtual interface",
-      "from_instance": "b_vif",
-      "to_instance": "b_mon",
+      "from_instance": "b_mon",
+      "to_instance": "b_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
       }
     },
     {
-      "id": "ar_vif_to_mon",
+      "id": "ar_mon_to_vif",
       "type": "axi4_bus",
-      "label": "AR vif \u2192 mon",
+      "label": "AR mon \u2192 vif",
       "description": "AR monitor observes signals through virtual interface",
-      "from_instance": "ar_vif",
-      "to_instance": "ar_mon",
+      "from_instance": "ar_mon",
+      "to_instance": "ar_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
       }
     },
     {
-      "id": "r_vif_to_mon",
+      "id": "r_mon_to_vif",
       "type": "axi4_bus",
-      "label": "R vif \u2192 mon",
+      "label": "R mon \u2192 vif",
       "description": "R monitor observes signals through virtual interface",
-      "from_instance": "r_vif",
-      "to_instance": "r_mon",
+      "from_instance": "r_mon",
+      "to_instance": "r_vif",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "monitor_mp",
+            "from_port": "vif",
             "wire": "vif_handle",
-            "to_port": "vif"
+            "to_port": "monitor_mp"
           }
         ]
       }
