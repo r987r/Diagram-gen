@@ -1,0 +1,609 @@
+{
+  "design_name": "spi_uvc_view",
+  "version": "3.0",
+  "description": "Individual view of the SPI AXI4 UVC \u2014 5 per-channel agents (AW, W, B, AR, R) with sequences and scoreboards for debugging.",
+  "includes": [
+    "blocks/uvm_agent.json",
+    "blocks/uvm_sequence.json"
+  ],
+  "parameters": {
+    "DATA_WIDTH": 64,
+    "ADDR_WIDTH": 32,
+    "ID_WIDTH": 4
+  },
+  "testbench": {
+    "module_name": "tb_top",
+    "description": "Testbench for SPI AXI4 UVC debug view.",
+    "global_signals": [
+      {
+        "name": "clk",
+        "width": 1,
+        "type": "reg",
+        "description": "System clock.",
+        "render": {
+          "face": "bottom",
+          "color": "#00E676"
+        }
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "type": "reg",
+        "description": "Active-low reset.",
+        "render": {
+          "face": "top",
+          "color": "#FF5252"
+        }
+      }
+    ]
+  },
+  "modules": {
+    "axi4_interconnect": {
+      "description": "AXI4 interconnect stub",
+      "render": {
+        "color": "#FF9800",
+        "size": {
+          "w": 6,
+          "h": 3,
+          "d": 3
+        }
+      },
+      "ports": [
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "System clock"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "Active-low reset"
+        }
+      ]
+    },
+    "uvm_read_scoreboard": {
+      "description": "Read scoreboard",
+      "render": {
+        "color": "#F44336"
+      },
+      "ports": [
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "System clock"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "Active-low reset"
+        },
+        {
+          "name": "analysis_export",
+          "direction": "input",
+          "width": 1,
+          "channel": "TLM",
+          "description": "TLM analysis export"
+        }
+      ]
+    },
+    "uvm_write_scoreboard": {
+      "description": "Write scoreboard",
+      "render": {
+        "color": "#E53935"
+      },
+      "ports": [
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "System clock"
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1,
+          "channel": "GLOBAL",
+          "description": "Active-low reset"
+        },
+        {
+          "name": "analysis_export",
+          "direction": "input",
+          "width": 1,
+          "channel": "TLM",
+          "description": "TLM analysis export"
+        }
+      ]
+    }
+  },
+  "instances": [
+    {
+      "instance_name": "spi_aw_agent",
+      "module": "uvm_agent",
+      "description": "SPI AW channel agent",
+      "position": {
+        "x": -10,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "spi_w_agent",
+      "module": "uvm_agent",
+      "description": "SPI W channel agent",
+      "position": {
+        "x": -5,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "spi_b_agent",
+      "module": "uvm_agent",
+      "description": "SPI B channel agent",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "spi_ar_agent",
+      "module": "uvm_agent",
+      "description": "SPI AR channel agent",
+      "position": {
+        "x": 5,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "spi_r_agent",
+      "module": "uvm_agent",
+      "description": "SPI R channel agent",
+      "position": {
+        "x": 10,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "dut_stub",
+      "module": "axi4_interconnect",
+      "description": "AXI4 interconnect slave port stub",
+      "position": {
+        "x": 0,
+        "y": 8,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "read_seq",
+      "module": "uvm_sequence",
+      "description": "Read sequence \u2014 AR/R stimulus",
+      "position": {
+        "x": -14,
+        "y": 6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "write_seq",
+      "module": "uvm_sequence",
+      "description": "Write sequence \u2014 AW/W/B stimulus",
+      "position": {
+        "x": 14,
+        "y": 6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "read_sb",
+      "module": "uvm_read_scoreboard",
+      "description": "Read scoreboard",
+      "position": {
+        "x": -14,
+        "y": -14,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "write_sb",
+      "module": "uvm_write_scoreboard",
+      "description": "Write scoreboard",
+      "position": {
+        "x": 14,
+        "y": -14,
+        "z": 0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "clk_fanout",
+      "type": "clock",
+      "description": "System clock",
+      "from": {
+        "instance": "tb_top",
+        "port": "clk"
+      },
+      "to": [
+        {
+          "instance": "spi_aw_agent",
+          "port": "clk"
+        },
+        {
+          "instance": "spi_w_agent",
+          "port": "clk"
+        },
+        {
+          "instance": "spi_b_agent",
+          "port": "clk"
+        },
+        {
+          "instance": "spi_ar_agent",
+          "port": "clk"
+        },
+        {
+          "instance": "spi_r_agent",
+          "port": "clk"
+        },
+        {
+          "instance": "dut_stub",
+          "port": "clk"
+        },
+        {
+          "instance": "read_seq",
+          "port": "clk"
+        },
+        {
+          "instance": "write_seq",
+          "port": "clk"
+        },
+        {
+          "instance": "read_sb",
+          "port": "clk"
+        },
+        {
+          "instance": "write_sb",
+          "port": "clk"
+        }
+      ]
+    },
+    {
+      "id": "rst_fanout",
+      "type": "reset",
+      "description": "Active-low reset",
+      "from": {
+        "instance": "tb_top",
+        "port": "rst_n"
+      },
+      "to": [
+        {
+          "instance": "spi_aw_agent",
+          "port": "rst_n"
+        },
+        {
+          "instance": "spi_w_agent",
+          "port": "rst_n"
+        },
+        {
+          "instance": "spi_b_agent",
+          "port": "rst_n"
+        },
+        {
+          "instance": "spi_ar_agent",
+          "port": "rst_n"
+        },
+        {
+          "instance": "spi_r_agent",
+          "port": "rst_n"
+        },
+        {
+          "instance": "dut_stub",
+          "port": "rst_n"
+        },
+        {
+          "instance": "read_seq",
+          "port": "rst_n"
+        },
+        {
+          "instance": "write_seq",
+          "port": "rst_n"
+        },
+        {
+          "instance": "read_sb",
+          "port": "rst_n"
+        },
+        {
+          "instance": "write_sb",
+          "port": "rst_n"
+        }
+      ]
+    },
+    {
+      "id": "dut_to_spi_aw_agent",
+      "type": "axi4_bus",
+      "label": "DUT \u2192 AW",
+      "description": "DUT drives AW agent via VIF",
+      "from_instance": "dut_stub",
+      "to_instance": "spi_aw_agent",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "spi_aw",
+            "wire": "vif_handle",
+            "to_port": "vif"
+          }
+        ]
+      }
+    },
+    {
+      "id": "write_seq_to_spi_aw_agent",
+      "type": "axi4_bus",
+      "label": "seq \u2192 AW",
+      "description": "Write sequence drives AW agent",
+      "from_instance": "write_seq",
+      "to_instance": "spi_aw_agent",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "seq_item_port",
+            "to_port": "seq_item_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "spi_aw_agent_to_write_sb",
+      "type": "axi4_bus",
+      "label": "AW \u2192 SB",
+      "description": "AW monitor to write scoreboard",
+      "from_instance": "spi_aw_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dut_to_spi_w_agent",
+      "type": "axi4_bus",
+      "label": "DUT \u2192 W",
+      "description": "DUT drives W agent via VIF",
+      "from_instance": "dut_stub",
+      "to_instance": "spi_w_agent",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "spi_w",
+            "wire": "vif_handle",
+            "to_port": "vif"
+          }
+        ]
+      }
+    },
+    {
+      "id": "write_seq_to_spi_w_agent",
+      "type": "axi4_bus",
+      "label": "seq \u2192 W",
+      "description": "Write sequence drives W agent",
+      "from_instance": "write_seq",
+      "to_instance": "spi_w_agent",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "seq_item_port",
+            "to_port": "seq_item_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "spi_w_agent_to_write_sb",
+      "type": "axi4_bus",
+      "label": "W \u2192 SB",
+      "description": "W monitor to write scoreboard",
+      "from_instance": "spi_w_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dut_to_spi_b_agent",
+      "type": "axi4_bus",
+      "label": "DUT \u2192 B",
+      "description": "DUT drives B agent via VIF",
+      "from_instance": "dut_stub",
+      "to_instance": "spi_b_agent",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "spi_b",
+            "wire": "vif_handle",
+            "to_port": "vif"
+          }
+        ]
+      }
+    },
+    {
+      "id": "write_seq_to_spi_b_agent",
+      "type": "axi4_bus",
+      "label": "seq \u2192 B",
+      "description": "Write sequence drives B agent",
+      "from_instance": "write_seq",
+      "to_instance": "spi_b_agent",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "seq_item_port",
+            "to_port": "seq_item_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "spi_b_agent_to_write_sb",
+      "type": "axi4_bus",
+      "label": "B \u2192 SB",
+      "description": "B monitor to write scoreboard",
+      "from_instance": "spi_b_agent",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dut_to_spi_ar_agent",
+      "type": "axi4_bus",
+      "label": "DUT \u2192 AR",
+      "description": "DUT drives AR agent via VIF",
+      "from_instance": "dut_stub",
+      "to_instance": "spi_ar_agent",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "spi_ar",
+            "wire": "vif_handle",
+            "to_port": "vif"
+          }
+        ]
+      }
+    },
+    {
+      "id": "read_seq_to_spi_ar_agent",
+      "type": "axi4_bus",
+      "label": "seq \u2192 AR",
+      "description": "Read sequence drives AR agent",
+      "from_instance": "read_seq",
+      "to_instance": "spi_ar_agent",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "seq_item_port",
+            "to_port": "seq_item_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "spi_ar_agent_to_read_sb",
+      "type": "axi4_bus",
+      "label": "AR \u2192 SB",
+      "description": "AR monitor to read scoreboard",
+      "from_instance": "spi_ar_agent",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dut_to_spi_r_agent",
+      "type": "axi4_bus",
+      "label": "DUT \u2192 R",
+      "description": "DUT drives R agent via VIF",
+      "from_instance": "dut_stub",
+      "to_instance": "spi_r_agent",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "spi_r",
+            "wire": "vif_handle",
+            "to_port": "vif"
+          }
+        ]
+      }
+    },
+    {
+      "id": "read_seq_to_spi_r_agent",
+      "type": "axi4_bus",
+      "label": "seq \u2192 R",
+      "description": "Read sequence drives R agent",
+      "from_instance": "read_seq",
+      "to_instance": "spi_r_agent",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "seq_item_port",
+            "to_port": "seq_item_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "spi_r_agent_to_read_sb",
+      "type": "axi4_bus",
+      "label": "R \u2192 SB",
+      "description": "R monitor to read scoreboard",
+      "from_instance": "spi_r_agent",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "spi_uvc",
+      "label": "SPI AXI4 UVC",
+      "description": "SPI AXI4 UVC \u2014 contains 5 per-channel agents",
+      "color": "#00897B",
+      "members": [
+        "spi_aw_agent",
+        "spi_w_agent",
+        "spi_b_agent",
+        "spi_ar_agent",
+        "spi_r_agent"
+      ]
+    }
+  ],
+  "connection_types": {
+    "axi4_bus": {
+      "color": "#FFC107",
+      "description": "AXI4 bus / TLM / hierarchy connection"
+    }
+  }
+}

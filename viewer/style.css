@@ -202,27 +202,36 @@ html, body {
 .pk { color: #78909c; }
 .pv { color: #fff; font-weight: 600; text-align: right; font-family: monospace; }
 
-/* ── Info popup (bottom sheet) ───────────────────────────────── */
+/* ── Info popup (overlay panel) ───────────────────────────────── */
 .popup {
   position: fixed;
-  bottom: 0; left: 0; right: 0;
-  z-index: 20;
-  background: rgba(13, 13, 26, 0.94);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 60;
+  background: rgba(13, 13, 26, 0.96);
   backdrop-filter: blur(8px);
-  border-top: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px 12px 0 0;
-  transition: transform 0.3s ease;
-  max-height: 55vh;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+  max-height: 60vh;
+  max-width: 520px;
+  width: 90%;
   display: flex;
   flex-direction: column;
 }
 
 .popup.collapsed {
-  transform: translateY(calc(100% - 36px));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .popup.expanded {
-  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .popup-handle {
@@ -248,14 +257,11 @@ html, body {
   font-size: 0.9rem;
   cursor: pointer;
   padding: 0 0.3rem;
-  transition: transform 0.3s ease;
 }
 
-.popup.collapsed .popup-toggle {
-  transform: rotate(0deg);
-}
+.popup.collapsed .popup-toggle,
 .popup.expanded .popup-toggle {
-  transform: rotate(180deg);
+  transform: none;
 }
 
 .popup-body {
@@ -402,6 +408,23 @@ html, body {
   color: #78909c;
   text-shadow: 0 0 6px rgba(0,0,0,0.9);
   letter-spacing: 0.06em;
+  background: rgba(13,13,26,0.55);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+}
+
+/* Encapsulation group label */
+.group-label-obj {
+  pointer-events: none;
+  user-select: none;
+}
+
+.group-label-text {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #42A5F5;
+  text-shadow: 0 0 6px rgba(0,0,0,0.9);
+  letter-spacing: 0.04em;
   background: rgba(13,13,26,0.55);
   padding: 0.1rem 0.4rem;
   border-radius: 3px;

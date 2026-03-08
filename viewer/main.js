@@ -144,15 +144,19 @@ function dashedBox(cx, cy, cz, w, h, d, color) {
   return ls;
 }
 
-/** Coloured cube with white wireframe edges and a floating label.
+/** Coloured block with white wireframe edges and a floating label.
+ *  Supports cuboid shapes via `renderSize` { w, h, d } or uniform `scale`.
  *  `scale` multiplies the default CUBE size (1 = normal, >1 = bigger). */
-function instanceCube(inst, hexColor, scale = 1) {
+function instanceCube(inst, hexColor, scale = 1, renderSize = null) {
   const group = new THREE.Group();
-  const size = CUBE * scale;
-  const half = size / 2;
+  const w = renderSize?.w ?? CUBE * scale;
+  const h = renderSize?.h ?? CUBE * scale;
+  const d = renderSize?.d ?? CUBE * scale;
+  const halfW = w / 2;
+  const halfH = h / 2;
 
   // Solid face
-  const geo = new THREE.BoxGeometry(size, size, size);
+  const geo = new THREE.BoxGeometry(w, h, d);
   const mat = new THREE.MeshLambertMaterial({
     color: hexColor, transparent: true, opacity: 0.82,
   });
@@ -165,17 +169,18 @@ function instanceCube(inst, hexColor, scale = 1) {
     edges, new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 1.5 })
   ));
 
-  // Floating label above the cube
+  // Floating label above the block
   const label = makeLabel(
     `<div class="inst-name">${inst.instance_name}</div>` +
     `<div class="mod-name">(${inst.module})</div>`,
     'cube-label'
   );
-  label.position.set(0, half + 0.5, 0);
+  label.position.set(0, halfH + 0.5, 0);
   group.add(label);
 
   group.position.set(inst.position.x, inst.position.y, inst.position.z);
-  group.userData.cubeHalf = half;      // expose for connection wiring
+  group.userData.cubeHalf  = halfW;      // expose for connection wiring (x-extent)
+  group.userData.cubeHalfH = halfH;      // y-extent
   return group;
 }
 
@@ -290,6 +295,22 @@ function showConnectionInfo(conn) {
   expandPopup();
 }
 
+/** Show group info in the popup. */
+function showGroupInfo(grp) {
+  let html = `<h3>${grp.label || grp.name}</h3>`;
+  html += `<div class="info-desc">${grp.description ?? ''}</div>`;
+  if (grp.members?.length) {
+    html += `<div class="info-section-title">Members</div><ul>`;
+    for (const m of grp.members) {
+      html += `<li><code>${m}</code></li>`;
+    }
+    html += `</ul>`;
+  }
+  popupBody.innerHTML = html;
+  popupHint.textContent = grp.label || grp.name;
+  expandPopup();
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // Overview overlay
 // ═══════════════════════════════════════════════════════════════════
@@ -340,6 +361,8 @@ renderer.domElement.addEventListener('pointerup', (e) => {
         showInstanceInfo(meta.instance, meta.module);
       } else if (meta.type === 'connection') {
         showConnectionInfo(meta.connection);
+      } else if (meta.type === 'group') {
+        showGroupInfo(meta.group);
       }
     }
   }
@@ -499,12 +522,16 @@ async function buildScene(designPath) {
   // Map instance name → its cube half-size for wiring
   const instHalf = {};
 
-  // ── Instance cubes ─────────────────────────────────────────────
+  // ── Instance cubes / cuboids ────────────────────────────────────
+  const instHalfH = {};   // y-extent per instance
   for (const inst of instances) {
     const s = scaleFor(inst);
-    const cubeGroup = instanceCube(inst, moduleColor[inst.module] ?? 0x888888, s);
+    const mod = design.modules[inst.module];
+    const renderSize = mod?.render?.size ?? null;   // { w, h, d } for cuboid
+    const cubeGroup = instanceCube(inst, moduleColor[inst.module] ?? 0x888888, s, renderSize);
     scene.add(cubeGroup);
-    instHalf[inst.instance_name] = cubeGroup.userData.cubeHalf;
+    instHalf[inst.instance_name]  = cubeGroup.userData.cubeHalf;
+    instHalfH[inst.instance_name] = cubeGroup.userData.cubeHalfH ?? cubeGroup.userData.cubeHalf;
 
     // Register for click detection
     clickableObjects.push(cubeGroup);
@@ -515,17 +542,72 @@ async function buildScene(designPath) {
     });
   }
 
+  // ── Encapsulation groups (dashed wireframe cuboids around children) ──
+  if (Array.isArray(design.groups)) {
+    for (const grp of design.groups) {
+      // Compute bounding box of member instances
+      const members = instances.filter(i => grp.members.includes(i.instance_name));
+      if (members.length === 0) continue;
+
+      let gxMin = Infinity, gxMax = -Infinity;
+      let gyMin = Infinity, gyMax = -Infinity;
+      let gzMin = Infinity, gzMax = -Infinity;
+      for (const m of members) {
+        const hx = instHalf[m.instance_name]  || HALF;
+        const hy = instHalfH[m.instance_name] || HALF;
+        gxMin = Math.min(gxMin, m.position.x - hx);
+        gxMax = Math.max(gxMax, m.position.x + hx);
+        gyMin = Math.min(gyMin, m.position.y - hy);
+        gyMax = Math.max(gyMax, m.position.y + hy);
+        gzMin = Math.min(gzMin, m.position.z - HALF);
+        gzMax = Math.max(gzMax, m.position.z + HALF);
+      }
+
+      const pad = grp.padding ?? 1.2;
+      gxMin -= pad; gxMax += pad;
+      gyMin -= pad; gyMax += pad;
+      gzMin -= pad; gzMax += pad;
+
+      const gw = gxMax - gxMin;
+      const gh = gyMax - gyMin;
+      const gd = gzMax - gzMin;
+      const gcx = (gxMin + gxMax) / 2;
+      const gcy = (gyMin + gyMax) / 2;
+      const gcz = (gzMin + gzMax) / 2;
+
+      const grpColor = parseInt((grp.color || '#42A5F5').replace('#', ''), 16);
+      const box = dashedBox(gcx, gcy, gcz, gw, gh, gd, grpColor);
+      scene.add(box);
+
+      // Group label
+      const grpLabel = makeLabel(
+        `<span class="group-label-text">${grp.label || grp.name}</span>`,
+        'group-label-obj'
+      );
+      grpLabel.position.set(gxMin + 0.6, gyMax + 0.4, gcz);
+      scene.add(grpLabel);
+
+      // Make group clickable
+      clickableObjects.push(box);
+      objectMeta.set(box, {
+        type: 'group',
+        group: grp,
+      });
+    }
+  }
+
   // ── Geometry helpers (use per-instance half for extents) ───────
   // Requires at least one instance; designs without instances have nothing to render.
   if (instances.length === 0) return;
 
   let xMin = Infinity, xMax = -Infinity, yMin = Infinity, yMax = -Infinity;
   for (const inst of instances) {
-    const h = instHalf[inst.instance_name];
-    xMin = Math.min(xMin, inst.position.x - h);
-    xMax = Math.max(xMax, inst.position.x + h);
-    yMin = Math.min(yMin, inst.position.y - h);
-    yMax = Math.max(yMax, inst.position.y + h);
+    const hx = instHalf[inst.instance_name];
+    const hy = instHalfH[inst.instance_name] || hx;
+    xMin = Math.min(xMin, inst.position.x - hx);
+    xMax = Math.max(xMax, inst.position.x + hx);
+    yMin = Math.min(yMin, inst.position.y - hy);
+    yMax = Math.max(yMax, inst.position.y + hy);
   }
 
   const clkY    = yMin - 1.8;            // horizontal CLK rail Y
@@ -555,15 +637,15 @@ async function buildScene(designPath) {
   for (const inst of instances) {
     const x = inst.position.x;
     const y = inst.position.y;
-    const h = instHalf[inst.instance_name];
+    const hy = instHalfH[inst.instance_name] || instHalf[inst.instance_name];
 
-    // CLK: bottom face of cube → CLK rail
-    scene.add(solidLine([[x, y - h, 0], [x, clkY, 0]], CLK_COL));
-    scene.add(portDot([x, y - h, 0], CLK_COL));
+    // CLK: bottom face of block → CLK rail
+    scene.add(solidLine([[x, y - hy, 0], [x, clkY, 0]], CLK_COL));
+    scene.add(portDot([x, y - hy, 0], CLK_COL));
 
-    // RST: top face of cube → RST rail
-    scene.add(solidLine([[x, y + h, 0], [x, rstY, 0]], RST_COL));
-    scene.add(portDot([x, y + h, 0], RST_COL));
+    // RST: top face of block → RST rail
+    scene.add(solidLine([[x, y + hy, 0], [x, rstY, 0]], RST_COL));
+    scene.add(portDot([x, y + hy, 0], RST_COL));
   }
 
   // ── Bus / TLM connections ────────────────────────────────────
