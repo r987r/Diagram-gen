@@ -1,0 +1,23 @@
+{
+  "block_name": "uvm_test",
+  "description": "UVM test. Configures the environment and starts the default sequence on the sequencer.",
+  "render": {
+    "color": "#9C27B0"
+  },
+  "ports": [
+    {
+      "name": "clk",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "System clock"
+    },
+    {
+      "name": "rst_n",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "Active-low reset"
+    }
+  ]
+}

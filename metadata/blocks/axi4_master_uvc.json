@@ -1,0 +1,35 @@
+{
+  "block_name": "axi4_master_uvc",
+  "description": "AXI4 master UVC agent (BFM). Replaces the RTL master. Contains sequencer, driver and monitor for generating and observing AXI4 master transactions.",
+  "render": {
+    "color": "#2196F3"
+  },
+  "ports": [
+    {
+      "name": "clk",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL"
+    },
+    {
+      "name": "rst_n",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL"
+    },
+    {
+      "name": "analysis_port",
+      "direction": "output",
+      "width": 1,
+      "channel": "TLM",
+      "description": "Monitor analysis port"
+    },
+    {
+      "name": "vif",
+      "direction": "output",
+      "width": 1,
+      "channel": "VIF",
+      "description": "Virtual interface to DUT"
+    }
+  ]
+}

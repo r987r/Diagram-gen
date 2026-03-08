@@ -374,12 +374,99 @@ function clearScene() {
   objectMeta.clear();
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// Resolve hierarchical includes: blocks → sub-blocks → leaf blocks
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Recursively resolve a design/block JSON that may contain an `includes`
+ * array referencing other block JSONs.  Each included file can itself
+ * contain `includes`, forming a tree.
+ *
+ * Resolution rules (applied depth-first):
+ *   1. Fetch every file listed in `includes`.
+ *   2. Recursively resolve each included file.
+ *   3. Merge included data into the parent:
+ *        • Leaf blocks contribute their module definition
+ *          (block_name → { description, render, ports }).
+ *        • Composite blocks contribute modules, instances & connections.
+ *   4. Inline `modules` in the parent override anything from includes
+ *      (lets a design carry variant definitions).
+ *
+ * @param {string} jsonPath  Path to the JSON file (relative to site root).
+ * @param {Set}    visited   Cycle guard – paths already being resolved.
+ * @returns {object}  The fully-resolved design object.
+ */
+async function resolveDesign(jsonPath, visited = new Set()) {
+  if (visited.has(jsonPath))
+    throw new Error(`Circular include detected: ${jsonPath}`);
+  visited.add(jsonPath);
+
+  const resp = await fetch('./' + jsonPath);
+  if (!resp.ok) throw new Error(`Cannot load ${jsonPath}: ${resp.status}`);
+  const raw = await resp.json();
+
+  // Determine the base directory for resolving relative include paths
+  const baseDir = jsonPath.substring(0, jsonPath.lastIndexOf('/') + 1);
+
+  // Containers that will accumulate data from includes
+  const mergedModules     = {};
+  const mergedInstances   = [];
+  const mergedConnections = [];
+
+  // ── Process includes (depth-first) ────────────────────────────
+  if (Array.isArray(raw.includes)) {
+    for (const incPath of raw.includes) {
+      // Resolve path relative to parent directory
+      const fullPath = baseDir + incPath;
+      const child = await resolveDesign(fullPath, new Set(visited));
+
+      // Leaf block: has block_name + ports → becomes a module
+      if (child.block_name && child.ports) {
+        mergedModules[child.block_name] = {
+          description: child.description || '',
+          render:      child.render || {},
+          ports:       child.ports,
+        };
+      }
+
+      // Merge child modules (from composite blocks or other designs)
+      if (child.modules) {
+        Object.assign(mergedModules, child.modules);
+      }
+
+      // Merge child instances & connections (composite blocks)
+      if (Array.isArray(child.instances)) {
+        mergedInstances.push(...child.instances);
+      }
+      if (Array.isArray(child.connections)) {
+        mergedConnections.push(...child.connections);
+      }
+    }
+  }
+
+  // ── Build resolved design ─────────────────────────────────────
+  // Inline modules override includes (design-specific variants)
+  const resolvedModules = Object.assign(mergedModules, raw.modules || {});
+
+  // Concatenate: included instances first, then any defined at this level
+  const resolvedInstances = mergedInstances.concat(raw.instances || []);
+
+  // Concatenate: included connections first, then this level's connections
+  const resolvedConnections = mergedConnections.concat(raw.connections || []);
+
+  // Return a fully-resolved object keeping all original top-level keys
+  return Object.assign({}, raw, {
+    modules:     resolvedModules,
+    instances:   resolvedInstances,
+    connections: resolvedConnections,
+  });
+}
+
 async function buildScene(designPath) {
   clearScene();
 
-  const response = await fetch('./' + designPath);
-  if (!response.ok) throw new Error(`Cannot load metadata: ${response.status}`);
-  const design = await response.json();
+  const design = await resolveDesign(designPath);
 
   // ── Module → hex colour map ────────────────────────────────────
   const moduleColor = {};

@@ -1,7 +1,11 @@
 {
   "design_name": "uvm_axi4_super",
-  "version": "1.0.0",
+  "version": "2.0",
   "description": "Super example: UVM verification environment wrapping the AXI4 wide interconnect. Each RTL master/slave is replaced by a UVC agent (BFM) that drives and monitors the interface. The AXI4 crossbar remains as the DUT, while UVM agents, monitors and scoreboards verify correctness.",
+  "includes": [
+    "blocks/axi4_master_uvc.json",
+    "blocks/axi4_slave_uvc.json"
+  ],
   "parameters": {
     "DATA_WIDTH": 64,
     "ADDR_WIDTH": 32,
@@ -55,40 +59,6 @@
           "direction": "input",
           "width": 1,
           "channel": "GLOBAL"
-        }
-      ]
-    },
-    "axi4_master_uvc": {
-      "description": "AXI4 master UVC agent (BFM). Replaces the RTL master. Contains sequencer, driver and monitor for generating and observing AXI4 master transactions.",
-      "render": {
-        "color": "#2196F3"
-      },
-      "ports": [
-        {
-          "name": "clk",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL"
-        },
-        {
-          "name": "rst_n",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL"
-        },
-        {
-          "name": "analysis_port",
-          "direction": "output",
-          "width": 1,
-          "channel": "TLM",
-          "description": "Monitor analysis port"
-        },
-        {
-          "name": "vif",
-          "direction": "output",
-          "width": 1,
-          "channel": "VIF",
-          "description": "Virtual interface to DUT"
         }
       ]
     },
@@ -166,40 +136,6 @@
           "width": 1,
           "channel": "AW",
           "side": "master"
-        }
-      ]
-    },
-    "axi4_slave_uvc": {
-      "description": "AXI4 slave UVC agent (BFM). Replaces the RTL slave. Contains responder driver and monitor for responding to and observing AXI4 slave transactions.",
-      "render": {
-        "color": "#4CAF50"
-      },
-      "ports": [
-        {
-          "name": "clk",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL"
-        },
-        {
-          "name": "rst_n",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL"
-        },
-        {
-          "name": "analysis_port",
-          "direction": "output",
-          "width": 1,
-          "channel": "TLM",
-          "description": "Monitor analysis port"
-        },
-        {
-          "name": "vif",
-          "direction": "output",
-          "width": 1,
-          "channel": "VIF",
-          "description": "Virtual interface to DUT"
         }
       ]
     },
@@ -362,7 +298,7 @@
     {
       "instance_name": "mst_fifo_0",
       "module": "tlm_analysis_fifo",
-      "description": "TLM FIFO: CPU UVC monitor \u2192 scoreboard",
+      "description": "TLM FIFO: CPU UVC monitor → scoreboard",
       "position": {
         "x": -10,
         "y": -6,
@@ -372,7 +308,7 @@
     {
       "instance_name": "mst_fifo_1",
       "module": "tlm_analysis_fifo",
-      "description": "TLM FIFO: DMA UVC monitor \u2192 scoreboard",
+      "description": "TLM FIFO: DMA UVC monitor → scoreboard",
       "position": {
         "x": -6,
         "y": -6,
@@ -382,7 +318,7 @@
     {
       "instance_name": "mst_fifo_2",
       "module": "tlm_analysis_fifo",
-      "description": "TLM FIFO: GPU UVC monitor \u2192 scoreboard",
+      "description": "TLM FIFO: GPU UVC monitor → scoreboard",
       "position": {
         "x": -2,
         "y": -6,
@@ -392,7 +328,7 @@
     {
       "instance_name": "slv_fifo_0",
       "module": "tlm_analysis_fifo",
-      "description": "TLM FIFO: SRAM UVC monitor \u2192 scoreboard",
+      "description": "TLM FIFO: SRAM UVC monitor → scoreboard",
       "position": {
         "x": 2,
         "y": -6,
@@ -402,7 +338,7 @@
     {
       "instance_name": "slv_fifo_1",
       "module": "tlm_analysis_fifo",
-      "description": "TLM FIFO: DDR UVC monitor \u2192 scoreboard",
+      "description": "TLM FIFO: DDR UVC monitor → scoreboard",
       "position": {
         "x": 6,
         "y": -6,
@@ -412,7 +348,7 @@
     {
       "instance_name": "slv_fifo_2",
       "module": "tlm_analysis_fifo",
-      "description": "TLM FIFO: UART UVC monitor \u2192 scoreboard",
+      "description": "TLM FIFO: UART UVC monitor → scoreboard",
       "position": {
         "x": 10,
         "y": -6,
@@ -422,7 +358,7 @@
     {
       "instance_name": "slv_fifo_3",
       "module": "tlm_analysis_fifo",
-      "description": "TLM FIFO: SPI UVC monitor \u2192 scoreboard",
+      "description": "TLM FIFO: SPI UVC monitor → scoreboard",
       "position": {
         "x": 14,
         "y": -6,
@@ -536,7 +472,7 @@
     {
       "id": "cpu_to_xbar",
       "type": "axi4_bus",
-      "label": "CPU UVC \u2192 XBAR S0",
+      "label": "CPU UVC → XBAR S0",
       "description": "CPU master UVC drives AXI4 transactions into interconnect slave port 0",
       "from_instance": "cpu_uvc",
       "to_instance": "u_xbar",
@@ -563,7 +499,7 @@
     {
       "id": "dma_to_xbar",
       "type": "axi4_bus",
-      "label": "DMA UVC \u2192 XBAR S1",
+      "label": "DMA UVC → XBAR S1",
       "description": "DMA master UVC drives AXI4 transactions into interconnect slave port 1",
       "from_instance": "dma_uvc",
       "to_instance": "u_xbar",
@@ -590,7 +526,7 @@
     {
       "id": "gpu_to_xbar",
       "type": "axi4_bus",
-      "label": "GPU UVC \u2192 XBAR S2",
+      "label": "GPU UVC → XBAR S2",
       "description": "GPU master UVC drives AXI4 transactions into interconnect slave port 2",
       "from_instance": "gpu_uvc",
       "to_instance": "u_xbar",
@@ -617,7 +553,7 @@
     {
       "id": "xbar_to_sram",
       "type": "axi4_bus",
-      "label": "XBAR M0 \u2192 SRAM UVC",
+      "label": "XBAR M0 → SRAM UVC",
       "description": "Interconnect master port 0 connects to SRAM slave UVC",
       "from_instance": "u_xbar",
       "to_instance": "sram_uvc",
@@ -644,7 +580,7 @@
     {
       "id": "xbar_to_ddr",
       "type": "axi4_bus",
-      "label": "XBAR M1 \u2192 DDR UVC",
+      "label": "XBAR M1 → DDR UVC",
       "description": "Interconnect master port 1 connects to DDR slave UVC",
       "from_instance": "u_xbar",
       "to_instance": "ddr_uvc",
@@ -671,7 +607,7 @@
     {
       "id": "xbar_to_uart",
       "type": "axi4_bus",
-      "label": "XBAR M2 \u2192 UART UVC",
+      "label": "XBAR M2 → UART UVC",
       "description": "Interconnect master port 2 connects to UART slave UVC",
       "from_instance": "u_xbar",
       "to_instance": "uart_uvc",
@@ -698,7 +634,7 @@
     {
       "id": "xbar_to_spi",
       "type": "axi4_bus",
-      "label": "XBAR M3 \u2192 SPI UVC",
+      "label": "XBAR M3 → SPI UVC",
       "description": "Interconnect master port 3 connects to SPI slave UVC",
       "from_instance": "u_xbar",
       "to_instance": "spi_uvc",
@@ -725,7 +661,7 @@
     {
       "id": "cpu_mon_to_fifo",
       "type": "axi4_bus",
-      "label": "CPU mon \u2192 FIFO",
+      "label": "CPU mon → FIFO",
       "description": "CPU UVC monitor analysis port writes to TLM FIFO",
       "from_instance": "cpu_uvc",
       "to_instance": "mst_fifo_0",
@@ -742,7 +678,7 @@
     {
       "id": "dma_mon_to_fifo",
       "type": "axi4_bus",
-      "label": "DMA mon \u2192 FIFO",
+      "label": "DMA mon → FIFO",
       "description": "DMA UVC monitor analysis port writes to TLM FIFO",
       "from_instance": "dma_uvc",
       "to_instance": "mst_fifo_1",
@@ -759,7 +695,7 @@
     {
       "id": "gpu_mon_to_fifo",
       "type": "axi4_bus",
-      "label": "GPU mon \u2192 FIFO",
+      "label": "GPU mon → FIFO",
       "description": "GPU UVC monitor analysis port writes to TLM FIFO",
       "from_instance": "gpu_uvc",
       "to_instance": "mst_fifo_2",
@@ -776,7 +712,7 @@
     {
       "id": "sram_mon_to_fifo",
       "type": "axi4_bus",
-      "label": "SRAM mon \u2192 FIFO",
+      "label": "SRAM mon → FIFO",
       "description": "SRAM UVC monitor analysis port writes to TLM FIFO",
       "from_instance": "sram_uvc",
       "to_instance": "slv_fifo_0",
@@ -793,7 +729,7 @@
     {
       "id": "ddr_mon_to_fifo",
       "type": "axi4_bus",
-      "label": "DDR mon \u2192 FIFO",
+      "label": "DDR mon → FIFO",
       "description": "DDR UVC monitor analysis port writes to TLM FIFO",
       "from_instance": "ddr_uvc",
       "to_instance": "slv_fifo_1",
@@ -810,7 +746,7 @@
     {
       "id": "uart_mon_to_fifo",
       "type": "axi4_bus",
-      "label": "UART mon \u2192 FIFO",
+      "label": "UART mon → FIFO",
       "description": "UART UVC monitor analysis port writes to TLM FIFO",
       "from_instance": "uart_uvc",
       "to_instance": "slv_fifo_2",
@@ -827,7 +763,7 @@
     {
       "id": "spi_mon_to_fifo",
       "type": "axi4_bus",
-      "label": "SPI mon \u2192 FIFO",
+      "label": "SPI mon → FIFO",
       "description": "SPI UVC monitor analysis port writes to TLM FIFO",
       "from_instance": "spi_uvc",
       "to_instance": "slv_fifo_3",
@@ -844,7 +780,7 @@
     {
       "id": "mst_fifo0_to_sb",
       "type": "axi4_bus",
-      "label": "FIFO \u2192 SB",
+      "label": "FIFO → SB",
       "description": "CPU TLM FIFO delivers to scoreboard",
       "from_instance": "mst_fifo_0",
       "to_instance": "sb_i",
@@ -861,7 +797,7 @@
     {
       "id": "mst_fifo1_to_sb",
       "type": "axi4_bus",
-      "label": "FIFO \u2192 SB",
+      "label": "FIFO → SB",
       "description": "DMA TLM FIFO delivers to scoreboard",
       "from_instance": "mst_fifo_1",
       "to_instance": "sb_i",
@@ -878,7 +814,7 @@
     {
       "id": "mst_fifo2_to_sb",
       "type": "axi4_bus",
-      "label": "FIFO \u2192 SB",
+      "label": "FIFO → SB",
       "description": "GPU TLM FIFO delivers to scoreboard",
       "from_instance": "mst_fifo_2",
       "to_instance": "sb_i",
@@ -895,7 +831,7 @@
     {
       "id": "slv_fifo0_to_sb",
       "type": "axi4_bus",
-      "label": "FIFO \u2192 SB",
+      "label": "FIFO → SB",
       "description": "SRAM TLM FIFO delivers to scoreboard",
       "from_instance": "slv_fifo_0",
       "to_instance": "sb_i",
@@ -912,7 +848,7 @@
     {
       "id": "slv_fifo1_to_sb",
       "type": "axi4_bus",
-      "label": "FIFO \u2192 SB",
+      "label": "FIFO → SB",
       "description": "DDR TLM FIFO delivers to scoreboard",
       "from_instance": "slv_fifo_1",
       "to_instance": "sb_i",
@@ -929,7 +865,7 @@
     {
       "id": "slv_fifo2_to_sb",
       "type": "axi4_bus",
-      "label": "FIFO \u2192 SB",
+      "label": "FIFO → SB",
       "description": "UART TLM FIFO delivers to scoreboard",
       "from_instance": "slv_fifo_2",
       "to_instance": "sb_i",
@@ -946,7 +882,7 @@
     {
       "id": "slv_fifo3_to_sb",
       "type": "axi4_bus",
-      "label": "FIFO \u2192 SB",
+      "label": "FIFO → SB",
       "description": "SPI TLM FIFO delivers to scoreboard",
       "from_instance": "slv_fifo_3",
       "to_instance": "sb_i",

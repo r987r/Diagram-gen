@@ -1,0 +1,23 @@
+{
+  "block_name": "uvm_env",
+  "description": "UVM environment. Contains the AXI4 agent and scoreboard. Connects the monitor analysis port to the scoreboard via a TLM FIFO.",
+  "render": {
+    "color": "#3F51B5"
+  },
+  "ports": [
+    {
+      "name": "clk",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "System clock"
+    },
+    {
+      "name": "rst_n",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "Active-low reset"
+    }
+  ]
+}

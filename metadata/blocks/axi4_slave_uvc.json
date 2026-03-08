@@ -1,0 +1,35 @@
+{
+  "block_name": "axi4_slave_uvc",
+  "description": "AXI4 slave UVC agent (BFM). Replaces the RTL slave. Contains responder driver and monitor for responding to and observing AXI4 slave transactions.",
+  "render": {
+    "color": "#4CAF50"
+  },
+  "ports": [
+    {
+      "name": "clk",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL"
+    },
+    {
+      "name": "rst_n",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL"
+    },
+    {
+      "name": "analysis_port",
+      "direction": "output",
+      "width": 1,
+      "channel": "TLM",
+      "description": "Monitor analysis port"
+    },
+    {
+      "name": "vif",
+      "direction": "output",
+      "width": 1,
+      "channel": "VIF",
+      "description": "Virtual interface to DUT"
+    }
+  ]
+}

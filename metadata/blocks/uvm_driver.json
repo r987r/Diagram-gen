@@ -1,0 +1,37 @@
+{
+  "block_name": "uvm_driver",
+  "description": "UVM AXI4 driver. Receives sequence items from the sequencer and drives them onto the AXI4 virtual interface signals.",
+  "render": {
+    "color": "#4CAF50"
+  },
+  "ports": [
+    {
+      "name": "clk",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "System clock"
+    },
+    {
+      "name": "rst_n",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "Active-low reset"
+    },
+    {
+      "name": "seq_item_port",
+      "direction": "input",
+      "width": 1,
+      "channel": "TLM",
+      "description": "Sequence item port (from sequencer)"
+    },
+    {
+      "name": "vif",
+      "direction": "output",
+      "width": 1,
+      "channel": "VIF",
+      "description": "Virtual interface to DUT"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+name: Validate Designs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'metadata/**'
+      - 'scripts/**'
+      - 'viewer/**'
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate JSON syntax, schema & connectivity
+        run: python scripts/validate_design.py metadata/
+
+      - name: Verify viewer JS syntax
+        run: node --check viewer/main.js
