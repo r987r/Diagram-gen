@@ -1,0 +1,450 @@
+{
+  "block_name": "axi4_pipeline",
+  "description": "AXI4 pipeline: master \u2192 repeater \u2192 slave",
+  "includes": [
+    "axi4_master.json",
+    "axi4_repeater.json",
+    "axi4_slave.json"
+  ],
+  "instances": [
+    {
+      "instance_name": "u_master",
+      "module": "axi4_master",
+      "position": {
+        "x": -8,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "u_repeater",
+      "module": "axi4_repeater",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "u_slave",
+      "module": "axi4_slave",
+      "position": {
+        "x": 8,
+        "y": 0,
+        "z": 0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "master_to_repeater",
+      "type": "axi4_bus",
+      "label": "AXI4  M\u2192R",
+      "description": "Full AXI4 bus: u_master (master) drives u_repeater (slave-side interface)",
+      "from_instance": "u_master",
+      "to_instance": "u_repeater",
+      "channel_signals": {
+        "AW": [
+          {
+            "from_port": "m_awid",
+            "to_port": "s_awid",
+            "wire": "m2r_awid"
+          },
+          {
+            "from_port": "m_awaddr",
+            "to_port": "s_awaddr",
+            "wire": "m2r_awaddr"
+          },
+          {
+            "from_port": "m_awlen",
+            "to_port": "s_awlen",
+            "wire": "m2r_awlen"
+          },
+          {
+            "from_port": "m_awsize",
+            "to_port": "s_awsize",
+            "wire": "m2r_awsize"
+          },
+          {
+            "from_port": "m_awburst",
+            "to_port": "s_awburst",
+            "wire": "m2r_awburst"
+          },
+          {
+            "from_port": "m_awlock",
+            "to_port": "s_awlock",
+            "wire": "m2r_awlock"
+          },
+          {
+            "from_port": "m_awcache",
+            "to_port": "s_awcache",
+            "wire": "m2r_awcache"
+          },
+          {
+            "from_port": "m_awprot",
+            "to_port": "s_awprot",
+            "wire": "m2r_awprot"
+          },
+          {
+            "from_port": "m_awqos",
+            "to_port": "s_awqos",
+            "wire": "m2r_awqos"
+          },
+          {
+            "from_port": "m_awvalid",
+            "to_port": "s_awvalid",
+            "wire": "m2r_awvalid"
+          },
+          {
+            "from_port": "m_awready",
+            "to_port": "s_awready",
+            "wire": "m2r_awready"
+          }
+        ],
+        "W": [
+          {
+            "from_port": "m_wdata",
+            "to_port": "s_wdata",
+            "wire": "m2r_wdata"
+          },
+          {
+            "from_port": "m_wstrb",
+            "to_port": "s_wstrb",
+            "wire": "m2r_wstrb"
+          },
+          {
+            "from_port": "m_wlast",
+            "to_port": "s_wlast",
+            "wire": "m2r_wlast"
+          },
+          {
+            "from_port": "m_wvalid",
+            "to_port": "s_wvalid",
+            "wire": "m2r_wvalid"
+          },
+          {
+            "from_port": "m_wready",
+            "to_port": "s_wready",
+            "wire": "m2r_wready"
+          }
+        ],
+        "B": [
+          {
+            "from_port": "m_bid",
+            "to_port": "s_bid",
+            "wire": "m2r_bid"
+          },
+          {
+            "from_port": "m_bresp",
+            "to_port": "s_bresp",
+            "wire": "m2r_bresp"
+          },
+          {
+            "from_port": "m_bvalid",
+            "to_port": "s_bvalid",
+            "wire": "m2r_bvalid"
+          },
+          {
+            "from_port": "m_bready",
+            "to_port": "s_bready",
+            "wire": "m2r_bready"
+          }
+        ],
+        "AR": [
+          {
+            "from_port": "m_arid",
+            "to_port": "s_arid",
+            "wire": "m2r_arid"
+          },
+          {
+            "from_port": "m_araddr",
+            "to_port": "s_araddr",
+            "wire": "m2r_araddr"
+          },
+          {
+            "from_port": "m_arlen",
+            "to_port": "s_arlen",
+            "wire": "m2r_arlen"
+          },
+          {
+            "from_port": "m_arsize",
+            "to_port": "s_arsize",
+            "wire": "m2r_arsize"
+          },
+          {
+            "from_port": "m_arburst",
+            "to_port": "s_arburst",
+            "wire": "m2r_arburst"
+          },
+          {
+            "from_port": "m_arlock",
+            "to_port": "s_arlock",
+            "wire": "m2r_arlock"
+          },
+          {
+            "from_port": "m_arcache",
+            "to_port": "s_arcache",
+            "wire": "m2r_arcache"
+          },
+          {
+            "from_port": "m_arprot",
+            "to_port": "s_arprot",
+            "wire": "m2r_arprot"
+          },
+          {
+            "from_port": "m_arqos",
+            "to_port": "s_arqos",
+            "wire": "m2r_arqos"
+          },
+          {
+            "from_port": "m_arvalid",
+            "to_port": "s_arvalid",
+            "wire": "m2r_arvalid"
+          },
+          {
+            "from_port": "m_arready",
+            "to_port": "s_arready",
+            "wire": "m2r_arready"
+          }
+        ],
+        "R": [
+          {
+            "from_port": "m_rid",
+            "to_port": "s_rid",
+            "wire": "m2r_rid"
+          },
+          {
+            "from_port": "m_rdata",
+            "to_port": "s_rdata",
+            "wire": "m2r_rdata"
+          },
+          {
+            "from_port": "m_rresp",
+            "to_port": "s_rresp",
+            "wire": "m2r_rresp"
+          },
+          {
+            "from_port": "m_rlast",
+            "to_port": "s_rlast",
+            "wire": "m2r_rlast"
+          },
+          {
+            "from_port": "m_rvalid",
+            "to_port": "s_rvalid",
+            "wire": "m2r_rvalid"
+          },
+          {
+            "from_port": "m_rready",
+            "to_port": "s_rready",
+            "wire": "m2r_rready"
+          }
+        ]
+      }
+    },
+    {
+      "id": "repeater_to_slave",
+      "type": "axi4_bus",
+      "label": "AXI4  R\u2192S",
+      "description": "Full AXI4 bus: u_repeater (master-side interface) drives u_slave",
+      "from_instance": "u_repeater",
+      "to_instance": "u_slave",
+      "channel_signals": {
+        "AW": [
+          {
+            "from_port": "m_awid",
+            "to_port": "s_awid",
+            "wire": "r2s_awid"
+          },
+          {
+            "from_port": "m_awaddr",
+            "to_port": "s_awaddr",
+            "wire": "r2s_awaddr"
+          },
+          {
+            "from_port": "m_awlen",
+            "to_port": "s_awlen",
+            "wire": "r2s_awlen"
+          },
+          {
+            "from_port": "m_awsize",
+            "to_port": "s_awsize",
+            "wire": "r2s_awsize"
+          },
+          {
+            "from_port": "m_awburst",
+            "to_port": "s_awburst",
+            "wire": "r2s_awburst"
+          },
+          {
+            "from_port": "m_awlock",
+            "to_port": "s_awlock",
+            "wire": "r2s_awlock"
+          },
+          {
+            "from_port": "m_awcache",
+            "to_port": "s_awcache",
+            "wire": "r2s_awcache"
+          },
+          {
+            "from_port": "m_awprot",
+            "to_port": "s_awprot",
+            "wire": "r2s_awprot"
+          },
+          {
+            "from_port": "m_awqos",
+            "to_port": "s_awqos",
+            "wire": "r2s_awqos"
+          },
+          {
+            "from_port": "m_awvalid",
+            "to_port": "s_awvalid",
+            "wire": "r2s_awvalid"
+          },
+          {
+            "from_port": "m_awready",
+            "to_port": "s_awready",
+            "wire": "r2s_awready"
+          }
+        ],
+        "W": [
+          {
+            "from_port": "m_wdata",
+            "to_port": "s_wdata",
+            "wire": "r2s_wdata"
+          },
+          {
+            "from_port": "m_wstrb",
+            "to_port": "s_wstrb",
+            "wire": "r2s_wstrb"
+          },
+          {
+            "from_port": "m_wlast",
+            "to_port": "s_wlast",
+            "wire": "r2s_wlast"
+          },
+          {
+            "from_port": "m_wvalid",
+            "to_port": "s_wvalid",
+            "wire": "r2s_wvalid"
+          },
+          {
+            "from_port": "m_wready",
+            "to_port": "s_wready",
+            "wire": "r2s_wready"
+          }
+        ],
+        "B": [
+          {
+            "from_port": "m_bid",
+            "to_port": "s_bid",
+            "wire": "r2s_bid"
+          },
+          {
+            "from_port": "m_bresp",
+            "to_port": "s_bresp",
+            "wire": "r2s_bresp"
+          },
+          {
+            "from_port": "m_bvalid",
+            "to_port": "s_bvalid",
+            "wire": "r2s_bvalid"
+          },
+          {
+            "from_port": "m_bready",
+            "to_port": "s_bready",
+            "wire": "r2s_bready"
+          }
+        ],
+        "AR": [
+          {
+            "from_port": "m_arid",
+            "to_port": "s_arid",
+            "wire": "r2s_arid"
+          },
+          {
+            "from_port": "m_araddr",
+            "to_port": "s_araddr",
+            "wire": "r2s_araddr"
+          },
+          {
+            "from_port": "m_arlen",
+            "to_port": "s_arlen",
+            "wire": "r2s_arlen"
+          },
+          {
+            "from_port": "m_arsize",
+            "to_port": "s_arsize",
+            "wire": "r2s_arsize"
+          },
+          {
+            "from_port": "m_arburst",
+            "to_port": "s_arburst",
+            "wire": "r2s_arburst"
+          },
+          {
+            "from_port": "m_arlock",
+            "to_port": "s_arlock",
+            "wire": "r2s_arlock"
+          },
+          {
+            "from_port": "m_arcache",
+            "to_port": "s_arcache",
+            "wire": "r2s_arcache"
+          },
+          {
+            "from_port": "m_arprot",
+            "to_port": "s_arprot",
+            "wire": "r2s_arprot"
+          },
+          {
+            "from_port": "m_arqos",
+            "to_port": "s_arqos",
+            "wire": "r2s_arqos"
+          },
+          {
+            "from_port": "m_arvalid",
+            "to_port": "s_arvalid",
+            "wire": "r2s_arvalid"
+          },
+          {
+            "from_port": "m_arready",
+            "to_port": "s_arready",
+            "wire": "r2s_arready"
+          }
+        ],
+        "R": [
+          {
+            "from_port": "m_rid",
+            "to_port": "s_rid",
+            "wire": "r2s_rid"
+          },
+          {
+            "from_port": "m_rdata",
+            "to_port": "s_rdata",
+            "wire": "r2s_rdata"
+          },
+          {
+            "from_port": "m_rresp",
+            "to_port": "s_rresp",
+            "wire": "r2s_rresp"
+          },
+          {
+            "from_port": "m_rlast",
+            "to_port": "s_rlast",
+            "wire": "r2s_rlast"
+          },
+          {
+            "from_port": "m_rvalid",
+            "to_port": "s_rvalid",
+            "wire": "r2s_rvalid"
+          },
+          {
+            "from_port": "m_rready",
+            "to_port": "s_rready",
+            "wire": "r2s_rready"
+          }
+        ]
+      }
+    }
+  ]
+}

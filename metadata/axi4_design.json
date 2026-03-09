@@ -1,0 +1,93 @@
+{
+  "design_name": "axi4_master_repeater_slave",
+  "version": "2.0",
+  "description": "AXI4 Master connected to an AXI4 Repeater Pipeline connected to an AXI4 Slave. All modules are instantiated inside the tb_top testbench. CLK connects at the bottom face of each instance cube; RST_N connects at the top face.",
+  "includes": [
+    "blocks/axi4_pipeline.json"
+  ],
+  "parameters": {
+    "DATA_WIDTH": 64,
+    "ADDR_WIDTH": 32,
+    "ID_WIDTH": 4,
+    "STRB_WIDTH": 8
+  },
+  "testbench": {
+    "module_name": "tb_top",
+    "description": "Top-level testbench. Declares clk and rst_n and drives them to all DUT instances.",
+    "global_signals": [
+      {
+        "name": "clk",
+        "width": 1,
+        "type": "reg",
+        "description": "System clock. Connects to the BOTTOM port of every instance cube.",
+        "render": {
+          "face": "bottom",
+          "color": "#00E676"
+        }
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "type": "reg",
+        "description": "Active-low synchronous reset. Connects to the TOP port of every instance cube.",
+        "render": {
+          "face": "top",
+          "color": "#FF5252"
+        }
+      }
+    ]
+  },
+  "connection_types": {
+    "axi4_bus": { "color": "#FFC107", "description": "AXI4 Bus" }
+  },
+  "modules": {},
+  "instances": [],
+  "connections": [
+    {
+      "id": "clk_fanout",
+      "type": "clock",
+      "description": "System clock from testbench to all instances (enters at BOTTOM of each cube)",
+      "from": {
+        "instance": "tb_top",
+        "port": "clk"
+      },
+      "to": [
+        {
+          "instance": "u_master",
+          "port": "clk"
+        },
+        {
+          "instance": "u_repeater",
+          "port": "clk"
+        },
+        {
+          "instance": "u_slave",
+          "port": "clk"
+        }
+      ]
+    },
+    {
+      "id": "rst_fanout",
+      "type": "reset",
+      "description": "Active-low reset from testbench to all instances (enters at TOP of each cube)",
+      "from": {
+        "instance": "tb_top",
+        "port": "rst_n"
+      },
+      "to": [
+        {
+          "instance": "u_master",
+          "port": "rst_n"
+        },
+        {
+          "instance": "u_repeater",
+          "port": "rst_n"
+        },
+        {
+          "instance": "u_slave",
+          "port": "rst_n"
+        }
+      ]
+    }
+  ]
+}

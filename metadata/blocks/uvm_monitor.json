@@ -1,8 +1,9 @@
 {
   "block_name": "uvm_monitor",
-  "description": "UVM monitor \u2014 observes pin activity and emits transactions.",
+  "description": "UVM AXI4 monitor. Observes AXI4 interface signals via the virtual interface and broadcasts observed transactions on its analysis port.",
   "render": {
-    "color": "#26A69A"
+    "color": "#FF9800",
+    "size": { "w": 2, "h": 2, "d": 2 }
   },
   "ports": [
     {
@@ -10,14 +11,14 @@
       "direction": "input",
       "width": 1,
       "channel": "VIF",
-      "description": "Virtual interface handle"
+      "description": "Virtual interface handle — clock and reset are accessed through the VIF"
     },
     {
       "name": "analysis_port",
       "direction": "output",
       "width": 1,
       "channel": "TLM",
-      "description": "Analysis port"
+      "description": "Analysis port broadcasting observed transactions"
     }
   ]
 }

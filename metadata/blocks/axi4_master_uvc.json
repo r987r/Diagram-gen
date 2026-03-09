@@ -1,8 +1,8 @@
 {
-  "block_name": "axi4_slave_uvc",
-  "description": "AXI4 slave UVC agent (BFM). Replaces the RTL slave. Contains responder driver and monitor for responding to and observing AXI4 slave transactions.",
+  "block_name": "axi4_master_uvc",
+  "description": "AXI4 master UVC agent (BFM). Replaces the RTL master. Contains sequencer, driver and monitor for generating and observing AXI4 master transactions.",
   "render": {
-    "color": "#4CAF50"
+    "color": "#2196F3"
   },
   "ports": [
     {

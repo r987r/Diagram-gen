@@ -1,0 +1,228 @@
+{
+  "design_name": "uvm_pipeline_uvc",
+  "version": "3.0",
+  "description": "UVM verification view of the AXI4 Master → Repeater → Slave pipeline. The RTL master and slave are replaced with AXI4 UVC agents (BFMs). The repeater remains as the DUT under test. Master-side and slave-side virtual interfaces connect the UVC agents to the DUT.",
+  "includes": [
+    "blocks/axi4_master_uvc.json",
+    "blocks/axi4_slave_uvc.json",
+    "blocks/axi4_vif.json",
+    "blocks/axi4_repeater.json",
+    "blocks/uvm_sequence.json",
+    "blocks/uvm_scoreboard.json"
+  ],
+  "parameters": {
+    "DATA_WIDTH": 64,
+    "ADDR_WIDTH": 32,
+    "ID_WIDTH": 4,
+    "STRB_WIDTH": 8
+  },
+  "testbench": {
+    "module_name": "tb_top",
+    "description": "UVM testbench for the AXI4 repeater pipeline. UVC agents replace RTL master and slave.",
+    "global_signals": [
+      {
+        "name": "clk",
+        "width": 1,
+        "type": "reg",
+        "description": "System clock. Connects to the BOTTOM port of every instance cube.",
+        "render": {
+          "face": "bottom",
+          "color": "#00E676"
+        }
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "type": "reg",
+        "description": "Active-low synchronous reset. Connects to the TOP port of every instance cube.",
+        "render": {
+          "face": "top",
+          "color": "#FF5252"
+        }
+      }
+    ]
+  },
+  "connection_types": {
+    "axi4_bus": { "color": "#FFC107", "description": "AXI4 Bus" },
+    "vif":      { "color": "#795548", "description": "Virtual Interface" },
+    "tlm":      { "color": "#E91E63", "description": "TLM Analysis Port" }
+  },
+  "modules": {},
+  "instances": [
+    {
+      "instance_name": "u_master_uvc",
+      "module": "axi4_master_uvc",
+      "description": "AXI4 master UVC — replaces the RTL master",
+      "position": { "x": -12, "y": 0, "z": 0 }
+    },
+    {
+      "instance_name": "master_vif",
+      "module": "axi4_vif",
+      "description": "Master-side virtual interface",
+      "position": { "x": -6, "y": 0, "z": 0 }
+    },
+    {
+      "instance_name": "u_repeater",
+      "module": "axi4_repeater",
+      "description": "AXI4 repeater pipeline — DUT under test",
+      "position": { "x": 0, "y": 0, "z": 0 }
+    },
+    {
+      "instance_name": "slave_vif",
+      "module": "axi4_vif",
+      "description": "Slave-side virtual interface",
+      "position": { "x": 6, "y": 0, "z": 0 }
+    },
+    {
+      "instance_name": "u_slave_uvc",
+      "module": "axi4_slave_uvc",
+      "description": "AXI4 slave UVC — replaces the RTL slave",
+      "position": { "x": 12, "y": 0, "z": 0 }
+    },
+    {
+      "instance_name": "u_sequence",
+      "module": "uvm_sequence",
+      "description": "Master-side stimulus sequence",
+      "position": { "x": -12, "y": 5, "z": 0 }
+    },
+    {
+      "instance_name": "u_scoreboard",
+      "module": "uvm_scoreboard",
+      "description": "Compares master-side and slave-side monitor outputs",
+      "position": { "x": 0, "y": 5, "z": 0 }
+    }
+  ],
+  "connections": [
+    {
+      "id": "clk_fanout",
+      "type": "clock",
+      "description": "System clock from testbench to DUT and VIFs",
+      "from": { "instance": "tb_top", "port": "clk" },
+      "to": [
+        { "instance": "u_repeater", "port": "clk" },
+        { "instance": "master_vif", "port": "clk" },
+        { "instance": "slave_vif", "port": "clk" }
+      ]
+    },
+    {
+      "id": "rst_fanout",
+      "type": "reset",
+      "description": "Active-low reset from testbench to DUT and VIFs",
+      "from": { "instance": "tb_top", "port": "rst_n" },
+      "to": [
+        { "instance": "u_repeater", "port": "rst_n" },
+        { "instance": "master_vif", "port": "rst_n" },
+        { "instance": "slave_vif", "port": "rst_n" }
+      ]
+    },
+    {
+      "id": "master_uvc_to_vif",
+      "type": "vif",
+      "label": "UVC → VIF",
+      "description": "Master UVC drives AXI4 transactions through the master-side VIF",
+      "from_instance": "u_master_uvc",
+      "to_instance": "master_vif",
+      "channel_signals": {
+        "VIF": [
+          { "from_port": "vif", "wire": "master_vif_conn", "to_port": "driver_mp" }
+        ]
+      }
+    },
+    {
+      "id": "master_vif_to_dut",
+      "type": "vif",
+      "label": "VIF → DUT (s)",
+      "description": "Master-side VIF connects to the repeater slave-side interface",
+      "from_instance": "master_vif",
+      "to_instance": "u_repeater",
+      "channel_signals": {
+        "VIF": [
+          { "from_port": "dut_mp", "wire": "master_dut_conn", "to_port": "s_awid" }
+        ]
+      }
+    },
+    {
+      "id": "dut_to_slave_vif",
+      "type": "vif",
+      "label": "DUT (m) → VIF",
+      "description": "Repeater master-side interface connects to slave-side VIF",
+      "from_instance": "u_repeater",
+      "to_instance": "slave_vif",
+      "channel_signals": {
+        "VIF": [
+          { "from_port": "m_awid", "wire": "slave_dut_conn", "to_port": "dut_mp" }
+        ]
+      }
+    },
+    {
+      "id": "slave_vif_to_uvc",
+      "type": "vif",
+      "label": "VIF → UVC",
+      "description": "Slave-side VIF connects to the slave UVC",
+      "from_instance": "slave_vif",
+      "to_instance": "u_slave_uvc",
+      "channel_signals": {
+        "VIF": [
+          { "from_port": "monitor_mp", "wire": "slave_vif_conn", "to_port": "vif" }
+        ]
+      }
+    },
+    {
+      "id": "seq_to_master",
+      "type": "tlm",
+      "label": "Sequence",
+      "description": "Stimulus sequence connected to master UVC",
+      "from_instance": "u_sequence",
+      "to_instance": "u_master_uvc",
+      "channel_signals": {
+        "TLM": [
+          { "from_port": "seq_item_port", "wire": "seq_to_sqr", "to_port": "analysis_port" }
+        ]
+      }
+    },
+    {
+      "id": "master_to_sb",
+      "type": "tlm",
+      "label": "Master Mon → SB",
+      "description": "Master UVC monitor analysis port to scoreboard",
+      "from_instance": "u_master_uvc",
+      "to_instance": "u_scoreboard",
+      "channel_signals": {
+        "TLM": [
+          { "from_port": "analysis_port", "wire": "master_mon_to_sb", "to_port": "analysis_export" }
+        ]
+      }
+    },
+    {
+      "id": "slave_to_sb",
+      "type": "tlm",
+      "label": "Slave Mon → SB",
+      "description": "Slave UVC monitor analysis port to scoreboard",
+      "from_instance": "u_slave_uvc",
+      "to_instance": "u_scoreboard",
+      "channel_signals": {
+        "TLM": [
+          { "from_port": "analysis_port", "wire": "slave_mon_to_sb", "to_port": "analysis_export" }
+        ]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "master_env",
+      "label": "Master AXI4 Env",
+      "description": "Master-side UVM verification components",
+      "color": "#1565C0",
+      "padding": 1.5,
+      "members": ["u_master_uvc", "master_vif", "u_sequence"]
+    },
+    {
+      "name": "slave_env",
+      "label": "Slave AXI4 Env",
+      "description": "Slave-side UVM verification components",
+      "color": "#00897B",
+      "padding": 1.5,
+      "members": ["u_slave_uvc", "slave_vif"]
+    }
+  ]
+}

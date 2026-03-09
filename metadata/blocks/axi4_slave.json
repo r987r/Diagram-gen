@@ -1,0 +1,282 @@
+{
+  "block_name": "axi4_slave",
+  "description": "AXI4 Slave. Receives and services read and write transactions from the AXI4 bus.",
+  "render": {
+    "color": "#4CAF50"
+  },
+  "ports": [
+    {
+      "name": "clk",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "System clock"
+    },
+    {
+      "name": "rst_n",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "Active-low reset"
+    },
+    {
+      "name": "s_awid",
+      "direction": "input",
+      "width": 4,
+      "channel": "AW",
+      "description": "Write address ID"
+    },
+    {
+      "name": "s_awaddr",
+      "direction": "input",
+      "width": 32,
+      "channel": "AW",
+      "description": "Write address"
+    },
+    {
+      "name": "s_awlen",
+      "direction": "input",
+      "width": 8,
+      "channel": "AW",
+      "description": "Burst length"
+    },
+    {
+      "name": "s_awsize",
+      "direction": "input",
+      "width": 3,
+      "channel": "AW",
+      "description": "Burst size"
+    },
+    {
+      "name": "s_awburst",
+      "direction": "input",
+      "width": 2,
+      "channel": "AW",
+      "description": "Burst type"
+    },
+    {
+      "name": "s_awlock",
+      "direction": "input",
+      "width": 1,
+      "channel": "AW",
+      "description": "Lock type"
+    },
+    {
+      "name": "s_awcache",
+      "direction": "input",
+      "width": 4,
+      "channel": "AW",
+      "description": "Cache type"
+    },
+    {
+      "name": "s_awprot",
+      "direction": "input",
+      "width": 3,
+      "channel": "AW",
+      "description": "Protection type"
+    },
+    {
+      "name": "s_awqos",
+      "direction": "input",
+      "width": 4,
+      "channel": "AW",
+      "description": "QoS value"
+    },
+    {
+      "name": "s_awvalid",
+      "direction": "input",
+      "width": 1,
+      "channel": "AW",
+      "description": "Write address valid"
+    },
+    {
+      "name": "s_awready",
+      "direction": "output",
+      "width": 1,
+      "channel": "AW",
+      "description": "Write address ready"
+    },
+    {
+      "name": "s_wdata",
+      "direction": "input",
+      "width": 64,
+      "channel": "W",
+      "description": "Write data"
+    },
+    {
+      "name": "s_wstrb",
+      "direction": "input",
+      "width": 8,
+      "channel": "W",
+      "description": "Write byte strobes"
+    },
+    {
+      "name": "s_wlast",
+      "direction": "input",
+      "width": 1,
+      "channel": "W",
+      "description": "Write last beat"
+    },
+    {
+      "name": "s_wvalid",
+      "direction": "input",
+      "width": 1,
+      "channel": "W",
+      "description": "Write data valid"
+    },
+    {
+      "name": "s_wready",
+      "direction": "output",
+      "width": 1,
+      "channel": "W",
+      "description": "Write data ready"
+    },
+    {
+      "name": "s_bid",
+      "direction": "output",
+      "width": 4,
+      "channel": "B",
+      "description": "Write response ID"
+    },
+    {
+      "name": "s_bresp",
+      "direction": "output",
+      "width": 2,
+      "channel": "B",
+      "description": "Write response"
+    },
+    {
+      "name": "s_bvalid",
+      "direction": "output",
+      "width": 1,
+      "channel": "B",
+      "description": "Write response valid"
+    },
+    {
+      "name": "s_bready",
+      "direction": "input",
+      "width": 1,
+      "channel": "B",
+      "description": "Write response ready"
+    },
+    {
+      "name": "s_arid",
+      "direction": "input",
+      "width": 4,
+      "channel": "AR",
+      "description": "Read address ID"
+    },
+    {
+      "name": "s_araddr",
+      "direction": "input",
+      "width": 32,
+      "channel": "AR",
+      "description": "Read address"
+    },
+    {
+      "name": "s_arlen",
+      "direction": "input",
+      "width": 8,
+      "channel": "AR",
+      "description": "Burst length"
+    },
+    {
+      "name": "s_arsize",
+      "direction": "input",
+      "width": 3,
+      "channel": "AR",
+      "description": "Burst size"
+    },
+    {
+      "name": "s_arburst",
+      "direction": "input",
+      "width": 2,
+      "channel": "AR",
+      "description": "Burst type"
+    },
+    {
+      "name": "s_arlock",
+      "direction": "input",
+      "width": 1,
+      "channel": "AR",
+      "description": "Lock type"
+    },
+    {
+      "name": "s_arcache",
+      "direction": "input",
+      "width": 4,
+      "channel": "AR",
+      "description": "Cache type"
+    },
+    {
+      "name": "s_arprot",
+      "direction": "input",
+      "width": 3,
+      "channel": "AR",
+      "description": "Protection type"
+    },
+    {
+      "name": "s_arqos",
+      "direction": "input",
+      "width": 4,
+      "channel": "AR",
+      "description": "QoS value"
+    },
+    {
+      "name": "s_arvalid",
+      "direction": "input",
+      "width": 1,
+      "channel": "AR",
+      "description": "Read address valid"
+    },
+    {
+      "name": "s_arready",
+      "direction": "output",
+      "width": 1,
+      "channel": "AR",
+      "description": "Read address ready"
+    },
+    {
+      "name": "s_rid",
+      "direction": "output",
+      "width": 4,
+      "channel": "R",
+      "description": "Read data ID"
+    },
+    {
+      "name": "s_rdata",
+      "direction": "output",
+      "width": 64,
+      "channel": "R",
+      "description": "Read data"
+    },
+    {
+      "name": "s_rresp",
+      "direction": "output",
+      "width": 2,
+      "channel": "R",
+      "description": "Read response"
+    },
+    {
+      "name": "s_rlast",
+      "direction": "output",
+      "width": 1,
+      "channel": "R",
+      "description": "Read last beat"
+    },
+    {
+      "name": "s_rvalid",
+      "direction": "output",
+      "width": 1,
+      "channel": "R",
+      "description": "Read data valid"
+    },
+    {
+      "name": "s_rready",
+      "direction": "input",
+      "width": 1,
+      "channel": "R",
+      "description": "Read data ready"
+    }
+  ]
+}

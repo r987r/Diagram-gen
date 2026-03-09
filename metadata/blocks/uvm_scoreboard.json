@@ -1,6 +1,6 @@
 {
   "block_name": "uvm_scoreboard",
-  "description": "UVM scoreboard \u2014 checks transactions for correctness.",
+  "description": "UVM scoreboard. Receives expected and actual transactions via analysis TLM FIFOs and compares them for correctness.",
   "render": {
     "color": "#F44336"
   },
@@ -10,7 +10,7 @@
       "direction": "input",
       "width": 1,
       "channel": "TLM",
-      "description": "Receives monitor transactions"
+      "description": "Analysis export (from TLM FIFO)"
     }
   ]
 }

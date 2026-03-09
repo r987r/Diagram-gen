@@ -1,167 +1,94 @@
 {
-  "_comment": "UVC view generation config. Each protocol entry produces a metadata/uvc_{protocol}.json. The script reads this and generates the full design JSONs based on blockify metadata.",
-  "protocols": {
-    "axi4": {
-      "label": "AXI4",
-      "version": "1.0",
-      "description": "AXI4 UVC — per-channel agents (AW, W, B, AR, R) with sequencers, drivers, monitors, and virtual interfaces. Based on axi4_avip from blockify metadata.",
-      "clk_name": "clk",
-      "rst_name": "rst_n",
-      "bus_type": "axi4_bus",
-      "bus_color": "#FFC107",
-      "env_color": "#1565C0",
-      "vif_block": "axi4_vif",
-      "dut_block": "axi4_dut_stub",
-      "includes": [
-        "blocks/uvm_sequencer.json",
-        "blocks/uvm_driver.json",
-        "blocks/uvm_monitor.json",
-        "blocks/uvm_sequence.json",
-        "blocks/uvm_scoreboard.json",
-        "blocks/axi4_vif.json",
-        "blocks/axi4_dut_stub.json"
-      ],
-      "channels": ["aw", "w", "b", "ar", "r"],
-      "agent_layout": {
-        "aw": { "sqr": {"x": -9, "y": 10, "z": 0}, "drv": {"x": -5, "y": 10, "z": 0}, "mon": {"x": -1, "y": 10, "z": 0}, "vif": {"x": -5, "y": 6, "z": 0} },
-        "w":  { "sqr": {"x": -9, "y": 3,  "z": 0}, "drv": {"x": -5, "y": 3,  "z": 0}, "mon": {"x": -1, "y": 3,  "z": 0}, "vif": {"x": -5, "y": -1, "z": 0} },
-        "b":  { "sqr": {"x": 3,  "y": 10, "z": 0}, "drv": {"x": 7,  "y": 10, "z": 0}, "mon": {"x": 11, "y": 10, "z": 0}, "vif": {"x": 7,  "y": 6,  "z": 0} },
-        "ar": { "sqr": {"x": 3,  "y": 3,  "z": 0}, "drv": {"x": 7,  "y": 3,  "z": 0}, "mon": {"x": 11, "y": 3,  "z": 0}, "vif": {"x": 7,  "y": -1, "z": 0} },
-        "r":  { "sqr": {"x": 3,  "y": -4, "z": 0}, "drv": {"x": 7,  "y": -4, "z": 0}, "mon": {"x": 11, "y": -4, "z": 0}, "vif": {"x": 7,  "y": -8, "z": 0} }
+  "_comment": "UVC view generation config. Each entry produces a metadata/uvm_{key}_uvc.json. The script reads this and generates the full design JSONs.",
+  "common": {
+    "version": "3.0",
+    "includes": [
+      "blocks/uvm_sequencer.json",
+      "blocks/uvm_driver.json",
+      "blocks/uvm_monitor.json",
+      "blocks/uvm_sequence.json",
+      "blocks/axi4_vif.json",
+      "blocks/uvm_axi4_env_common.json"
+    ],
+    "parameters": {
+      "DATA_WIDTH": 64,
+      "ADDR_WIDTH": 32,
+      "ID_WIDTH": 4
+    },
+    "testbench": {
+      "module_name": "tb_top",
+      "global_signals": [
+        {
+          "name": "clk",
+          "width": 1,
+          "type": "reg",
+          "description": "System clock.",
+          "render": { "face": "bottom", "color": "#00E676" }
+        },
+        {
+          "name": "rst_n",
+          "width": 1,
+          "type": "reg",
+          "description": "Active-low reset.",
+          "render": { "face": "top", "color": "#FF5252" }
+        }
+      ]
+    },
+    "connection_types": {
+      "axi4_bus": { "color": "#FFC107", "description": "AXI4 Bus" },
+      "vif":      { "color": "#795548", "description": "Virtual Interface" },
+      "tlm":      { "color": "#E91E63", "description": "TLM Analysis Port" }
+    },
+    "dut_module": {
+      "description": "AXI4 interconnect DUT stub",
+      "render": {
+        "color": "#FF9800",
+        "size": { "w": 8, "h": 3, "d": 3 }
       },
-      "extra_positions": {
-        "dut_stub":   {"x": 0,  "y": -14, "z": 0},
-        "read_seq":   {"x": -9, "y": -4,  "z": 0},
-        "write_seq":  {"x": -5, "y": -4,  "z": 0},
-        "read_sb":    {"x": -9, "y": -8,  "z": 0},
-        "write_sb":   {"x": -5, "y": -8,  "z": 0}
+      "ports": [
+        { "name": "clk",   "direction": "input", "width": 1, "channel": "GLOBAL", "description": "System clock" },
+        { "name": "rst_n", "direction": "input", "width": 1, "channel": "GLOBAL", "description": "Active-low reset" }
+      ]
+    },
+    "scoreboard_modules": {
+      "uvm_read_scoreboard": {
+        "description": "Read scoreboard — checks AR/R channel transactions",
+        "render": { "color": "#F44336" },
+        "ports": [
+          { "name": "analysis_export", "direction": "input", "width": 1, "channel": "TLM", "description": "Receives monitor transactions" }
+        ]
       },
-      "sequences": {
-        "read_seq":  {"target_channel": "ar", "label": "Read seq\u2192AR"},
-        "write_seq": {"target_channel": "aw", "label": "Write seq\u2192AW"}
-      },
-      "scoreboards": {
-        "read_sb":  {"label": "Read Scoreboard",  "channels": ["ar", "r"]},
-        "write_sb": {"label": "Write Scoreboard", "channels": ["aw", "w", "b"]}
+      "uvm_write_scoreboard": {
+        "description": "Write scoreboard — checks AW/W/B channel transactions",
+        "render": { "color": "#E91E63" },
+        "ports": [
+          { "name": "analysis_export", "direction": "input", "width": 1, "channel": "TLM", "description": "Receives monitor transactions" }
+        ]
       }
     },
-    "ahb": {
-      "label": "AHB",
-      "version": "1.0",
-      "description": "AHB UVC — master and slave agents with address and data phase handling. Based on ahb_avip from blockify metadata.",
-      "clk_name": "hclk",
-      "rst_name": "hresetn",
-      "bus_type": "ahb_bus",
-      "bus_color": "#2196F3",
-      "env_color": "#0D47A1",
-      "vif_block": "ahb_vif",
-      "dut_block": "ahb_dut_stub",
-      "includes": [
-        "blocks/uvm_sequencer.json",
-        "blocks/uvm_driver.json",
-        "blocks/uvm_monitor.json",
-        "blocks/uvm_sequence.json",
-        "blocks/uvm_scoreboard.json",
-        "blocks/ahb_vif.json",
-        "blocks/ahb_dut_stub.json"
-      ],
-      "channels": ["addr", "data"],
-      "agent_layout": {
-        "addr": { "sqr": {"x": -7, "y": 6, "z": 0}, "drv": {"x": -3, "y": 6, "z": 0}, "mon": {"x": 1, "y": 6, "z": 0}, "vif": {"x": -3, "y": 2, "z": 0} },
-        "data": { "sqr": {"x": -7, "y": -2, "z": 0}, "drv": {"x": -3, "y": -2, "z": 0}, "mon": {"x": 1, "y": -2, "z": 0}, "vif": {"x": -3, "y": -6, "z": 0} }
-      },
-      "extra_positions": {
-        "dut_stub":   {"x": 0,  "y": -12, "z": 0},
-        "read_seq":   {"x": 5,  "y": 6,  "z": 0},
-        "write_seq":  {"x": 9,  "y": 6,  "z": 0},
-        "read_sb":    {"x": 5,  "y": -2, "z": 0},
-        "write_sb":   {"x": 9,  "y": -2, "z": 0}
-      },
-      "sequences": {
-        "read_seq":  {"target_channel": "addr", "label": "Read seq\u2192ADDR"},
-        "write_seq": {"target_channel": "data", "label": "Write seq\u2192DATA"}
-      },
-      "scoreboards": {
-        "read_sb":  {"label": "Read Scoreboard",  "channels": ["addr"]},
-        "write_sb": {"label": "Write Scoreboard", "channels": ["data"]}
-      }
+    "channels": ["aw", "w", "b", "ar", "r"],
+    "agent_layout": {
+      "aw": { "sqr": {"x": -9, "y": 10, "z": 0}, "drv": {"x": -5, "y": 10, "z": 0}, "mon": {"x": -1, "y": 10, "z": 0}, "vif": {"x": -5, "y": 6, "z": 0} },
+      "w":  { "sqr": {"x": -9, "y": 3,  "z": 0}, "drv": {"x": -5, "y": 3,  "z": 0}, "mon": {"x": -1, "y": 3,  "z": 0}, "vif": {"x": -5, "y": -1, "z": 0} },
+      "b":  { "sqr": {"x": 3,  "y": 10, "z": 0}, "drv": {"x": 7,  "y": 10, "z": 0}, "mon": {"x": 11, "y": 10, "z": 0}, "vif": {"x": 7,  "y": 6,  "z": 0} },
+      "ar": { "sqr": {"x": 3,  "y": 3,  "z": 0}, "drv": {"x": 7,  "y": 3,  "z": 0}, "mon": {"x": 11, "y": 3,  "z": 0}, "vif": {"x": 7,  "y": -1, "z": 0} },
+      "r":  { "sqr": {"x": 3,  "y": -4, "z": 0}, "drv": {"x": 7,  "y": -4, "z": 0}, "mon": {"x": 11, "y": -4, "z": 0}, "vif": {"x": 7,  "y": -8, "z": 0} }
     },
-    "apb": {
-      "label": "APB",
-      "version": "1.0",
-      "description": "APB UVC — master and slave agents for simple peripheral bus protocol. Based on apb_avip from blockify metadata.",
-      "clk_name": "pclk",
-      "rst_name": "preset_n",
-      "bus_type": "apb_bus",
-      "bus_color": "#4CAF50",
-      "env_color": "#1B5E20",
-      "vif_block": "apb_vif",
-      "dut_block": "apb_dut_stub",
-      "includes": [
-        "blocks/uvm_sequencer.json",
-        "blocks/uvm_driver.json",
-        "blocks/uvm_monitor.json",
-        "blocks/uvm_sequence.json",
-        "blocks/uvm_scoreboard.json",
-        "blocks/apb_vif.json",
-        "blocks/apb_dut_stub.json"
-      ],
-      "channels": ["apb"],
-      "agent_layout": {
-        "apb": { "sqr": {"x": -5, "y": 6, "z": 0}, "drv": {"x": -1, "y": 6, "z": 0}, "mon": {"x": 3, "y": 6, "z": 0}, "vif": {"x": -1, "y": 2, "z": 0} }
-      },
-      "extra_positions": {
-        "dut_stub": {"x": 0, "y": -6, "z": 0},
-        "seq":      {"x": 7, "y": 6, "z": 0},
-        "sb":       {"x": 7, "y": 2, "z": 0}
-      },
-      "sequences": {
-        "seq": {"target_channel": "apb", "label": "APB seq\u2192SQR"}
-      },
-      "scoreboards": {
-        "sb": {"label": "APB Scoreboard", "channels": ["apb"]}
-      }
-    },
-    "uart": {
-      "label": "UART",
-      "version": "1.0",
-      "description": "UART UVC — TX and RX channel agents for serial communication protocol. Based on uart_avip from blockify metadata.",
-      "clk_name": "clk",
-      "rst_name": "reset",
-      "bus_type": "uart_bus",
-      "bus_color": "#9C27B0",
-      "env_color": "#4A148C",
-      "vif_block": "uart_vif",
-      "dut_block": "uart_dut_stub",
-      "includes": [
-        "blocks/uvm_sequencer.json",
-        "blocks/uvm_driver.json",
-        "blocks/uvm_monitor.json",
-        "blocks/uvm_sequence.json",
-        "blocks/uvm_scoreboard.json",
-        "blocks/uart_vif.json",
-        "blocks/uart_dut_stub.json"
-      ],
-      "channels": ["tx", "rx"],
-      "agent_layout": {
-        "tx": { "sqr": {"x": -7, "y": 6, "z": 0}, "drv": {"x": -3, "y": 6, "z": 0}, "mon": {"x": 1, "y": 6, "z": 0}, "vif": {"x": -3, "y": 2, "z": 0} },
-        "rx": { "sqr": {"x": -7, "y": -2, "z": 0}, "drv": {"x": -3, "y": -2, "z": 0}, "mon": {"x": 1, "y": -2, "z": 0}, "vif": {"x": -3, "y": -6, "z": 0} }
-      },
-      "extra_positions": {
-        "dut_stub":   {"x": 0,  "y": -12, "z": 0},
-        "tx_seq":     {"x": 5,  "y": 6,  "z": 0},
-        "rx_seq":     {"x": 9,  "y": 6,  "z": 0},
-        "tx_sb":      {"x": 5,  "y": -2, "z": 0},
-        "rx_sb":      {"x": 9,  "y": -2, "z": 0}
-      },
-      "sequences": {
-        "tx_seq": {"target_channel": "tx", "label": "TX seq\u2192SQR"},
-        "rx_seq": {"target_channel": "rx", "label": "RX seq\u2192SQR"}
-      },
-      "scoreboards": {
-        "tx_sb": {"label": "TX Scoreboard", "channels": ["tx"]},
-        "rx_sb": {"label": "RX Scoreboard", "channels": ["rx"]}
-      }
+    "extra_positions": {
+      "dut_stub":  {"x": 0,  "y": -14, "z": 0},
+      "read_seq":  {"x": -9, "y": -4,  "z": 0},
+      "write_seq": {"x": -5, "y": -4,  "z": 0},
+      "read_sb":   {"x": -9, "y": -8,  "z": 0},
+      "write_sb":  {"x": -5, "y": -8,  "z": 0}
     }
+  },
+  "uvcs": {
+    "cpu":  { "role": "master", "env_color": "#1565C0", "label": "CPU" },
+    "dma":  { "role": "master", "env_color": "#1565C0", "label": "DMA" },
+    "gpu":  { "role": "master", "env_color": "#1565C0", "label": "GPU" },
+    "sram": { "role": "slave",  "env_color": "#00897B", "label": "SRAM" },
+    "ddr":  { "role": "slave",  "env_color": "#00897B", "label": "DDR" },
+    "uart": { "role": "slave",  "env_color": "#00897B", "label": "UART" },
+    "spi":  { "role": "slave",  "env_color": "#00897B", "label": "SPI" }
   }
 }

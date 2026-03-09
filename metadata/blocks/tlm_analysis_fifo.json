@@ -1,0 +1,23 @@
+{
+  "block_name": "tlm_analysis_fifo",
+  "description": "UVM TLM analysis FIFO. Buffers transactions between the monitor analysis port and the scoreboard analysis export.",
+  "render": {
+    "color": "#607D8B"
+  },
+  "ports": [
+    {
+      "name": "analysis_imp",
+      "direction": "input",
+      "width": 1,
+      "channel": "TLM",
+      "description": "Analysis implementation (input from monitor)"
+    },
+    {
+      "name": "blocking_get_export",
+      "direction": "output",
+      "width": 1,
+      "channel": "TLM",
+      "description": "Blocking get export (to scoreboard)"
+    }
+  ]
+}
