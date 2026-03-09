@@ -1,0 +1,30 @@
+{
+  "block_name": "uvm_agent",
+  "description": "UVM AXI4 agent (active). Encapsulates the sequencer, driver and monitor. The driver and monitor get a handle to the virtual interface to drive/observe RTL signals. Operates in active mode.",
+  "render": {
+    "color": "#2196F3"
+  },
+  "ports": [
+    {
+      "name": "vif",
+      "direction": "input",
+      "width": 1,
+      "channel": "VIF",
+      "description": "Virtual interface handle — passed to internal driver and monitor to connect to RTL"
+    },
+    {
+      "name": "seq_item_export",
+      "direction": "input",
+      "width": 1,
+      "channel": "TLM",
+      "description": "Sequence item export — sequences connect here via TLM to reach the internal sequencer"
+    },
+    {
+      "name": "analysis_port",
+      "direction": "output",
+      "width": 1,
+      "channel": "TLM",
+      "description": "Analysis port — internal monitor broadcasts observed transactions out to scoreboards via TLM"
+    }
+  ]
+}

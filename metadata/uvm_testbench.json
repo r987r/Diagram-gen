@@ -1,0 +1,454 @@
+{
+  "design_name": "uvm_axi4_testbench",
+  "version": "3.0",
+  "description": "UVM verification environment for an AXI4 DUT showing proper UVM methodology. The agent encapsulates driver, monitor and sequencer. The driver and monitor connect to the DUT via a virtual interface (axi4_vif). Sequences generate items via TLM to the sequencer, which forwards to the driver. The monitor broadcasts observed transactions via TLM analysis port to the scoreboard. TLM ports bypass their parent hierarchy blocks.",
+  "includes": [
+    "blocks/uvm_test.json",
+    "blocks/uvm_env.json",
+    "blocks/uvm_agent.json",
+    "blocks/uvm_sequencer.json",
+    "blocks/uvm_driver.json",
+    "blocks/uvm_monitor.json",
+    "blocks/uvm_scoreboard.json",
+    "blocks/uvm_sequence.json",
+    "blocks/axi4_vif.json",
+    "blocks/tlm_analysis_fifo.json",
+    "blocks/axi4_interconnect.json"
+  ],
+  "parameters": {
+    "DATA_WIDTH": 64,
+    "ADDR_WIDTH": 32,
+    "ID_WIDTH": 4
+  },
+  "testbench": {
+    "module_name": "tb_top",
+    "description": "Top-level UVM testbench module. Instantiates the DUT and connects the UVM environment via virtual interfaces.",
+    "global_signals": [
+      {
+        "name": "clk",
+        "width": 1,
+        "type": "reg",
+        "description": "System clock driven by the testbench.",
+        "render": {
+          "face": "bottom",
+          "color": "#00E676"
+        }
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "type": "reg",
+        "description": "Active-low synchronous reset.",
+        "render": {
+          "face": "top",
+          "color": "#FF5252"
+        }
+      }
+    ]
+  },
+  "modules": {},
+  "instances": [
+    {
+      "instance_name": "uvm_test_i",
+      "module": "uvm_test",
+      "description": "Top-level UVM test \u2014 configures the environment and starts sequences",
+      "position": {
+        "x": 0,
+        "y": 12,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "env_i",
+      "module": "uvm_env",
+      "description": "UVM environment \u2014 the bigger box containing agents, scoreboards and sequences",
+      "position": {
+        "x": 0,
+        "y": 8,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "agent_i",
+      "module": "uvm_agent",
+      "description": "AXI4 UVM agent \u2014 encapsulates sequencer, driver and monitor",
+      "position": {
+        "x": -6,
+        "y": 4,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "sqr_i",
+      "module": "uvm_sequencer",
+      "description": "AXI4 sequencer \u2014 inside the agent, arbitrates sequence items",
+      "position": {
+        "x": -12,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "drv_i",
+      "module": "uvm_driver",
+      "description": "AXI4 driver \u2014 inside the agent, drives RTL via virtual interface handle",
+      "position": {
+        "x": -6,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "mon_i",
+      "module": "uvm_monitor",
+      "description": "AXI4 monitor \u2014 inside the agent, observes RTL via virtual interface handle",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "vif_i",
+      "module": "axi4_vif",
+      "description": "AXI4 virtual interface \u2014 connects driver/monitor to the RTL DUT signals",
+      "position": {
+        "x": -3,
+        "y": -4,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "dut_i",
+      "module": "axi4_interconnect",
+      "description": "External DUT \u2014 the RTL design under test connected via virtual interface",
+      "position": {
+        "x": -3,
+        "y": -8,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "seq_i",
+      "module": "uvm_sequence",
+      "description": "UVM sequence \u2014 generates stimulus, connects to sequencer via TLM port",
+      "position": {
+        "x": -12,
+        "y": 4,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "fifo_i",
+      "module": "tlm_analysis_fifo",
+      "description": "TLM analysis FIFO \u2014 buffers transactions from monitor to scoreboard",
+      "position": {
+        "x": 8,
+        "y": 4,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "sb_i",
+      "module": "uvm_scoreboard",
+      "description": "UVM scoreboard \u2014 receives and checks transactions via TLM analysis port",
+      "position": {
+        "x": 12,
+        "y": 4,
+        "z": 0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "clk_fanout",
+      "type": "clock",
+      "description": "System clock from testbench to all UVM components",
+      "from": {
+        "instance": "tb_top",
+        "port": "clk"
+      },
+      "to": [
+        {
+          "instance": "vif_i",
+          "port": "clk"
+        },
+        {
+          "instance": "dut_i",
+          "port": "clk"
+        }
+      ]
+    },
+    {
+      "id": "rst_fanout",
+      "type": "reset",
+      "description": "Active-low reset from testbench to all UVM components",
+      "from": {
+        "instance": "tb_top",
+        "port": "rst_n"
+      },
+      "to": [
+        {
+          "instance": "vif_i",
+          "port": "rst_n"
+        },
+        {
+          "instance": "dut_i",
+          "port": "rst_n"
+        }
+      ]
+    },
+    {
+      "id": "test_to_env",
+      "type": "axi4_bus",
+      "label": "uvm_test \u2192 env",
+      "description": "UVM test creates and configures the environment",
+      "from_instance": "uvm_test_i",
+      "to_instance": "env_i",
+      "channel_signals": {
+        "HIERARCHY": [
+          {
+            "from_port": "build_phase",
+            "wire": "create",
+            "to_port": "env_i"
+          }
+        ]
+      }
+    },
+    {
+      "id": "env_to_agent",
+      "type": "axi4_bus",
+      "label": "env \u2192 agent",
+      "description": "Environment creates and contains the AXI4 agent",
+      "from_instance": "env_i",
+      "to_instance": "agent_i",
+      "channel_signals": {
+        "HIERARCHY": [
+          {
+            "from_port": "build_phase",
+            "wire": "create",
+            "to_port": "agent_i"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent_to_sqr",
+      "type": "axi4_bus",
+      "label": "agent \u2192 sequencer",
+      "description": "Agent creates and encapsulates the sequencer",
+      "from_instance": "agent_i",
+      "to_instance": "sqr_i",
+      "channel_signals": {
+        "HIERARCHY": [
+          {
+            "from_port": "build_phase",
+            "wire": "create",
+            "to_port": "sqr_i"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent_to_drv",
+      "type": "axi4_bus",
+      "label": "agent \u2192 driver",
+      "description": "Agent creates and encapsulates the driver",
+      "from_instance": "agent_i",
+      "to_instance": "drv_i",
+      "channel_signals": {
+        "HIERARCHY": [
+          {
+            "from_port": "build_phase",
+            "wire": "create",
+            "to_port": "drv_i"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent_to_mon",
+      "type": "axi4_bus",
+      "label": "agent \u2192 monitor",
+      "description": "Agent creates and encapsulates the monitor",
+      "from_instance": "agent_i",
+      "to_instance": "mon_i",
+      "channel_signals": {
+        "HIERARCHY": [
+          {
+            "from_port": "build_phase",
+            "wire": "create",
+            "to_port": "mon_i"
+          }
+        ]
+      }
+    },
+    {
+      "id": "env_to_sb",
+      "type": "axi4_bus",
+      "label": "env \u2192 scoreboard",
+      "description": "Environment creates and contains the scoreboard",
+      "from_instance": "env_i",
+      "to_instance": "sb_i",
+      "channel_signals": {
+        "HIERARCHY": [
+          {
+            "from_port": "build_phase",
+            "wire": "create",
+            "to_port": "sb_i"
+          }
+        ]
+      }
+    },
+    {
+      "id": "env_to_seq",
+      "type": "axi4_bus",
+      "label": "env \u2192 sequence",
+      "description": "Environment creates and contains the sequence",
+      "from_instance": "env_i",
+      "to_instance": "seq_i",
+      "channel_signals": {
+        "HIERARCHY": [
+          {
+            "from_port": "build_phase",
+            "wire": "create",
+            "to_port": "seq_i"
+          }
+        ]
+      }
+    },
+    {
+      "id": "seq_to_sqr",
+      "type": "axi4_bus",
+      "label": "seq \u2192 sequencer (TLM)",
+      "description": "Sequence sends generated items to the sequencer via TLM seq_item_port. This TLM connection bypasses the agent boundary.",
+      "from_instance": "seq_i",
+      "to_instance": "sqr_i",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "seq_item_port",
+            "to_port": "seq_item_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sqr_to_drv",
+      "type": "axi4_bus",
+      "label": "seq_item_port",
+      "description": "TLM seq_item_port: Sequencer delivers sequence items to the driver. The driver calls get_next_item() / item_done() on this port.",
+      "from_instance": "sqr_i",
+      "to_instance": "drv_i",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_export",
+            "wire": "seq_item_port",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "drv_to_vif",
+      "type": "axi4_bus",
+      "label": "driver \u2192 vif",
+      "description": "Driver gets a handle to the virtual interface and drives AXI4 signals onto the DUT through it.",
+      "from_instance": "drv_i",
+      "to_instance": "vif_i",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "driver_mp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mon_to_vif",
+      "type": "axi4_bus",
+      "label": "monitor \u2192 vif",
+      "description": "Monitor gets a handle to the virtual interface and observes AXI4 signals from the DUT through it.",
+      "from_instance": "mon_i",
+      "to_instance": "vif_i",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "vif_handle",
+            "to_port": "monitor_mp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mon_to_fifo",
+      "type": "axi4_bus",
+      "label": "analysis_port \u2192 FIFO",
+      "description": "Monitor broadcasts observed transactions to the TLM analysis FIFO via its analysis port. This TLM connection bypasses the agent boundary.",
+      "from_instance": "mon_i",
+      "to_instance": "fifo_i",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "analysis_write",
+            "to_port": "analysis_imp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fifo_to_sb",
+      "type": "axi4_bus",
+      "label": "FIFO \u2192 scoreboard",
+      "description": "TLM analysis FIFO provides buffered transactions to the scoreboard for checking.",
+      "from_instance": "fifo_i",
+      "to_instance": "sb_i",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "blocking_get_export",
+            "wire": "get_port",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vif_to_dut",
+      "type": "axi4_bus",
+      "label": "vif \u2192 DUT",
+      "description": "Virtual interface connects to the external RTL DUT AXI4 port.",
+      "from_instance": "vif_i",
+      "to_instance": "dut_i",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "dut_mp",
+            "wire": "axi4_if",
+            "to_port": "axi4_port"
+          }
+        ]
+      }
+    }
+  ],
+  "connection_types": {
+    "axi4_bus": {
+      "color": "#FFC107",
+      "description": "AXI4 Bus"
+    },
+    "vif": {
+      "color": "#795548",
+      "description": "Virtual Interface"
+    },
+    "tlm": {
+      "color": "#E91E63",
+      "description": "TLM Analysis Port"
+    }
+  }
+}

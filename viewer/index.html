@@ -25,23 +25,26 @@
 
   <!-- ── Top bar ──────────────────────────────────────────────── -->
   <header id="topbar">
-    <span id="design-title">3D Diagram Viewer</span>
-    <span id="design-subtitle">UVC & DMA Diagrams</span>
+    <span id="design-title">AXI4 Interconnect</span>
+    <span id="design-subtitle">Master → Repeater → Slave</span>
 
     <!-- Design selector -->
     <select id="design-select" title="Choose design">
-      <optgroup label="Protocol UVCs">
-        <option value="metadata/uvc_axi4.json">AXI4 UVC</option>
-        <option value="metadata/uvc_ahb.json">AHB UVC</option>
-        <option value="metadata/uvc_apb.json">APB UVC</option>
-        <option value="metadata/uvc_uart.json">UART UVC</option>
+      <optgroup label="Full Designs">
+        <option value="metadata/axi4_design.json">AXI4 M→R→S</option>
+        <option value="metadata/axi4_wide_interconnect.json">Wide Interconnect</option>
+        <option value="metadata/uvm_pipeline_uvc.json">UVM Pipeline (M→R→S)</option>
+        <option value="metadata/uvm_testbench.json">UVM Testbench</option>
+        <option value="metadata/uvm_axi4_super.json">UVM + Interconnect (Super)</option>
       </optgroup>
-      <optgroup label="DMA Modules">
-        <option value="metadata/dma_axi32_design.json">DMA AXI 32</option>
-        <option value="metadata/dma_axi64_design.json">DMA AXI 64</option>
-      </optgroup>
-      <optgroup label="Testbenches">
-        <option value="metadata/dma_axi64_testbench.json">DMA AXI 64 TB (2×AXI4 Slave + APB Master)</option>
+      <optgroup label="Individual UVC Views">
+        <option value="metadata/uvm_cpu_uvc.json">CPU UVC</option>
+        <option value="metadata/uvm_dma_uvc.json">DMA UVC</option>
+        <option value="metadata/uvm_gpu_uvc.json">GPU UVC</option>
+        <option value="metadata/uvm_sram_uvc.json">SRAM UVC</option>
+        <option value="metadata/uvm_ddr_uvc.json">DDR UVC</option>
+        <option value="metadata/uvm_uart_uvc.json">UART UVC</option>
+        <option value="metadata/uvm_spi_uvc.json">SPI UVC</option>
       </optgroup>
     </select>
 

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Generate UVC design JSON files for each protocol from a shared config.
+"""Generate individual UVC design JSON files from a shared config.
 
-Reads ``scripts/uvc_config.json`` and emits one design JSON per protocol
-(e.g. ``metadata/uvc_axi4.json``, ``metadata/uvc_ahb.json``).  All structural
-data — instance layout, connections, groups, modules — is computed from the
-config so that there is a **single source of truth** for each protocol's UVC
-pattern.
+Reads ``metadata/uvc_config.json`` and emits one design JSON per UVC
+entry (e.g. ``metadata/uvm_cpu_uvc.json``).  All structural data — instance
+layout, connections, groups, modules — is computed from the config so that
+there is a **single source of truth** for the common AXI4 env pattern.
 
 Usage:
     python scripts/generate_uvc_views.py           # default metadata dir
@@ -17,27 +16,22 @@ import sys
 from pathlib import Path
 
 
-def build_uvc_design(proto_key: str, proto: dict) -> dict:
-    """Return a fully-populated design dict for one protocol UVC."""
+def build_uvc_design(key: str, uvc: dict, common: dict) -> dict:
+    """Return a fully-populated design dict for one UVC."""
 
-    label = proto["label"]
-    channels = proto["channels"]
-    layout = proto["agent_layout"]
-    extra = proto["extra_positions"]
-    clk = proto["clk_name"]
-    rst = proto["rst_name"]
-    bus_type = proto["bus_type"]
-    bus_color = proto["bus_color"]
-    env_color = proto["env_color"]
-    vif_block = proto["vif_block"]
-    dut_block = proto["dut_block"]
-    sequences = proto["sequences"]
-    scoreboards = proto["scoreboards"]
+    role = uvc["role"]            # "master" or "slave"
+    label = uvc["label"]          # e.g. "CPU"
+    env_color = uvc["env_color"]  # e.g. "#1565C0"
+    channels = common["channels"]
+    layout = common["agent_layout"]
+    extra = common["extra_positions"]
 
-    ch_list = ", ".join(ch.upper() for ch in channels)
+    # ── Description ──────────────────────────────────────────────
     desc = (
-        f"{label} UVC \u2014 per-channel agents ({ch_list}) with "
-        f"sequencers, drivers, monitors, and virtual interfaces."
+        f"Individual view of the {label} AXI4 Env \u2014 each per-channel "
+        f"agent (AW, W, B, AR, R) is expanded to show its internal "
+        f"sequencer, driver, and monitor. Per-channel virtual interfaces "
+        f"connect agents to the DUT."
     )
 
     # ── Instances ────────────────────────────────────────────────
@@ -47,43 +41,41 @@ def build_uvc_design(proto_key: str, proto: dict) -> dict:
         instances.append({"instance_name": f"{ch}_sqr", "module": "uvm_sequencer", "position": pos["sqr"]})
         instances.append({"instance_name": f"{ch}_drv", "module": "uvm_driver",    "position": pos["drv"]})
         instances.append({"instance_name": f"{ch}_mon", "module": "uvm_monitor",   "position": pos["mon"]})
-        instances.append({"instance_name": f"{ch}_vif", "module": vif_block,       "position": pos["vif"]})
+        instances.append({"instance_name": f"{ch}_vif", "module": "axi4_vif",      "position": pos["vif"]})
 
-    instances.append({"instance_name": "dut_stub", "module": dut_block, "position": extra["dut_stub"]})
-
-    for seq_name, seq_cfg in sequences.items():
-        instances.append({"instance_name": seq_name, "module": "uvm_sequence", "position": extra[seq_name]})
-
-    for sb_name, sb_cfg in scoreboards.items():
-        instances.append({"instance_name": sb_name, "module": "uvm_scoreboard", "position": extra[sb_name]})
+    instances.append({"instance_name": "dut_stub",  "module": "axi4_interconnect", "position": extra["dut_stub"]})
+    instances.append({"instance_name": "read_seq",  "module": "uvm_sequence",      "position": extra["read_seq"]})
+    instances.append({"instance_name": "write_seq", "module": "uvm_sequence",      "position": extra["write_seq"]})
+    instances.append({"instance_name": "read_sb",   "module": "uvm_read_scoreboard",  "position": extra["read_sb"]})
+    instances.append({"instance_name": "write_sb",  "module": "uvm_write_scoreboard", "position": extra["write_sb"]})
 
     # ── Connections ──────────────────────────────────────────────
     connections: list[dict] = []
 
-    # Clock / reset fanout — only to VIFs and DUT
-    clk_targets = [{"instance": f"{ch}_vif", "port": clk} for ch in channels]
-    clk_targets.append({"instance": "dut_stub", "port": clk})
-    rst_targets = [{"instance": f"{ch}_vif", "port": rst} for ch in channels]
-    rst_targets.append({"instance": "dut_stub", "port": rst})
+    # Clock / reset fanout — only to VIFs and DUT (not to UVM components)
+    clk_targets = [{"instance": f"{ch}_vif", "port": "clk"} for ch in channels]
+    clk_targets.append({"instance": "dut_stub", "port": "clk"})
+    rst_targets = [{"instance": f"{ch}_vif", "port": "rst_n"} for ch in channels]
+    rst_targets.append({"instance": "dut_stub", "port": "rst_n"})
 
     connections.append({
         "id": "clk_fanout", "type": "clock",
-        "description": f"{label} clock to all VIFs and DUT",
-        "from": {"instance": "tb_top", "port": clk},
+        "description": "System clock to all VIFs and DUT",
+        "from": {"instance": "tb_top", "port": "clk"},
         "to": clk_targets,
     })
     connections.append({
         "id": "rst_fanout", "type": "reset",
-        "description": f"{label} reset to all VIFs and DUT",
-        "from": {"instance": "tb_top", "port": rst},
+        "description": "Active-low reset to all VIFs and DUT",
+        "from": {"instance": "tb_top", "port": "rst_n"},
         "to": rst_targets,
     })
 
-    # Per-channel agent wiring: sqr→drv, drv→vif, mon→vif
+    # Per-channel agent wiring: sqr→drv, drv→vif, mon→vif, mon→sb
     for ch in channels:
         connections.append({
             "id": f"{ch}_sqr_to_drv", "type": "tlm",
-            "label": f"{ch.upper()} sqr\u2192drv",
+            "label": f"{ch.upper()} sqr→drv",
             "description": f"{ch.upper()} sequencer to driver",
             "from_instance": f"{ch}_sqr", "to_instance": f"{ch}_drv",
             "channel_signals": {
@@ -92,7 +84,7 @@ def build_uvc_design(proto_key: str, proto: dict) -> dict:
         })
         connections.append({
             "id": f"{ch}_drv_to_vif", "type": "vif",
-            "label": f"{ch.upper()} drv\u2192vif",
+            "label": f"{ch.upper()} drv→vif",
             "description": f"{ch.upper()} driver to virtual interface",
             "from_instance": f"{ch}_drv", "to_instance": f"{ch}_vif",
             "channel_signals": {
@@ -101,7 +93,7 @@ def build_uvc_design(proto_key: str, proto: dict) -> dict:
         })
         connections.append({
             "id": f"{ch}_mon_to_vif", "type": "vif",
-            "label": f"{ch.upper()} mon\u2192vif",
+            "label": f"{ch.upper()} mon→vif",
             "description": f"{ch.upper()} monitor to virtual interface",
             "from_instance": f"{ch}_mon", "to_instance": f"{ch}_vif",
             "channel_signals": {
@@ -109,43 +101,61 @@ def build_uvc_design(proto_key: str, proto: dict) -> dict:
             },
         })
 
-    # Monitor → scoreboard
-    for sb_name, sb_cfg in scoreboards.items():
-        for ch in sb_cfg["channels"]:
-            connections.append({
-                "id": f"{ch}_mon_to_{sb_name}", "type": "tlm",
-                "label": f"{ch.upper()} mon\u2192SB",
-                "description": f"{ch.upper()} monitor analysis to {sb_cfg['label']}",
-                "from_instance": f"{ch}_mon", "to_instance": sb_name,
-                "channel_signals": {
-                    "TLM": [{"from_port": "analysis_port", "wire": f"{ch}_mon_ap", "to_port": "analysis_export"}]
-                },
-            })
+    # Monitor → scoreboard (read: AR+R, write: AW+W+B)
+    for ch, sb in [("ar", "read_sb"), ("r", "read_sb"),
+                    ("aw", "write_sb"), ("w", "write_sb"), ("b", "write_sb")]:
+        connections.append({
+            "id": f"{ch}_mon_to_{sb}", "type": "tlm",
+            "label": f"{ch.upper()} mon→SB",
+            "description": f"{ch.upper()} monitor analysis to {sb.replace('_', ' ')}",
+            "from_instance": f"{ch}_mon", "to_instance": sb,
+            "channel_signals": {
+                "TLM": [{"from_port": "analysis_port", "wire": f"{ch}_mon_ap", "to_port": "analysis_export"}]
+            },
+        })
 
     # Sequence → sequencer
-    for seq_name, seq_cfg in sequences.items():
-        target_ch = seq_cfg["target_channel"]
-        connections.append({
-            "id": f"{seq_name}_to_{target_ch}", "type": "tlm",
-            "label": seq_cfg["label"],
-            "description": f"Sequence generates {target_ch.upper()} channel transactions",
-            "from_instance": seq_name, "to_instance": f"{target_ch}_sqr",
-            "channel_signals": {
-                "TLM": [{"from_port": "seq_item_port", "wire": f"{seq_name}_out", "to_port": "seq_item_port"}]
-            },
-        })
+    connections.append({
+        "id": "read_seq_to_ar", "type": "tlm",
+        "label": "Read seq→AR",
+        "description": "Read sequence generates AR channel transactions",
+        "from_instance": "read_seq", "to_instance": "ar_sqr",
+        "channel_signals": {
+            "TLM": [{"from_port": "seq_item_port", "wire": "read_seq_out", "to_port": "seq_item_port"}]
+        },
+    })
+    connections.append({
+        "id": "write_seq_to_aw", "type": "tlm",
+        "label": "Write seq→AW",
+        "description": "Write sequence generates AW channel transactions",
+        "from_instance": "write_seq", "to_instance": "aw_sqr",
+        "channel_signals": {
+            "TLM": [{"from_port": "seq_item_port", "wire": "write_seq_out", "to_port": "seq_item_port"}]
+        },
+    })
 
-    # VIF → DUT connections
+    # VIF ↔ DUT connections (direction depends on master/slave role)
     for ch in channels:
-        connections.append({
-            "id": f"{ch}_vif_to_dut", "type": bus_type,
-            "label": f"{ch.upper()} vif \u2192 DUT",
-            "description": f"{ch.upper()} virtual interface connects to DUT",
-            "from_instance": f"{ch}_vif", "to_instance": "dut_stub",
-            "channel_signals": {
-                "VIF": [{"from_port": "dut_mp", "wire": "vif_handle", "to_port": ch}]
-            },
-        })
+        if role == "master":
+            connections.append({
+                "id": f"{ch}_vif_to_dut", "type": "axi4_bus",
+                "label": f"{ch.upper()} vif \u2192 DUT",
+                "description": f"{ch.upper()} virtual interface connects to DUT",
+                "from_instance": f"{ch}_vif", "to_instance": "dut_stub",
+                "channel_signals": {
+                    "VIF": [{"from_port": "dut_mp", "wire": "vif_handle", "to_port": ch}]
+                },
+            })
+        else:
+            connections.append({
+                "id": f"dut_to_{ch}_vif", "type": "axi4_bus",
+                "label": f"DUT \u2192 {ch.upper()} vif",
+                "description": f"DUT connects to {ch.upper()} virtual interface",
+                "from_instance": "dut_stub", "to_instance": f"{ch}_vif",
+                "channel_signals": {
+                    "VIF": [{"from_port": ch, "wire": "vif_handle", "to_port": "dut_mp"}]
+                },
+            })
 
     # ── Groups ───────────────────────────────────────────────────
     agent_members_all: list[str] = []
@@ -156,20 +166,20 @@ def build_uvc_design(proto_key: str, proto: dict) -> dict:
         groups.append({
             "name": f"{ch}_agent",
             "label": f"{ch.upper()} Agent",
-            "description": f"{ch.upper()} channel agent (sequencer + driver + monitor + VIF)",
+            "description": f"AXI4 {ch.upper()} channel agent (sequencer + driver + monitor + VIF)",
             "color": "#42A5F5",
             "padding": 0.8,
             "members": members,
         })
 
-    # Env encapsulation group
-    env_members = agent_members_all + list(sequences.keys()) + list(scoreboards.keys())
+    # Env encapsulation group (all agents + sequences + scoreboards)
+    env_members = agent_members_all + ["read_seq", "write_seq", "read_sb", "write_sb"]
     groups.append({
-        "name": f"{proto_key}_env",
-        "label": f"{label} Env",
+        "name": "axi4_env",
+        "label": f"AXI4 Env ({label})",
         "description": (
-            f"{label} Env \u2014 {len(channels)} per-channel agents "
-            f"({ch_list}), sequences, and scoreboards."
+            f"AXI4 Env ({label}) \u2014 5 per-channel agents "
+            f"(AW, W, B for write; AR, R for read), sequences, and scoreboards."
         ),
         "color": env_color,
         "padding": 1.5,
@@ -177,28 +187,21 @@ def build_uvc_design(proto_key: str, proto: dict) -> dict:
     })
 
     # ── Assemble design ─────────────────────────────────────────
-    # DUT stub is included via block file; no need to redefine inline
+    modules = {"axi4_interconnect": common["dut_module"]}
+    modules.update(common["scoreboard_modules"])
+
+    tb = dict(common["testbench"])
+    tb["description"] = f"Testbench for {label} AXI4 Env debug view."
 
     return {
-        "design_name": f"uvc_{proto_key}",
-        "version": proto["version"],
+        "design_name": f"{key}_axi4_env_view",
+        "version": common["version"],
         "description": desc,
-        "includes": list(proto["includes"]),
-        "parameters": {},
-        "testbench": {
-            "module_name": "tb_top",
-            "description": f"Testbench for {label} UVC.",
-            "global_signals": [
-                {"name": clk, "width": 1, "type": "reg", "description": f"{label} clock.", "render": {"face": "bottom", "color": "#00E676"}},
-                {"name": rst, "width": 1, "type": "reg", "description": f"{label} reset.", "render": {"face": "top", "color": "#FF5252"}},
-            ]
-        },
-        "connection_types": {
-            bus_type: {"color": bus_color, "description": f"{label} Bus"},
-            "vif":    {"color": "#795548", "description": "Virtual Interface"},
-            "tlm":    {"color": "#E91E63", "description": "TLM Analysis Port"},
-        },
-        "modules": {},
+        "includes": list(common["includes"]),
+        "parameters": dict(common["parameters"]),
+        "testbench": tb,
+        "connection_types": dict(common["connection_types"]),
+        "modules": modules,
         "instances": instances,
         "connections": connections,
         "groups": groups,
@@ -219,12 +222,13 @@ def main() -> int:
     with open(config_path) as f:
         config = json.load(f)
 
-    protocols = config["protocols"]
+    common = config["common"]
+    uvcs = config["uvcs"]
 
     generated = 0
-    for key, proto in protocols.items():
-        design = build_uvc_design(key, proto)
-        out_path = meta_dir / f"uvc_{key}.json"
+    for key, uvc in uvcs.items():
+        design = build_uvc_design(key, uvc, common)
+        out_path = meta_dir / f"uvm_{key}_uvc.json"
         with open(out_path, "w") as f:
             json.dump(design, f, indent=2)
             f.write("\n")

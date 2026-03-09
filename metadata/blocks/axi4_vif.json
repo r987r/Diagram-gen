@@ -1,8 +1,9 @@
 {
   "block_name": "axi4_vif",
-  "description": "AXI4 virtual interface \u2014 clock, reset, and AXI4 channel signals.",
+  "description": "AXI4 virtual interface — bundles AXI4 signals and provides modports for driver, monitor, and DUT connections.",
   "render": {
-    "color": "#FF7043"
+    "color": "#795548",
+    "size": { "w": 1.5, "h": 1.5, "d": 1.5 }
   },
   "ports": [
     {
@@ -10,35 +11,35 @@
       "direction": "input",
       "width": 1,
       "channel": "GLOBAL",
-      "description": "Clock"
+      "description": "System clock"
     },
     {
       "name": "rst_n",
       "direction": "input",
       "width": 1,
       "channel": "GLOBAL",
-      "description": "Reset"
+      "description": "Active-low reset"
     },
     {
       "name": "driver_mp",
       "direction": "input",
       "width": 1,
       "channel": "VIF",
-      "description": "Driver modport"
+      "description": "Driver modport — driver drives AXI4 signals through this"
     },
     {
       "name": "monitor_mp",
-      "direction": "output",
+      "direction": "input",
       "width": 1,
       "channel": "VIF",
-      "description": "Monitor modport"
+      "description": "Monitor modport — monitor observes AXI4 signals through this"
     },
     {
       "name": "dut_mp",
       "direction": "output",
       "width": 1,
-      "channel": "AXI4",
-      "description": "DUT modport"
+      "channel": "VIF",
+      "description": "DUT modport — connects to the RTL DUT AXI4 port"
     }
   ]
 }

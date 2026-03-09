@@ -1,0 +1,8 @@
+{
+  "block_name": "uvm_test",
+  "description": "UVM test. Configures the environment and starts the default sequence on the sequencer.",
+  "render": {
+    "color": "#9C27B0"
+  },
+  "ports": []
+}
