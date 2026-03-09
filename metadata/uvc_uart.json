@@ -1,0 +1,476 @@
+{
+  "design_name": "uvc_uart",
+  "version": "1.0",
+  "description": "UART UVC \u2014 per-channel agents (TX, RX) with sequencers, drivers, monitors, and virtual interfaces.",
+  "includes": [
+    "blocks/uvm_sequencer.json",
+    "blocks/uvm_driver.json",
+    "blocks/uvm_monitor.json",
+    "blocks/uvm_sequence.json",
+    "blocks/uvm_scoreboard.json",
+    "blocks/uart_vif.json",
+    "blocks/uart_dut_stub.json"
+  ],
+  "parameters": {},
+  "testbench": {
+    "module_name": "tb_top",
+    "description": "Testbench for UART UVC.",
+    "global_signals": [
+      {
+        "name": "clk",
+        "width": 1,
+        "type": "reg",
+        "description": "UART clock.",
+        "render": {
+          "face": "bottom",
+          "color": "#00E676"
+        }
+      },
+      {
+        "name": "reset",
+        "width": 1,
+        "type": "reg",
+        "description": "UART reset.",
+        "render": {
+          "face": "top",
+          "color": "#FF5252"
+        }
+      }
+    ]
+  },
+  "connection_types": {
+    "uart_bus": {
+      "color": "#9C27B0",
+      "description": "UART Bus"
+    },
+    "vif": {
+      "color": "#795548",
+      "description": "Virtual Interface"
+    },
+    "tlm": {
+      "color": "#E91E63",
+      "description": "TLM Analysis Port"
+    }
+  },
+  "modules": {},
+  "instances": [
+    {
+      "instance_name": "tx_sqr",
+      "module": "uvm_sequencer",
+      "position": {
+        "x": -7,
+        "y": 6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "tx_drv",
+      "module": "uvm_driver",
+      "position": {
+        "x": -3,
+        "y": 6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "tx_mon",
+      "module": "uvm_monitor",
+      "position": {
+        "x": 1,
+        "y": 6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "tx_vif",
+      "module": "uart_vif",
+      "position": {
+        "x": -3,
+        "y": 2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "rx_sqr",
+      "module": "uvm_sequencer",
+      "position": {
+        "x": -7,
+        "y": -2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "rx_drv",
+      "module": "uvm_driver",
+      "position": {
+        "x": -3,
+        "y": -2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "rx_mon",
+      "module": "uvm_monitor",
+      "position": {
+        "x": 1,
+        "y": -2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "rx_vif",
+      "module": "uart_vif",
+      "position": {
+        "x": -3,
+        "y": -6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "dut_stub",
+      "module": "uart_dut_stub",
+      "position": {
+        "x": 0,
+        "y": -12,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "tx_seq",
+      "module": "uvm_sequence",
+      "position": {
+        "x": 5,
+        "y": 6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "rx_seq",
+      "module": "uvm_sequence",
+      "position": {
+        "x": 9,
+        "y": 6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "tx_sb",
+      "module": "uvm_scoreboard",
+      "position": {
+        "x": 5,
+        "y": -2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "rx_sb",
+      "module": "uvm_scoreboard",
+      "position": {
+        "x": 9,
+        "y": -2,
+        "z": 0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "clk_fanout",
+      "type": "clock",
+      "description": "UART clock to all VIFs and DUT",
+      "from": {
+        "instance": "tb_top",
+        "port": "clk"
+      },
+      "to": [
+        {
+          "instance": "tx_vif",
+          "port": "clk"
+        },
+        {
+          "instance": "rx_vif",
+          "port": "clk"
+        },
+        {
+          "instance": "dut_stub",
+          "port": "clk"
+        }
+      ]
+    },
+    {
+      "id": "rst_fanout",
+      "type": "reset",
+      "description": "UART reset to all VIFs and DUT",
+      "from": {
+        "instance": "tb_top",
+        "port": "reset"
+      },
+      "to": [
+        {
+          "instance": "tx_vif",
+          "port": "reset"
+        },
+        {
+          "instance": "rx_vif",
+          "port": "reset"
+        },
+        {
+          "instance": "dut_stub",
+          "port": "reset"
+        }
+      ]
+    },
+    {
+      "id": "tx_sqr_to_drv",
+      "type": "tlm",
+      "label": "TX sqr\u2192drv",
+      "description": "TX sequencer to driver",
+      "from_instance": "tx_sqr",
+      "to_instance": "tx_drv",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "tx_seq_item",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tx_drv_to_vif",
+      "type": "vif",
+      "label": "TX drv\u2192vif",
+      "description": "TX driver to virtual interface",
+      "from_instance": "tx_drv",
+      "to_instance": "tx_vif",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "tx_drv_vif",
+            "to_port": "driver_mp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tx_mon_to_vif",
+      "type": "vif",
+      "label": "TX mon\u2192vif",
+      "description": "TX monitor to virtual interface",
+      "from_instance": "tx_mon",
+      "to_instance": "tx_vif",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "tx_mon_vif",
+            "to_port": "monitor_mp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rx_sqr_to_drv",
+      "type": "tlm",
+      "label": "RX sqr\u2192drv",
+      "description": "RX sequencer to driver",
+      "from_instance": "rx_sqr",
+      "to_instance": "rx_drv",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "rx_seq_item",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rx_drv_to_vif",
+      "type": "vif",
+      "label": "RX drv\u2192vif",
+      "description": "RX driver to virtual interface",
+      "from_instance": "rx_drv",
+      "to_instance": "rx_vif",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "rx_drv_vif",
+            "to_port": "driver_mp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rx_mon_to_vif",
+      "type": "vif",
+      "label": "RX mon\u2192vif",
+      "description": "RX monitor to virtual interface",
+      "from_instance": "rx_mon",
+      "to_instance": "rx_vif",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "rx_mon_vif",
+            "to_port": "monitor_mp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tx_mon_to_tx_sb",
+      "type": "tlm",
+      "label": "TX mon\u2192SB",
+      "description": "TX monitor analysis to TX Scoreboard",
+      "from_instance": "tx_mon",
+      "to_instance": "tx_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "tx_mon_ap",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rx_mon_to_rx_sb",
+      "type": "tlm",
+      "label": "RX mon\u2192SB",
+      "description": "RX monitor analysis to RX Scoreboard",
+      "from_instance": "rx_mon",
+      "to_instance": "rx_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "rx_mon_ap",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tx_seq_to_tx",
+      "type": "tlm",
+      "label": "TX seq\u2192SQR",
+      "description": "Sequence generates TX channel transactions",
+      "from_instance": "tx_seq",
+      "to_instance": "tx_sqr",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "tx_seq_out",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rx_seq_to_rx",
+      "type": "tlm",
+      "label": "RX seq\u2192SQR",
+      "description": "Sequence generates RX channel transactions",
+      "from_instance": "rx_seq",
+      "to_instance": "rx_sqr",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "rx_seq_out",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tx_vif_to_dut",
+      "type": "uart_bus",
+      "label": "TX vif \u2192 DUT",
+      "description": "TX virtual interface connects to DUT",
+      "from_instance": "tx_vif",
+      "to_instance": "dut_stub",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "dut_mp",
+            "wire": "vif_handle",
+            "to_port": "tx"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rx_vif_to_dut",
+      "type": "uart_bus",
+      "label": "RX vif \u2192 DUT",
+      "description": "RX virtual interface connects to DUT",
+      "from_instance": "rx_vif",
+      "to_instance": "dut_stub",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "dut_mp",
+            "wire": "vif_handle",
+            "to_port": "rx"
+          }
+        ]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "tx_agent",
+      "label": "TX Agent",
+      "description": "TX channel agent (sequencer + driver + monitor + VIF)",
+      "color": "#42A5F5",
+      "padding": 0.8,
+      "members": [
+        "tx_sqr",
+        "tx_drv",
+        "tx_mon",
+        "tx_vif"
+      ]
+    },
+    {
+      "name": "rx_agent",
+      "label": "RX Agent",
+      "description": "RX channel agent (sequencer + driver + monitor + VIF)",
+      "color": "#42A5F5",
+      "padding": 0.8,
+      "members": [
+        "rx_sqr",
+        "rx_drv",
+        "rx_mon",
+        "rx_vif"
+      ]
+    },
+    {
+      "name": "uart_env",
+      "label": "UART Env",
+      "description": "UART Env \u2014 2 per-channel agents (TX, RX), sequences, and scoreboards.",
+      "color": "#4A148C",
+      "padding": 1.5,
+      "members": [
+        "tx_sqr",
+        "tx_drv",
+        "tx_mon",
+        "tx_vif",
+        "rx_sqr",
+        "rx_drv",
+        "rx_mon",
+        "rx_vif",
+        "tx_seq",
+        "rx_seq",
+        "tx_sb",
+        "rx_sb"
+      ]
+    }
+  ]
+}

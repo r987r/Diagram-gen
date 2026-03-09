@@ -1,9 +1,8 @@
 {
   "block_name": "uvm_driver",
-  "description": "UVM AXI4 driver. Receives sequence items from the sequencer and drives them onto the AXI4 virtual interface signals.",
+  "description": "UVM driver \u2014 converts sequence items into pin-level activity.",
   "render": {
-    "color": "#4CAF50",
-    "size": { "w": 2, "h": 2, "d": 2 }
+    "color": "#42A5F5"
   },
   "ports": [
     {
@@ -11,14 +10,14 @@
       "direction": "input",
       "width": 1,
       "channel": "TLM",
-      "description": "Sequence item port (from sequencer)"
+      "description": "Sequence item port"
     },
     {
       "name": "vif",
-      "direction": "input",
+      "direction": "output",
       "width": 1,
       "channel": "VIF",
-      "description": "Virtual interface handle — clock and reset are accessed through the VIF"
+      "description": "Virtual interface handle"
     }
   ]
 }

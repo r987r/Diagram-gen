@@ -1,0 +1,35 @@
+{
+  "block_name": "apb_master_uvc",
+  "description": "APB Master UVC \u2014 complete master verification component for APB protocol.",
+  "render": {
+    "color": "#1565C0",
+    "size": {
+      "w": 6,
+      "h": 3,
+      "d": 3
+    }
+  },
+  "ports": [
+    {
+      "name": "pclk",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "APB clock"
+    },
+    {
+      "name": "preset_n",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "APB reset"
+    },
+    {
+      "name": "apb_if",
+      "direction": "output",
+      "width": 1,
+      "channel": "APB",
+      "description": "APB interface"
+    }
+  ]
+}

@@ -1,0 +1,336 @@
+{
+  "block_name": "dma_axi64",
+  "description": "DMA AXI 64-bit \u2014 multi-channel DMA controller with AXI master and APB slave interfaces. 64-bit data width.",
+  "render": {
+    "color": "#FF9800",
+    "size": {
+      "w": 10,
+      "h": 4,
+      "d": 4
+    }
+  },
+  "ports": [
+    {
+      "name": "clk",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "clk (logic)"
+    },
+    {
+      "name": "reset",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "reset (logic)"
+    },
+    {
+      "name": "scan_en",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "scan_en (logic)"
+    },
+    {
+      "name": "idle",
+      "direction": "output",
+      "width": 1,
+      "channel": "SIDEBAND",
+      "description": "idle (logic)"
+    },
+    {
+      "name": "INT",
+      "direction": "output",
+      "width": 1,
+      "channel": "SIDEBAND",
+      "description": "INT (logic[0:0])"
+    },
+    {
+      "name": "periph_tx_req",
+      "direction": "input",
+      "width": 31,
+      "channel": "SIDEBAND",
+      "description": "periph_tx_req (logic[31:1])"
+    },
+    {
+      "name": "periph_tx_clr",
+      "direction": "output",
+      "width": 31,
+      "channel": "SIDEBAND",
+      "description": "periph_tx_clr (logic[31:1])"
+    },
+    {
+      "name": "periph_rx_req",
+      "direction": "input",
+      "width": 31,
+      "channel": "SIDEBAND",
+      "description": "periph_rx_req (logic[31:1])"
+    },
+    {
+      "name": "periph_rx_clr",
+      "direction": "output",
+      "width": 31,
+      "channel": "SIDEBAND",
+      "description": "periph_rx_clr (logic[31:1])"
+    },
+    {
+      "name": "pclken",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "pclken (logic)"
+    },
+    {
+      "name": "psel",
+      "direction": "input",
+      "width": 1,
+      "channel": "APB",
+      "description": "psel (logic)"
+    },
+    {
+      "name": "penable",
+      "direction": "input",
+      "width": 1,
+      "channel": "APB",
+      "description": "penable (logic)"
+    },
+    {
+      "name": "paddr",
+      "direction": "input",
+      "width": 13,
+      "channel": "APB",
+      "description": "paddr (logic[12:0])"
+    },
+    {
+      "name": "pwrite",
+      "direction": "input",
+      "width": 1,
+      "channel": "APB",
+      "description": "pwrite (logic)"
+    },
+    {
+      "name": "pwdata",
+      "direction": "input",
+      "width": 32,
+      "channel": "APB",
+      "description": "pwdata (logic[31:0])"
+    },
+    {
+      "name": "prdata",
+      "direction": "output",
+      "width": 32,
+      "channel": "APB",
+      "description": "prdata (logic[31:0])"
+    },
+    {
+      "name": "pslverr",
+      "direction": "output",
+      "width": 1,
+      "channel": "APB",
+      "description": "pslverr (logic)"
+    },
+    {
+      "name": "pready",
+      "direction": "output",
+      "width": 1,
+      "channel": "APB",
+      "description": "pready (logic)"
+    },
+    {
+      "name": "AWID0",
+      "direction": "output",
+      "width": 1,
+      "channel": "AW",
+      "description": "AWID0 (logic[0:0])"
+    },
+    {
+      "name": "AWADDR0",
+      "direction": "output",
+      "width": 32,
+      "channel": "AW",
+      "description": "AWADDR0 (logic[31:0])"
+    },
+    {
+      "name": "AWLEN0",
+      "direction": "output",
+      "width": 4,
+      "channel": "AW",
+      "description": "AWLEN0 (logic[3:0])"
+    },
+    {
+      "name": "AWSIZE0",
+      "direction": "output",
+      "width": 2,
+      "channel": "AW",
+      "description": "AWSIZE0 (logic[1:0])"
+    },
+    {
+      "name": "AWVALID0",
+      "direction": "output",
+      "width": 1,
+      "channel": "AW",
+      "description": "AWVALID0 (logic)"
+    },
+    {
+      "name": "AWREADY0",
+      "direction": "input",
+      "width": 1,
+      "channel": "AW",
+      "description": "AWREADY0 (logic)"
+    },
+    {
+      "name": "WID0",
+      "direction": "output",
+      "width": 1,
+      "channel": "W",
+      "description": "WID0 (logic[0:0])"
+    },
+    {
+      "name": "WDATA0",
+      "direction": "output",
+      "width": 64,
+      "channel": "W",
+      "description": "WDATA0 (logic[63:0])"
+    },
+    {
+      "name": "WSTRB0",
+      "direction": "output",
+      "width": 8,
+      "channel": "W",
+      "description": "WSTRB0 (logic[7:0])"
+    },
+    {
+      "name": "WLAST0",
+      "direction": "output",
+      "width": 1,
+      "channel": "W",
+      "description": "WLAST0 (logic)"
+    },
+    {
+      "name": "WVALID0",
+      "direction": "output",
+      "width": 1,
+      "channel": "W",
+      "description": "WVALID0 (logic)"
+    },
+    {
+      "name": "WREADY0",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "WREADY0 (logic)"
+    },
+    {
+      "name": "BID0",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "BID0 (logic[0:0])"
+    },
+    {
+      "name": "BRESP0",
+      "direction": "input",
+      "width": 2,
+      "channel": "B",
+      "description": "BRESP0 (logic[1:0])"
+    },
+    {
+      "name": "BVALID0",
+      "direction": "input",
+      "width": 1,
+      "channel": "B",
+      "description": "BVALID0 (logic)"
+    },
+    {
+      "name": "BREADY0",
+      "direction": "output",
+      "width": 1,
+      "channel": "B",
+      "description": "BREADY0 (logic)"
+    },
+    {
+      "name": "ARID0",
+      "direction": "output",
+      "width": 1,
+      "channel": "AR",
+      "description": "ARID0 (logic[0:0])"
+    },
+    {
+      "name": "ARADDR0",
+      "direction": "output",
+      "width": 32,
+      "channel": "AR",
+      "description": "ARADDR0 (logic[31:0])"
+    },
+    {
+      "name": "ARLEN0",
+      "direction": "output",
+      "width": 4,
+      "channel": "AR",
+      "description": "ARLEN0 (logic[3:0])"
+    },
+    {
+      "name": "ARSIZE0",
+      "direction": "output",
+      "width": 2,
+      "channel": "AR",
+      "description": "ARSIZE0 (logic[1:0])"
+    },
+    {
+      "name": "ARVALID0",
+      "direction": "output",
+      "width": 1,
+      "channel": "AR",
+      "description": "ARVALID0 (logic)"
+    },
+    {
+      "name": "ARREADY0",
+      "direction": "input",
+      "width": 1,
+      "channel": "AR",
+      "description": "ARREADY0 (logic)"
+    },
+    {
+      "name": "RID0",
+      "direction": "input",
+      "width": 1,
+      "channel": "R",
+      "description": "RID0 (logic[0:0])"
+    },
+    {
+      "name": "RDATA0",
+      "direction": "input",
+      "width": 64,
+      "channel": "R",
+      "description": "RDATA0 (logic[63:0])"
+    },
+    {
+      "name": "RRESP0",
+      "direction": "input",
+      "width": 2,
+      "channel": "R",
+      "description": "RRESP0 (logic[1:0])"
+    },
+    {
+      "name": "RLAST0",
+      "direction": "input",
+      "width": 1,
+      "channel": "R",
+      "description": "RLAST0 (logic)"
+    },
+    {
+      "name": "RVALID0",
+      "direction": "input",
+      "width": 1,
+      "channel": "R",
+      "description": "RVALID0 (logic)"
+    },
+    {
+      "name": "RREADY0",
+      "direction": "output",
+      "width": 1,
+      "channel": "R",
+      "description": "RREADY0 (logic)"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "block_name": "ahb_dut_stub",
+  "description": "AHB DUT stub for UVC verification.",
+  "render": {
+    "color": "#FF9800",
+    "size": {
+      "w": 8,
+      "h": 3,
+      "d": 3
+    }
+  },
+  "ports": [
+    {
+      "name": "hclk",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "Clock"
+    },
+    {
+      "name": "hresetn",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "Reset"
+    },
+    {
+      "name": "addr",
+      "direction": "inout",
+      "width": 1,
+      "channel": "ADDR",
+      "description": "ADDR channel interface"
+    },
+    {
+      "name": "data",
+      "direction": "inout",
+      "width": 1,
+      "channel": "DATA",
+      "description": "DATA channel interface"
+    }
+  ]
+}

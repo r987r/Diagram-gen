@@ -1,28 +1,26 @@
 {
-  "design_name": "ddr_axi4_env_view",
-  "version": "3.0",
-  "description": "Individual view of the DDR AXI4 Env \u2014 each per-channel agent (AW, W, B, AR, R) is expanded to show its internal sequencer, driver, and monitor. Per-channel virtual interfaces connect agents to the DUT.",
+  "design_name": "uvc_axi4",
+  "version": "1.0",
+  "description": "AXI4 UVC \u2014 per-channel agents (AW, W, B, AR, R) with sequencers, drivers, monitors, and virtual interfaces.",
   "includes": [
     "blocks/uvm_sequencer.json",
     "blocks/uvm_driver.json",
     "blocks/uvm_monitor.json",
     "blocks/uvm_sequence.json",
+    "blocks/uvm_scoreboard.json",
     "blocks/axi4_vif.json",
-    "blocks/uvm_axi4_env_common.json"
+    "blocks/axi4_dut_stub.json"
   ],
-  "parameters": {
-    "DATA_WIDTH": 64,
-    "ADDR_WIDTH": 32,
-    "ID_WIDTH": 4
-  },
+  "parameters": {},
   "testbench": {
     "module_name": "tb_top",
+    "description": "Testbench for AXI4 UVC.",
     "global_signals": [
       {
         "name": "clk",
         "width": 1,
         "type": "reg",
-        "description": "System clock.",
+        "description": "AXI4 clock.",
         "render": {
           "face": "bottom",
           "color": "#00E676"
@@ -32,14 +30,13 @@
         "name": "rst_n",
         "width": 1,
         "type": "reg",
-        "description": "Active-low reset.",
+        "description": "AXI4 reset.",
         "render": {
           "face": "top",
           "color": "#FF5252"
         }
       }
-    ],
-    "description": "Testbench for DDR AXI4 Env debug view."
+    ]
   },
   "connection_types": {
     "axi4_bus": {
@@ -55,65 +52,7 @@
       "description": "TLM Analysis Port"
     }
   },
-  "modules": {
-    "axi4_interconnect": {
-      "description": "AXI4 interconnect DUT stub",
-      "render": {
-        "color": "#FF9800",
-        "size": {
-          "w": 8,
-          "h": 3,
-          "d": 3
-        }
-      },
-      "ports": [
-        {
-          "name": "clk",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL",
-          "description": "System clock"
-        },
-        {
-          "name": "rst_n",
-          "direction": "input",
-          "width": 1,
-          "channel": "GLOBAL",
-          "description": "Active-low reset"
-        }
-      ]
-    },
-    "uvm_read_scoreboard": {
-      "description": "Read scoreboard \u2014 checks AR/R channel transactions",
-      "render": {
-        "color": "#F44336"
-      },
-      "ports": [
-        {
-          "name": "analysis_export",
-          "direction": "input",
-          "width": 1,
-          "channel": "TLM",
-          "description": "Receives monitor transactions"
-        }
-      ]
-    },
-    "uvm_write_scoreboard": {
-      "description": "Write scoreboard \u2014 checks AW/W/B channel transactions",
-      "render": {
-        "color": "#E91E63"
-      },
-      "ports": [
-        {
-          "name": "analysis_export",
-          "direction": "input",
-          "width": 1,
-          "channel": "TLM",
-          "description": "Receives monitor transactions"
-        }
-      ]
-    }
-  },
+  "modules": {},
   "instances": [
     {
       "instance_name": "aw_sqr",
@@ -297,7 +236,7 @@
     },
     {
       "instance_name": "dut_stub",
-      "module": "axi4_interconnect",
+      "module": "axi4_dut_stub",
       "position": {
         "x": 0,
         "y": -14,
@@ -324,7 +263,7 @@
     },
     {
       "instance_name": "read_sb",
-      "module": "uvm_read_scoreboard",
+      "module": "uvm_scoreboard",
       "position": {
         "x": -9,
         "y": -8,
@@ -333,7 +272,7 @@
     },
     {
       "instance_name": "write_sb",
-      "module": "uvm_write_scoreboard",
+      "module": "uvm_scoreboard",
       "position": {
         "x": -5,
         "y": -8,
@@ -345,7 +284,7 @@
     {
       "id": "clk_fanout",
       "type": "clock",
-      "description": "System clock to all VIFs and DUT",
+      "description": "AXI4 clock to all VIFs and DUT",
       "from": {
         "instance": "tb_top",
         "port": "clk"
@@ -380,7 +319,7 @@
     {
       "id": "rst_fanout",
       "type": "reset",
-      "description": "Active-low reset to all VIFs and DUT",
+      "description": "AXI4 reset to all VIFs and DUT",
       "from": {
         "instance": "tb_top",
         "port": "rst_n"
@@ -671,7 +610,7 @@
       "id": "ar_mon_to_read_sb",
       "type": "tlm",
       "label": "AR mon\u2192SB",
-      "description": "AR monitor analysis to read sb",
+      "description": "AR monitor analysis to Read Scoreboard",
       "from_instance": "ar_mon",
       "to_instance": "read_sb",
       "channel_signals": {
@@ -688,7 +627,7 @@
       "id": "r_mon_to_read_sb",
       "type": "tlm",
       "label": "R mon\u2192SB",
-      "description": "R monitor analysis to read sb",
+      "description": "R monitor analysis to Read Scoreboard",
       "from_instance": "r_mon",
       "to_instance": "read_sb",
       "channel_signals": {
@@ -705,7 +644,7 @@
       "id": "aw_mon_to_write_sb",
       "type": "tlm",
       "label": "AW mon\u2192SB",
-      "description": "AW monitor analysis to write sb",
+      "description": "AW monitor analysis to Write Scoreboard",
       "from_instance": "aw_mon",
       "to_instance": "write_sb",
       "channel_signals": {
@@ -722,7 +661,7 @@
       "id": "w_mon_to_write_sb",
       "type": "tlm",
       "label": "W mon\u2192SB",
-      "description": "W monitor analysis to write sb",
+      "description": "W monitor analysis to Write Scoreboard",
       "from_instance": "w_mon",
       "to_instance": "write_sb",
       "channel_signals": {
@@ -739,7 +678,7 @@
       "id": "b_mon_to_write_sb",
       "type": "tlm",
       "label": "B mon\u2192SB",
-      "description": "B monitor analysis to write sb",
+      "description": "B monitor analysis to Write Scoreboard",
       "from_instance": "b_mon",
       "to_instance": "write_sb",
       "channel_signals": {
@@ -756,7 +695,7 @@
       "id": "read_seq_to_ar",
       "type": "tlm",
       "label": "Read seq\u2192AR",
-      "description": "Read sequence generates AR channel transactions",
+      "description": "Sequence generates AR channel transactions",
       "from_instance": "read_seq",
       "to_instance": "ar_sqr",
       "channel_signals": {
@@ -773,7 +712,7 @@
       "id": "write_seq_to_aw",
       "type": "tlm",
       "label": "Write seq\u2192AW",
-      "description": "Write sequence generates AW channel transactions",
+      "description": "Sequence generates AW channel transactions",
       "from_instance": "write_seq",
       "to_instance": "aw_sqr",
       "channel_signals": {
@@ -787,86 +726,86 @@
       }
     },
     {
-      "id": "dut_to_aw_vif",
+      "id": "aw_vif_to_dut",
       "type": "axi4_bus",
-      "label": "DUT \u2192 AW vif",
-      "description": "DUT connects to AW virtual interface",
-      "from_instance": "dut_stub",
-      "to_instance": "aw_vif",
+      "label": "AW vif \u2192 DUT",
+      "description": "AW virtual interface connects to DUT",
+      "from_instance": "aw_vif",
+      "to_instance": "dut_stub",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "aw",
+            "from_port": "dut_mp",
             "wire": "vif_handle",
-            "to_port": "dut_mp"
+            "to_port": "aw"
           }
         ]
       }
     },
     {
-      "id": "dut_to_w_vif",
+      "id": "w_vif_to_dut",
       "type": "axi4_bus",
-      "label": "DUT \u2192 W vif",
-      "description": "DUT connects to W virtual interface",
-      "from_instance": "dut_stub",
-      "to_instance": "w_vif",
+      "label": "W vif \u2192 DUT",
+      "description": "W virtual interface connects to DUT",
+      "from_instance": "w_vif",
+      "to_instance": "dut_stub",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "w",
+            "from_port": "dut_mp",
             "wire": "vif_handle",
-            "to_port": "dut_mp"
+            "to_port": "w"
           }
         ]
       }
     },
     {
-      "id": "dut_to_b_vif",
+      "id": "b_vif_to_dut",
       "type": "axi4_bus",
-      "label": "DUT \u2192 B vif",
-      "description": "DUT connects to B virtual interface",
-      "from_instance": "dut_stub",
-      "to_instance": "b_vif",
+      "label": "B vif \u2192 DUT",
+      "description": "B virtual interface connects to DUT",
+      "from_instance": "b_vif",
+      "to_instance": "dut_stub",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "b",
+            "from_port": "dut_mp",
             "wire": "vif_handle",
-            "to_port": "dut_mp"
+            "to_port": "b"
           }
         ]
       }
     },
     {
-      "id": "dut_to_ar_vif",
+      "id": "ar_vif_to_dut",
       "type": "axi4_bus",
-      "label": "DUT \u2192 AR vif",
-      "description": "DUT connects to AR virtual interface",
-      "from_instance": "dut_stub",
-      "to_instance": "ar_vif",
+      "label": "AR vif \u2192 DUT",
+      "description": "AR virtual interface connects to DUT",
+      "from_instance": "ar_vif",
+      "to_instance": "dut_stub",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "ar",
+            "from_port": "dut_mp",
             "wire": "vif_handle",
-            "to_port": "dut_mp"
+            "to_port": "ar"
           }
         ]
       }
     },
     {
-      "id": "dut_to_r_vif",
+      "id": "r_vif_to_dut",
       "type": "axi4_bus",
-      "label": "DUT \u2192 R vif",
-      "description": "DUT connects to R virtual interface",
-      "from_instance": "dut_stub",
-      "to_instance": "r_vif",
+      "label": "R vif \u2192 DUT",
+      "description": "R virtual interface connects to DUT",
+      "from_instance": "r_vif",
+      "to_instance": "dut_stub",
       "channel_signals": {
         "VIF": [
           {
-            "from_port": "r",
+            "from_port": "dut_mp",
             "wire": "vif_handle",
-            "to_port": "dut_mp"
+            "to_port": "r"
           }
         ]
       }
@@ -876,7 +815,7 @@
     {
       "name": "aw_agent",
       "label": "AW Agent",
-      "description": "AXI4 AW channel agent (sequencer + driver + monitor + VIF)",
+      "description": "AW channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [
@@ -889,7 +828,7 @@
     {
       "name": "w_agent",
       "label": "W Agent",
-      "description": "AXI4 W channel agent (sequencer + driver + monitor + VIF)",
+      "description": "W channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [
@@ -902,7 +841,7 @@
     {
       "name": "b_agent",
       "label": "B Agent",
-      "description": "AXI4 B channel agent (sequencer + driver + monitor + VIF)",
+      "description": "B channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [
@@ -915,7 +854,7 @@
     {
       "name": "ar_agent",
       "label": "AR Agent",
-      "description": "AXI4 AR channel agent (sequencer + driver + monitor + VIF)",
+      "description": "AR channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [
@@ -928,7 +867,7 @@
     {
       "name": "r_agent",
       "label": "R Agent",
-      "description": "AXI4 R channel agent (sequencer + driver + monitor + VIF)",
+      "description": "R channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [
@@ -940,9 +879,9 @@
     },
     {
       "name": "axi4_env",
-      "label": "AXI4 Env (DDR)",
-      "description": "AXI4 Env (DDR) \u2014 5 per-channel agents (AW, W, B for write; AR, R for read), sequences, and scoreboards.",
-      "color": "#00897B",
+      "label": "AXI4 Env",
+      "description": "AXI4 Env \u2014 5 per-channel agents (AW, W, B, AR, R), sequences, and scoreboards.",
+      "color": "#1565C0",
       "padding": 1.5,
       "members": [
         "aw_sqr",

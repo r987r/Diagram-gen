@@ -1,0 +1,63 @@
+{
+  "block_name": "sideband_signals",
+  "description": "Sideband signal generator \u2014 DMA peripheral requests, interrupts, scan, idle.",
+  "render": {
+    "color": "#78909C",
+    "size": {
+      "w": 5,
+      "h": 2,
+      "d": 2
+    }
+  },
+  "ports": [
+    {
+      "name": "periph_tx_req",
+      "direction": "output",
+      "width": 31,
+      "channel": "SIDEBAND",
+      "description": "Peripheral TX request"
+    },
+    {
+      "name": "periph_rx_req",
+      "direction": "output",
+      "width": 31,
+      "channel": "SIDEBAND",
+      "description": "Peripheral RX request"
+    },
+    {
+      "name": "periph_tx_clr",
+      "direction": "input",
+      "width": 31,
+      "channel": "SIDEBAND",
+      "description": "Peripheral TX clear"
+    },
+    {
+      "name": "periph_rx_clr",
+      "direction": "input",
+      "width": 31,
+      "channel": "SIDEBAND",
+      "description": "Peripheral RX clear"
+    },
+    {
+      "name": "scan_en",
+      "direction": "output",
+      "width": 1,
+      "channel": "SIDEBAND",
+      "description": "Scan enable"
+    },
+    {
+      "name": "idle",
+      "direction": "input",
+      "width": 1,
+      "channel": "SIDEBAND",
+      "description": "DMA idle"
+    },
+    {
+      "name": "INT",
+      "direction": "input",
+      "width": 1,
+      "channel": "SIDEBAND",
+      "description": "Interrupt"
+    }
+  ]
+}
