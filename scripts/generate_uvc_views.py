@@ -156,7 +156,7 @@ def build_uvc_design(proto_key: str, proto: dict) -> dict:
         groups.append({
             "name": f"{ch}_agent",
             "label": f"{ch.upper()} Agent",
-            "description": f"{label} {ch.upper()} channel agent (sequencer + driver + monitor + VIF)",
+            "description": f"{ch.upper()} channel agent (sequencer + driver + monitor + VIF)",
             "color": "#42A5F5",
             "padding": 0.8,
             "members": members,

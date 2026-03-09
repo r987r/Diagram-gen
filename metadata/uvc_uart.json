@@ -428,7 +428,7 @@
     {
       "name": "tx_agent",
       "label": "TX Agent",
-      "description": "UART TX channel agent (sequencer + driver + monitor + VIF)",
+      "description": "TX channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [
@@ -441,7 +441,7 @@
     {
       "name": "rx_agent",
       "label": "RX Agent",
-      "description": "UART RX channel agent (sequencer + driver + monitor + VIF)",
+      "description": "RX channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [

@@ -264,7 +264,7 @@
     {
       "name": "apb_agent",
       "label": "APB Agent",
-      "description": "APB APB channel agent (sequencer + driver + monitor + VIF)",
+      "description": "APB channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [

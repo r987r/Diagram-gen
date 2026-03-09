@@ -428,7 +428,7 @@
     {
       "name": "addr_agent",
       "label": "ADDR Agent",
-      "description": "AHB ADDR channel agent (sequencer + driver + monitor + VIF)",
+      "description": "ADDR channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [
@@ -441,7 +441,7 @@
     {
       "name": "data_agent",
       "label": "DATA Agent",
-      "description": "AHB DATA channel agent (sequencer + driver + monitor + VIF)",
+      "description": "DATA channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [

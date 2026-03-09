@@ -815,7 +815,7 @@
     {
       "name": "aw_agent",
       "label": "AW Agent",
-      "description": "AXI4 AW channel agent (sequencer + driver + monitor + VIF)",
+      "description": "AW channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [
@@ -828,7 +828,7 @@
     {
       "name": "w_agent",
       "label": "W Agent",
-      "description": "AXI4 W channel agent (sequencer + driver + monitor + VIF)",
+      "description": "W channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [
@@ -841,7 +841,7 @@
     {
       "name": "b_agent",
       "label": "B Agent",
-      "description": "AXI4 B channel agent (sequencer + driver + monitor + VIF)",
+      "description": "B channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [
@@ -854,7 +854,7 @@
     {
       "name": "ar_agent",
       "label": "AR Agent",
-      "description": "AXI4 AR channel agent (sequencer + driver + monitor + VIF)",
+      "description": "AR channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [
@@ -867,7 +867,7 @@
     {
       "name": "r_agent",
       "label": "R Agent",
-      "description": "AXI4 R channel agent (sequencer + driver + monitor + VIF)",
+      "description": "R channel agent (sequencer + driver + monitor + VIF)",
       "color": "#42A5F5",
       "padding": 0.8,
       "members": [
