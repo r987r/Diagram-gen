@@ -1,8 +1,8 @@
 {
   "block_name": "uvm_sequence",
-  "description": "UVM sequence. Generates stimulus transaction items and sends them to the sequencer via a TLM seq_item_port. The sequencer arbitrates and forwards items to the driver.",
+  "description": "UVM sequence \u2014 generates stimulus transactions.",
   "render": {
-    "color": "#E91E63"
+    "color": "#AB47BC"
   },
   "ports": [
     {
@@ -10,7 +10,7 @@
       "direction": "output",
       "width": 1,
       "channel": "TLM",
-      "description": "Sequence item TLM port (connects to sequencer's seq_item_export)"
+      "description": "Sequence item port"
     }
   ]
 }

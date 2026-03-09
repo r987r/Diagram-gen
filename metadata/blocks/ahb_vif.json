@@ -1,23 +1,23 @@
 {
-  "block_name": "axi4_vif",
-  "description": "AXI4 virtual interface \u2014 clock, reset, and AXI4 channel signals.",
+  "block_name": "ahb_vif",
+  "description": "AHB virtual interface \u2014 clock, reset, and AHB signals.",
   "render": {
     "color": "#FF7043"
   },
   "ports": [
     {
-      "name": "clk",
+      "name": "hclk",
       "direction": "input",
       "width": 1,
       "channel": "GLOBAL",
-      "description": "Clock"
+      "description": "AHB clock"
     },
     {
-      "name": "rst_n",
+      "name": "hresetn",
       "direction": "input",
       "width": 1,
       "channel": "GLOBAL",
-      "description": "Reset"
+      "description": "AHB reset"
     },
     {
       "name": "driver_mp",
@@ -37,7 +37,7 @@
       "name": "dut_mp",
       "direction": "output",
       "width": 1,
-      "channel": "AXI4",
+      "channel": "AHB",
       "description": "DUT modport"
     }
   ]

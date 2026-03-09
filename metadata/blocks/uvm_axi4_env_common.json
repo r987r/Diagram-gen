@@ -1,8 +1,0 @@
-{
-  "block_name": "uvm_axi4_env_common",
-  "description": "Common AXI4 UVC environment composition. Reused across all per-port UVC environments (CPU, DMA, GPU, SRAM, DDR, UART, SPI). Each AXI4 env contains 5 per-channel agents (AW, W, B, AR, R), a read sequence, a write sequence, a read scoreboard, and a write scoreboard.",
-  "render": {
-    "color": "#1565C0"
-  },
-  "ports": []
-}

@@ -1,23 +1,23 @@
 {
-  "block_name": "axi4_vif",
-  "description": "AXI4 virtual interface \u2014 clock, reset, and AXI4 channel signals.",
+  "block_name": "apb_vif",
+  "description": "APB virtual interface \u2014 clock, reset, and APB signals.",
   "render": {
     "color": "#FF7043"
   },
   "ports": [
     {
-      "name": "clk",
+      "name": "pclk",
       "direction": "input",
       "width": 1,
       "channel": "GLOBAL",
-      "description": "Clock"
+      "description": "APB clock"
     },
     {
-      "name": "rst_n",
+      "name": "preset_n",
       "direction": "input",
       "width": 1,
       "channel": "GLOBAL",
-      "description": "Reset"
+      "description": "APB reset"
     },
     {
       "name": "driver_mp",
@@ -37,7 +37,7 @@
       "name": "dut_mp",
       "direction": "output",
       "width": 1,
-      "channel": "AXI4",
+      "channel": "APB",
       "description": "DUT modport"
     }
   ]

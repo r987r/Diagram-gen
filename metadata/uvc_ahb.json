@@ -1,0 +1,476 @@
+{
+  "design_name": "uvc_ahb",
+  "version": "1.0",
+  "description": "AHB UVC \u2014 per-channel agents (ADDR, DATA) with sequencers, drivers, monitors, and virtual interfaces.",
+  "includes": [
+    "blocks/uvm_sequencer.json",
+    "blocks/uvm_driver.json",
+    "blocks/uvm_monitor.json",
+    "blocks/uvm_sequence.json",
+    "blocks/uvm_scoreboard.json",
+    "blocks/ahb_vif.json",
+    "blocks/ahb_dut_stub.json"
+  ],
+  "parameters": {},
+  "testbench": {
+    "module_name": "tb_top",
+    "description": "Testbench for AHB UVC.",
+    "global_signals": [
+      {
+        "name": "hclk",
+        "width": 1,
+        "type": "reg",
+        "description": "AHB clock.",
+        "render": {
+          "face": "bottom",
+          "color": "#00E676"
+        }
+      },
+      {
+        "name": "hresetn",
+        "width": 1,
+        "type": "reg",
+        "description": "AHB reset.",
+        "render": {
+          "face": "top",
+          "color": "#FF5252"
+        }
+      }
+    ]
+  },
+  "connection_types": {
+    "ahb_bus": {
+      "color": "#2196F3",
+      "description": "AHB Bus"
+    },
+    "vif": {
+      "color": "#795548",
+      "description": "Virtual Interface"
+    },
+    "tlm": {
+      "color": "#E91E63",
+      "description": "TLM Analysis Port"
+    }
+  },
+  "modules": {},
+  "instances": [
+    {
+      "instance_name": "addr_sqr",
+      "module": "uvm_sequencer",
+      "position": {
+        "x": -7,
+        "y": 6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "addr_drv",
+      "module": "uvm_driver",
+      "position": {
+        "x": -3,
+        "y": 6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "addr_mon",
+      "module": "uvm_monitor",
+      "position": {
+        "x": 1,
+        "y": 6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "addr_vif",
+      "module": "ahb_vif",
+      "position": {
+        "x": -3,
+        "y": 2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "data_sqr",
+      "module": "uvm_sequencer",
+      "position": {
+        "x": -7,
+        "y": -2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "data_drv",
+      "module": "uvm_driver",
+      "position": {
+        "x": -3,
+        "y": -2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "data_mon",
+      "module": "uvm_monitor",
+      "position": {
+        "x": 1,
+        "y": -2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "data_vif",
+      "module": "ahb_vif",
+      "position": {
+        "x": -3,
+        "y": -6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "dut_stub",
+      "module": "ahb_dut_stub",
+      "position": {
+        "x": 0,
+        "y": -12,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "read_seq",
+      "module": "uvm_sequence",
+      "position": {
+        "x": 5,
+        "y": 6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "write_seq",
+      "module": "uvm_sequence",
+      "position": {
+        "x": 9,
+        "y": 6,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "read_sb",
+      "module": "uvm_scoreboard",
+      "position": {
+        "x": 5,
+        "y": -2,
+        "z": 0
+      }
+    },
+    {
+      "instance_name": "write_sb",
+      "module": "uvm_scoreboard",
+      "position": {
+        "x": 9,
+        "y": -2,
+        "z": 0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "clk_fanout",
+      "type": "clock",
+      "description": "AHB clock to all VIFs and DUT",
+      "from": {
+        "instance": "tb_top",
+        "port": "hclk"
+      },
+      "to": [
+        {
+          "instance": "addr_vif",
+          "port": "hclk"
+        },
+        {
+          "instance": "data_vif",
+          "port": "hclk"
+        },
+        {
+          "instance": "dut_stub",
+          "port": "hclk"
+        }
+      ]
+    },
+    {
+      "id": "rst_fanout",
+      "type": "reset",
+      "description": "AHB reset to all VIFs and DUT",
+      "from": {
+        "instance": "tb_top",
+        "port": "hresetn"
+      },
+      "to": [
+        {
+          "instance": "addr_vif",
+          "port": "hresetn"
+        },
+        {
+          "instance": "data_vif",
+          "port": "hresetn"
+        },
+        {
+          "instance": "dut_stub",
+          "port": "hresetn"
+        }
+      ]
+    },
+    {
+      "id": "addr_sqr_to_drv",
+      "type": "tlm",
+      "label": "ADDR sqr\u2192drv",
+      "description": "ADDR sequencer to driver",
+      "from_instance": "addr_sqr",
+      "to_instance": "addr_drv",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "addr_seq_item",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "addr_drv_to_vif",
+      "type": "vif",
+      "label": "ADDR drv\u2192vif",
+      "description": "ADDR driver to virtual interface",
+      "from_instance": "addr_drv",
+      "to_instance": "addr_vif",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "addr_drv_vif",
+            "to_port": "driver_mp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "addr_mon_to_vif",
+      "type": "vif",
+      "label": "ADDR mon\u2192vif",
+      "description": "ADDR monitor to virtual interface",
+      "from_instance": "addr_mon",
+      "to_instance": "addr_vif",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "addr_mon_vif",
+            "to_port": "monitor_mp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "data_sqr_to_drv",
+      "type": "tlm",
+      "label": "DATA sqr\u2192drv",
+      "description": "DATA sequencer to driver",
+      "from_instance": "data_sqr",
+      "to_instance": "data_drv",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "data_seq_item",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "data_drv_to_vif",
+      "type": "vif",
+      "label": "DATA drv\u2192vif",
+      "description": "DATA driver to virtual interface",
+      "from_instance": "data_drv",
+      "to_instance": "data_vif",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "data_drv_vif",
+            "to_port": "driver_mp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "data_mon_to_vif",
+      "type": "vif",
+      "label": "DATA mon\u2192vif",
+      "description": "DATA monitor to virtual interface",
+      "from_instance": "data_mon",
+      "to_instance": "data_vif",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "vif",
+            "wire": "data_mon_vif",
+            "to_port": "monitor_mp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "addr_mon_to_read_sb",
+      "type": "tlm",
+      "label": "ADDR mon\u2192SB",
+      "description": "ADDR monitor analysis to Read Scoreboard",
+      "from_instance": "addr_mon",
+      "to_instance": "read_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "addr_mon_ap",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "data_mon_to_write_sb",
+      "type": "tlm",
+      "label": "DATA mon\u2192SB",
+      "description": "DATA monitor analysis to Write Scoreboard",
+      "from_instance": "data_mon",
+      "to_instance": "write_sb",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "analysis_port",
+            "wire": "data_mon_ap",
+            "to_port": "analysis_export"
+          }
+        ]
+      }
+    },
+    {
+      "id": "read_seq_to_addr",
+      "type": "tlm",
+      "label": "Read seq\u2192ADDR",
+      "description": "Sequence generates ADDR channel transactions",
+      "from_instance": "read_seq",
+      "to_instance": "addr_sqr",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "read_seq_out",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "write_seq_to_data",
+      "type": "tlm",
+      "label": "Write seq\u2192DATA",
+      "description": "Sequence generates DATA channel transactions",
+      "from_instance": "write_seq",
+      "to_instance": "data_sqr",
+      "channel_signals": {
+        "TLM": [
+          {
+            "from_port": "seq_item_port",
+            "wire": "write_seq_out",
+            "to_port": "seq_item_port"
+          }
+        ]
+      }
+    },
+    {
+      "id": "addr_vif_to_dut",
+      "type": "ahb_bus",
+      "label": "ADDR vif \u2192 DUT",
+      "description": "ADDR virtual interface connects to DUT",
+      "from_instance": "addr_vif",
+      "to_instance": "dut_stub",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "dut_mp",
+            "wire": "vif_handle",
+            "to_port": "addr"
+          }
+        ]
+      }
+    },
+    {
+      "id": "data_vif_to_dut",
+      "type": "ahb_bus",
+      "label": "DATA vif \u2192 DUT",
+      "description": "DATA virtual interface connects to DUT",
+      "from_instance": "data_vif",
+      "to_instance": "dut_stub",
+      "channel_signals": {
+        "VIF": [
+          {
+            "from_port": "dut_mp",
+            "wire": "vif_handle",
+            "to_port": "data"
+          }
+        ]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "addr_agent",
+      "label": "ADDR Agent",
+      "description": "AHB ADDR channel agent (sequencer + driver + monitor + VIF)",
+      "color": "#42A5F5",
+      "padding": 0.8,
+      "members": [
+        "addr_sqr",
+        "addr_drv",
+        "addr_mon",
+        "addr_vif"
+      ]
+    },
+    {
+      "name": "data_agent",
+      "label": "DATA Agent",
+      "description": "AHB DATA channel agent (sequencer + driver + monitor + VIF)",
+      "color": "#42A5F5",
+      "padding": 0.8,
+      "members": [
+        "data_sqr",
+        "data_drv",
+        "data_mon",
+        "data_vif"
+      ]
+    },
+    {
+      "name": "ahb_env",
+      "label": "AHB Env",
+      "description": "AHB Env \u2014 2 per-channel agents (ADDR, DATA), sequences, and scoreboards.",
+      "color": "#0D47A1",
+      "padding": 1.5,
+      "members": [
+        "addr_sqr",
+        "addr_drv",
+        "addr_mon",
+        "addr_vif",
+        "data_sqr",
+        "data_drv",
+        "data_mon",
+        "data_vif",
+        "read_seq",
+        "write_seq",
+        "read_sb",
+        "write_sb"
+      ]
+    }
+  ]
+}

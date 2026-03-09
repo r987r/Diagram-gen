@@ -1,6 +1,6 @@
 {
-  "block_name": "axi4_vif",
-  "description": "AXI4 virtual interface \u2014 clock, reset, and AXI4 channel signals.",
+  "block_name": "uart_vif",
+  "description": "UART virtual interface \u2014 clock, reset, TX/RX signals.",
   "render": {
     "color": "#FF7043"
   },
@@ -10,14 +10,14 @@
       "direction": "input",
       "width": 1,
       "channel": "GLOBAL",
-      "description": "Clock"
+      "description": "UART clock"
     },
     {
-      "name": "rst_n",
+      "name": "reset",
       "direction": "input",
       "width": 1,
       "channel": "GLOBAL",
-      "description": "Reset"
+      "description": "UART reset"
     },
     {
       "name": "driver_mp",
@@ -37,7 +37,7 @@
       "name": "dut_mp",
       "direction": "output",
       "width": 1,
-      "channel": "AXI4",
+      "channel": "UART",
       "description": "DUT modport"
     }
   ]

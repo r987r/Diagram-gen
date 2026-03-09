@@ -1,8 +1,0 @@
-{
-  "block_name": "uvm_env",
-  "description": "UVM environment. Contains the AXI4 agent and scoreboard. Connects the monitor analysis port to the scoreboard via a TLM FIFO.",
-  "render": {
-    "color": "#3F51B5"
-  },
-  "ports": []
-}

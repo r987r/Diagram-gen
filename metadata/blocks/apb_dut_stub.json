@@ -1,35 +1,35 @@
 {
-  "block_name": "axi4_slave_uvc",
-  "description": "AXI4 Slave UVC \u2014 complete slave verification component with agents.",
+  "block_name": "apb_dut_stub",
+  "description": "APB DUT stub for UVC verification.",
   "render": {
-    "color": "#00897B",
+    "color": "#FF9800",
     "size": {
-      "w": 6,
+      "w": 8,
       "h": 3,
       "d": 3
     }
   },
   "ports": [
     {
-      "name": "clk",
+      "name": "pclk",
       "direction": "input",
       "width": 1,
       "channel": "GLOBAL",
       "description": "Clock"
     },
     {
-      "name": "rst_n",
+      "name": "preset_n",
       "direction": "input",
       "width": 1,
       "channel": "GLOBAL",
       "description": "Reset"
     },
     {
-      "name": "axi4_if",
-      "direction": "input",
+      "name": "apb",
+      "direction": "inout",
       "width": 1,
-      "channel": "AXI4",
-      "description": "AXI4 interface"
+      "channel": "APB",
+      "description": "APB channel interface"
     }
   ]
 }

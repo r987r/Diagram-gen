@@ -1,0 +1,94 @@
+{
+  "design_name": "dma_axi32",
+  "version": "1.0",
+  "description": "DMA AXI 32-bit controller \u2014 shows the module with APB slave, AXI master, and sideband interfaces. Based on blockify metadata from freecores/dma_axi.",
+  "includes": [
+    "blocks/dma_axi32.json"
+  ],
+  "parameters": {
+    "DATA_WIDTH": 32,
+    "ADDR_WIDTH": 32
+  },
+  "testbench": {
+    "module_name": "tb_dma_axi32",
+    "description": "DMA AXI 32 module view.",
+    "global_signals": [
+      {
+        "name": "clk",
+        "width": 1,
+        "type": "reg",
+        "render": {
+          "face": "bottom",
+          "color": "#00E676"
+        }
+      },
+      {
+        "name": "reset",
+        "width": 1,
+        "type": "reg",
+        "render": {
+          "face": "top",
+          "color": "#FF5252"
+        }
+      }
+    ]
+  },
+  "connection_types": {
+    "axi4_bus": {
+      "color": "#FFC107",
+      "description": "AXI4 Master Bus"
+    },
+    "apb_bus": {
+      "color": "#4CAF50",
+      "description": "APB Slave Bus"
+    },
+    "sideband": {
+      "color": "#78909C",
+      "description": "Sideband Signals"
+    }
+  },
+  "modules": {},
+  "instances": [
+    {
+      "instance_name": "u_dma",
+      "module": "dma_axi32",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "clk_fanout",
+      "type": "clock",
+      "description": "System clock",
+      "from": {
+        "instance": "tb_dma_axi32",
+        "port": "clk"
+      },
+      "to": [
+        {
+          "instance": "u_dma",
+          "port": "clk"
+        }
+      ]
+    },
+    {
+      "id": "reset_fanout",
+      "type": "reset",
+      "description": "System reset",
+      "from": {
+        "instance": "tb_dma_axi32",
+        "port": "reset"
+      },
+      "to": [
+        {
+          "instance": "u_dma",
+          "port": "reset"
+        }
+      ]
+    }
+  ]
+}

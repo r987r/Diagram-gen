@@ -1,0 +1,63 @@
+{
+  "block_name": "axi4_dut_stub",
+  "description": "AXI4 DUT stub for UVC verification.",
+  "render": {
+    "color": "#FF9800",
+    "size": {
+      "w": 8,
+      "h": 3,
+      "d": 3
+    }
+  },
+  "ports": [
+    {
+      "name": "clk",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "Clock"
+    },
+    {
+      "name": "rst_n",
+      "direction": "input",
+      "width": 1,
+      "channel": "GLOBAL",
+      "description": "Reset"
+    },
+    {
+      "name": "aw",
+      "direction": "inout",
+      "width": 1,
+      "channel": "AW",
+      "description": "AW channel interface"
+    },
+    {
+      "name": "w",
+      "direction": "inout",
+      "width": 1,
+      "channel": "W",
+      "description": "W channel interface"
+    },
+    {
+      "name": "b",
+      "direction": "inout",
+      "width": 1,
+      "channel": "B",
+      "description": "B channel interface"
+    },
+    {
+      "name": "ar",
+      "direction": "inout",
+      "width": 1,
+      "channel": "AR",
+      "description": "AR channel interface"
+    },
+    {
+      "name": "r",
+      "direction": "inout",
+      "width": 1,
+      "channel": "R",
+      "description": "R channel interface"
+    }
+  ]
+}
